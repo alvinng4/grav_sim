@@ -71,7 +71,14 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
     }
 
     /* Get mean background density */
-    const double mean_bkg_density = vec_sum(system->m, num_particles) / ((system->box_width * 2) * (system->box_width * 2) * (system->box_width * 2));
+    const double mean_bkg_density = vec_sum(
+        system->m, num_particles
+    ) / ((system->box_width * 2) * (system->box_width * 2) * (system->box_width * 2));
+    const double G = 6.67430e-8 * (
+        system->unit_mass
+        * system->unit_time * system->unit_time
+        / (system->unit_length * system->unit_length * system->unit_length)
+    );
 
     /* Initial output */
     if (is_output && output_param->output_initial)
@@ -106,10 +113,9 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
         num_particles,
         x,
         m,
+        G,
         system->box_center,
         system->box_width,
-        H0,
-        omega_m,
         mean_bkg_density,
         pm_grid_size,
         *t_ptr
@@ -172,10 +178,9 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
             num_particles,
             x,
             m,
+            G,
             system->box_center,
             system->box_width,
-            H0,
-            omega_m,
             mean_bkg_density,
             pm_grid_size,
             *t_ptr

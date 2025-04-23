@@ -105,7 +105,7 @@ IN_FILE void cloud_in_cell(
 #endif
     for (int i = 0; i < grid_size_3; i++)
     {
-        delta[i] = (delta[i] / (cell_volume * mean_bkg_density)) - 1.0;
+        delta[i] = (delta[i] / cell_volume) - mean_bkg_density;
     }
 }
 
@@ -276,10 +276,9 @@ WIN32DLL_API ErrorStatus acceleration_PM(
     const int num_particles,
     const double *restrict x,
     const double *restrict m,
+    const double G,
     const double *restrict box_center,
     const double box_width,
-    const double H0,
-    const double omega_m,
     const double mean_bkg_density,
     const int pm_grid_size,
     const double scale_factor
@@ -349,7 +348,7 @@ WIN32DLL_API ErrorStatus acceleration_PM(
     }
     fftw_execute(plan_backward);
 
-    const double factor = ((3.0 / 2.0) * omega_m * H0 * H0) / (scale_factor * (double) grid_size_3);
+    const double factor = 4.0 * M_PI * G / (scale_factor * (double) grid_size_3);
     for (int i = 0; i < grid_size_3; i++)
     {
         phi[i] *= factor;
