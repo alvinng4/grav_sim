@@ -14,9 +14,9 @@ can be skipped if it is too difficult for the reader.
 - [Step 2: Acceleration](step2.md)
 - [Step 3: Your first N-body program](step3.md)
 - [Step 4: Higher-order algorithms](step4.md)
-- [Step 5: Adaptive time-stepping]
+- [Step 5: Adaptive time-stepping](step5.md)
 - [Step 6a: Keplerian orbital elements]
-- [Step 6b: Real-time display (Optional)]
+- [Step 6b: Animations (Optional)]
 - [Step 7: Test particles]
 - [Step 8: Introduction to large-scale simulations]
 - [Step 9: Barnes-Hut algorithm (Part 1)]
@@ -29,3 +29,4 @@ can be skipped if it is too difficult for the reader.
 ## References
 1. @CFDPython
 2. @MovingPlanetsAround
+3. @NumericalAnalysis
