@@ -132,7 +132,7 @@ Python loops completely, we can achieve a significant speedup.
 This can be done by vectorizing the code. Note that this would be quite difficult
 for beginners, but learning this could help you understand a lot about NumPy arrays.
 
-1. We first compute a displacement matrix $\mathbf{R}$, where $\mathbf{R}_{ij} = \mathbf{x}_j - \mathbf{x}_i$.
+1. We first compute a displacement matrix $\mathbf{R}$, where $\mathbf{R}_{ij} = \mathbf{r}_j - \mathbf{r}_i$.
     Therefore, it is a 3D array of shape $(N, N, 3)$, and the diagonal elements are all zero.
     This is computed by broadcasting first $\mathbf{r}$ along the axis 0 (row) and 
     the second $\mathbf{r}$ along the axis 1 (column): `r_ij = x[:, np.newaxis, :] - x[np.newaxis, :, :]`

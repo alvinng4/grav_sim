@@ -31,6 +31,7 @@ nav:
     - Step 2: 12_steps_to_n_body_simulation/step2.md
     - Step 3: 12_steps_to_n_body_simulation/step3.md
     - Step 4: 12_steps_to_n_body_simulation/step4.md
+    - Step 5: 12_steps_to_n_body_simulation/step5.md
 theme:
   name: material
   logo: docs/orbit_logo.svg

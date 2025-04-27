@@ -17,7 +17,7 @@ SOLAR_SYSTEM_COLORS = {
     "Uranus": "paleturquoise",
     "Neptune": "blue",
 }
-OBJECT_NAMES = list(SOLAR_SYSTEM_COLORS.keys())
+LABELS = list(SOLAR_SYSTEM_COLORS.keys())
 COLORS = list(SOLAR_SYSTEM_COLORS.values())
 MARKER_SIZE = [6.0, 1.5, 1.5, 2.0, 1.5, 4.0, 3.5, 3.5, 3.5]
 
@@ -93,7 +93,7 @@ def main() -> None:
                     marker="o",
                     color=COLORS[j],
                     s=MARKER_SIZE[j],
-                    label=OBJECT_NAMES[j],
+                    label=LABELS[j],
                 )
 
             # Add legend

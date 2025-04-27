@@ -1,0 +1,20 @@
+\documentclass[tikz,border=2mm]{standalone}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{tikzpicture}[scale=1.5]
+
+% Define positions of the three bodies
+\node[circle, fill=red, inner sep=2pt, label=above:Particle 1] (R1) at (1.0, 3.0) {};
+\node[circle, fill=blue, inner sep=2pt, label=below:Particle 2] (R2) at (-2.0, -1.0) {};
+\node[circle, fill=green, inner sep=2pt, label=below:Particle 3] (R3) at (1.0, -1.0) {};
+
+% Draw dashed lines connecting the points
+\draw[dashed] (R1) -- (R2) node[midway, left] {5};
+\draw[dashed] (R2) -- (R3) node[midway, below] {3};
+\draw[dashed] (R3) -- (R1) node[midway, right] {4};
+
+\end{tikzpicture}
+
+\end{document}

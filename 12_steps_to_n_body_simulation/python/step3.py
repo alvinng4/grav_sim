@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Default units is AU, days, and M_sun
-TF = 200.0 * 365.24  # 200 years to days
-DT = 1.0  # 1.0 days
-OUTPUT_INTERVAL = 0.01 * 365.24  # 0.01 year to days
+TF = 200.0 * 365.24  # years to days
+DT = 1.0
+OUTPUT_INTERVAL = 0.1 * 365.24  # years to days
 NUM_STEPS = int(TF / DT)
 
 SOLAR_SYSTEM_COLORS = {
@@ -20,6 +20,9 @@ SOLAR_SYSTEM_COLORS = {
     "Uranus": "paleturquoise",
     "Neptune": "blue",
 }
+LABELS = list(SOLAR_SYSTEM_COLORS.keys())
+COLORS = list(SOLAR_SYSTEM_COLORS.values())
+LEGEND = True
 
 
 class System:
@@ -52,8 +55,10 @@ def main() -> None:
     sol_size = int(TF // OUTPUT_INTERVAL + 2)  # +2 for initial and final time
     sol_x = np.zeros((sol_size, system.num_particles, 3))
     sol_v = np.zeros((sol_size, system.num_particles, 3))
+    sol_t = np.zeros(sol_size)
     sol_x[0] = system.x
     sol_v[0] = system.v
+    sol_t[0] = 0.0
     output_count = 1
 
     # Launch simulation
@@ -67,6 +72,7 @@ def main() -> None:
         if current_time >= next_output_time:
             sol_x[output_count] = system.x
             sol_v[output_count] = system.v
+            sol_t[output_count] = current_time
 
             output_count += 1
             next_output_time = output_count * OUTPUT_INTERVAL
@@ -75,6 +81,7 @@ def main() -> None:
 
     sol_x = sol_x[:output_count]
     sol_v = sol_v[:output_count]
+    sol_t = sol_t[:output_count]
 
     end = timeit.default_timer()
 
@@ -82,8 +89,9 @@ def main() -> None:
     print(f"Done! Runtime: {end - start:.3g} seconds, Solution size: {output_count}")
     plot_trajectory(
         sol_x=sol_x,
-        labels=list(SOLAR_SYSTEM_COLORS.keys()),
-        colors=list(SOLAR_SYSTEM_COLORS.values()),
+        labels=LABELS,
+        colors=COLORS,
+        legend=LEGEND,
     )
 
 
@@ -163,6 +171,7 @@ def plot_trajectory(
     sol_x: np.ndarray,
     labels: list,
     colors: list,
+    legend: bool,
 ) -> None:
     """
     Plot the 2D trajectory.
@@ -175,6 +184,8 @@ def plot_trajectory(
         List of labels for the particles.
     colors : list
         List of colors for the particles.
+    legend : bool
+        Whether to show the legend.
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, aspect="equal")
@@ -191,12 +202,15 @@ def plot_trajectory(
         ax.plot(
             sol_x[-1, i, 0],
             sol_x[-1, i, 1],
+            marker="o",
             color=traj[0].get_color(),
             label=labels[i],
         )
 
-    fig.legend(loc="center right", borderaxespad=0.2)
-    fig.tight_layout()
+    if legend:
+        fig.legend(loc="center right", borderaxespad=0.2)
+        fig.tight_layout()
+
     plt.show()
 
 

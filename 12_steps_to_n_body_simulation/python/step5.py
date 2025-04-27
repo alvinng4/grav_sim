@@ -10,25 +10,30 @@ import matplotlib.pyplot as plt
 # TOLERANCE = 1e-8
 # OUTPUT_INTERVAL = 0.01 * 365.24  # 0.01 year to days
 # INITIAL_DT = 1.0  # Initial time step in days
+# SOLAR_SYSTEM_COLORS = {
+#     "Sun": "orange",
+#     "Mercury": "slategrey",
+#     "Venus": "wheat",
+#     "Earth": "skyblue",
+#     "Mars": "red",
+#     "Jupiter": "darkgoldenrod",
+#     "Saturn": "gold",
+#     "Uranus": "paleturquoise",
+#     "Neptune": "blue",
+# }
+# LABELS = list(SOLAR_SYSTEM_COLORS.keys())
+# COLORS = list(SOLAR_SYSTEM_COLORS.values())
+# LEGEND = True
 
 # Pyth-3-body
 INITIAL_CONDITION = "pyth-3-body"
-TF = 70.0 # 70 days
+TF = 70.0  # 70 days
 TOLERANCE = 1e-13
-OUTPUT_INTERVAL = 0.01  # 0.01 day
+OUTPUT_INTERVAL = 0.001  # 0.001 day
 INITIAL_DT = 0.01  # Initial time step in days
-
-SOLAR_SYSTEM_COLORS = {
-    "Sun": "orange",
-    "Mercury": "slategrey",
-    "Venus": "wheat",
-    "Earth": "skyblue",
-    "Mars": "red",
-    "Jupiter": "darkgoldenrod",
-    "Saturn": "gold",
-    "Uranus": "paleturquoise",
-    "Neptune": "blue",
-}
+LABELS = [None, None, None]
+COLORS = [None, None, None]
+LEGEND = False
 
 
 class System:
@@ -107,9 +112,11 @@ def main() -> None:
     sol_size = int(TF // OUTPUT_INTERVAL + 2)  # +2 for initial and final time
     sol_x = np.zeros((sol_size, system.num_particles, 3))
     sol_v = np.zeros((sol_size, system.num_particles, 3))
+    sol_t = np.zeros(sol_size)
     sol_dt = np.zeros(sol_size)
     sol_x[0] = system.x
     sol_v[0] = system.v
+    sol_t[0] = 0.0
     sol_dt[0] = INITIAL_DT
     output_count = 1
 
@@ -168,7 +175,7 @@ def main() -> None:
         sum = np.sum(np.square(error_estimation_delta_x / tolerance_scale_x)) + np.sum(
             np.square(error_estimation_delta_v / tolerance_scale_v)
         )
-        error = math.sqrt(0.5 * sum / (system.num_particles * 3.0))
+        error = math.sqrt(sum / (system.num_particles * 3.0 * 2.0))
 
         # Advance step
         if error <= 1.0 or dt <= TF * 1e-12:
@@ -179,6 +186,7 @@ def main() -> None:
             if current_time >= next_output_time:
                 sol_x[output_count] = system.x
                 sol_v[output_count] = system.v
+                sol_t[output_count] = current_time
                 sol_dt[output_count] = dt
 
                 output_count += 1
@@ -207,6 +215,8 @@ def main() -> None:
 
     sol_x = sol_x[:output_count]
     sol_v = sol_v[:output_count]
+    sol_t = sol_t[:output_count]
+    sol_dt = sol_dt[:output_count]
 
     end = timeit.default_timer()
 
@@ -214,17 +224,19 @@ def main() -> None:
     print(f"Done! Runtime: {end - start:.3g} seconds, Solution size: {output_count}")
     plot_trajectory(
         sol_x=sol_x,
-        labels=list(SOLAR_SYSTEM_COLORS.keys()),
-        colors=list(SOLAR_SYSTEM_COLORS.values()),
+        labels=LABELS,
+        colors=COLORS,
+        legend=LEGEND,
     )
 
     # Compute and plot relative energy error
-    rel_energy_error = compute_energy_error(sol_x, sol_v, system)
-    plot_rel_energy_error(rel_energy_error)
-    plot_dt(sol_dt)
+    rel_energy_error = compute_rel_energy_error(sol_x, sol_v, system)
+    print(f"Relative energy error: {rel_energy_error[-1]:.3g}")
+    plot_rel_energy_error(rel_energy_error, sol_t / 365.24)
+    plot_dt(sol_dt, sol_t)
 
 
-def compute_energy_error(
+def compute_rel_energy_error(
     sol_x: np.ndarray, sol_v: np.ndarray, system: System
 ) -> np.ndarray:
     """
@@ -270,7 +282,7 @@ def compute_energy_error(
     return rel_energy_error
 
 
-def plot_rel_energy_error(rel_energy_error: np.ndarray) -> None:
+def plot_rel_energy_error(rel_energy_error: np.ndarray, sol_t: np.ndarray) -> None:
     """
     Plot the relative energy error.
 
@@ -278,18 +290,19 @@ def plot_rel_energy_error(rel_energy_error: np.ndarray) -> None:
     ----------
     rel_energy_error : np.ndarray
         Relative energy error of the simulation, with shape (N_steps,).
+    sol_t : np.ndarray
+        Solution time array with shape (N_steps,).
     """
     plt.figure()
-    plt.plot(rel_energy_error)
+    plt.plot(sol_t, rel_energy_error)
     plt.yscale("log")
     plt.xlabel("Time step")
     plt.ylabel("Relative Energy Error")
     plt.title("Relative Energy Error vs Time Step")
-    plt.grid()
     plt.show()
 
 
-def plot_dt(sol_dt: np.ndarray) -> None:
+def plot_dt(sol_dt: np.ndarray, sol_t: np.ndarray) -> None:
     """
     Plot the time step.
 
@@ -297,13 +310,14 @@ def plot_dt(sol_dt: np.ndarray) -> None:
     ----------
     sol_dt : np.ndarray
         Time step array with shape (N_steps,).
+    sol_t : np.ndarray
+        Solution time array with shape (N_steps,).
     """
     plt.figure()
-    plt.semilogy(sol_dt)
+    plt.semilogy(sol_t, sol_dt)
     plt.xlabel("Time step")
     plt.ylabel("Time step (days)")
     plt.title("Time Step vs Time Step")
-    plt.grid()
     plt.show()
 
 
@@ -365,6 +379,7 @@ def plot_trajectory(
     sol_x: np.ndarray,
     labels: list,
     colors: list,
+    legend: bool,
 ) -> None:
     """
     Plot the 2D trajectory.
@@ -393,12 +408,14 @@ def plot_trajectory(
         ax.plot(
             sol_x[-1, i, 0],
             sol_x[-1, i, 1],
+            marker="o",
             color=traj[0].get_color(),
             label=labels[i],
         )
 
-    fig.legend(loc="center right", borderaxespad=0.2)
-    fig.tight_layout()
+    if legend:
+        fig.legend(loc="center right", borderaxespad=0.2)
+        fig.tight_layout()
     plt.show()
 
 

@@ -12,6 +12,9 @@ SOLAR_SYSTEM_COLORS = {
     "Uranus": "paleturquoise",
     "Neptune": "blue",
 }
+LABELS = list(SOLAR_SYSTEM_COLORS.keys())
+COLORS = list(SOLAR_SYSTEM_COLORS.values())
+LEGEND = True
 
 
 class System:
@@ -45,8 +48,9 @@ def main():
     # Plot the initial conditions
     plot_initial_conditions(
         system,
-        labels=list(SOLAR_SYSTEM_COLORS.keys()),
-        colors=list(SOLAR_SYSTEM_COLORS.values()),
+        labels=LABELS,
+        colors=COLORS,
+        legend=LEGEND,
     )
 
 
@@ -287,7 +291,12 @@ def get_initial_conditions() -> System:
     return system
 
 
-def plot_initial_conditions(system: System, labels: list, colors: list) -> None:
+def plot_initial_conditions(
+    system: System,
+    labels: list,
+    colors: list,
+    legend: bool,
+) -> None:
     """
     Plot the initial positions.
 
@@ -297,15 +306,23 @@ def plot_initial_conditions(system: System, labels: list, colors: list) -> None:
         System object.
     labels : list
         Labels for the particles.
+    colors : list
+        Colors for the particles.
+    legend : bool
+        Whether to show the legend.
     """
     fig, ax = plt.subplots()
     ax.set_xlabel("$x$ (AU)")
     ax.set_ylabel("$y$ (AU)")
 
     for i in range(system.num_particles):
-        ax.plot(system.x[i, 0], system.x[i, 1], "o", color=colors[i], label=labels[i])
+        ax.plot(
+            system.x[i, 0], system.x[i, 1], marker="o", color=colors[i], label=labels[i]
+        )
 
-    ax.legend()
+    if legend:
+        ax.legend()
+
     plt.show()
 
 

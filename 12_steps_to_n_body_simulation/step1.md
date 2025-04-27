@@ -64,19 +64,39 @@ To compute the center of mass terms, we first compute $m_i \mathbf{r}_i$ by
 self.m[:, np.newaxis] * self.x
 ```
 where `np.newaxis` is used to "broadcast" the mass array to the shape of the position array.
-Originally, the shape of `self.m` is `(N,)` and the shape of `self.x` is `(N, 3)`.
-By adding `np.newaxis`, the multiplication are done element-wise as
+By adding `np.newaxis`, the mass array is reshaped from `(N,)` to `(N, 1)`, i.e. expanded along
+axis 1 (column).
 
 $$
     \begin{bmatrix}
-        m_{1} x_{1,1} & m_{1} x_{1,2} & m_{1} x_{1,3} \\
-        m_{2} x_{2,1} & m_{2} x_{2,2} & m_{2} x_{2,3} \\
-        \vdots & \vdots & \vdots \\
-        m_{N} x_{N,1} & m_{N} x_{N,2} & m_{N} x_{N,3}
+        m_{1} \\
+        m_{2} \\
+        \vdots \\
+        m_{N}
+    \end{bmatrix}
+    \to
+    \begin{bmatrix}
+        m_{1} \dots \\
+        m_{2} \dots \\
+        \vdots  \\
+        m_{N} \dots
     \end{bmatrix}
 $$
 
-Then, we perform the summation along the first axis with length `N` by
+
+The shape of `self.m[:, np.newaxis]` is now `(N, 1)` and the shape of `self.x` is `(N, 3)`.
+The multiplication is then done element-wise as
+
+$$
+    \begin{bmatrix}
+        m_{1} r_{1,1} & m_{1} r_{1,2} & m_{1} r_{1,3} \\
+        m_{2} r_{2,1} & m_{2} r_{2,2} & m_{2} r_{2,3} \\
+        \vdots & \vdots & \vdots \\
+        m_{N} r_{N,1} & m_{N} r_{N,2} & m_{N} r_{N,3}
+    \end{bmatrix}
+$$
+
+Then, we perform the summation along the axis 0 (row) with length `N` by
 ```
 np.sum(self.m[:, np.newaxis] * self.x, axis=0)
 ```
@@ -356,7 +376,7 @@ Colors and labels are optional, but they make the plot look nicer.
 If `plt.show()` does not work in your environment, you may need to change it to
 `plt.savefig(file_name)` to save the plot.
 
-```python hl_lines="32 33"
+```python hl_lines="52 53"
 SOLAR_SYSTEM_COLORS = {
     "Sun": "orange",
     "Mercury": "slategrey",
@@ -368,8 +388,16 @@ SOLAR_SYSTEM_COLORS = {
     "Uranus": "paleturquoise",
     "Neptune": "blue",
 }
+LABELS = list(SOLAR_SYSTEM_COLORS.keys())
+COLORS = list(SOLAR_SYSTEM_COLORS.values())
+LEGEND = True
 
-def plot_initial_conditions(system: System, labels: list, colors: list) -> None:
+def plot_initial_conditions(
+    system: System,
+    labels: list,
+    colors: list,
+    legend: bool,
+) -> None:
     """
     Plot the initial positions.
 
@@ -379,15 +407,27 @@ def plot_initial_conditions(system: System, labels: list, colors: list) -> None:
         System object.
     labels : list
         Labels for the particles.
+    colors : list
+        Colors for the particles.
+    legend : bool
+        Whether to show the legend.
     """
     fig, ax = plt.subplots()
     ax.set_xlabel("$x$ (AU)")
     ax.set_ylabel("$y$ (AU)")
 
     for i in range(system.num_particles):
-        ax.plot(system.x[i, 0], system.x[i, 1], "o", color=colors[i], label=labels[i])
+        ax.plot(
+            system.x[i, 0],
+            system.x[i, 1],
+            marker = "o",
+            color=colors[i],
+            label=labels[i]
+        )
 
-    ax.legend()
+    if legend:
+        ax.legend()
+
     plt.show() # Here, you may need to change to plt.savefig(file_name) if 
                # plt.show() does not work in your environment. 
 ```
@@ -407,8 +447,9 @@ def main():
     # Plot the initial conditions
     plot_initial_conditions(
         system,
-        labels=list(SOLAR_SYSTEM_COLORS.keys()),
-        colors=list(SOLAR_SYSTEM_COLORS.values()),
+        labels=LABELS,
+        colors=COLORS,
+        legend=LEGEND,
     )
 
 if __name__ == "__main__":
