@@ -16,6 +16,7 @@ nav:
     - Barnes-Hut algorithm: docs/documentations/barnes_hut.md
     - Particle-Mesh algorithm: docs/documentations/particle_mesh.md
     - Reducing round off error: docs/documentations/reducing_round_off_error.md
+    - Why C?: docs/documentations/why_c.md
     - Python API:
         - docs/documentations/PythonAPI/GravitySimulatorAPI.md
         - docs/documentations/PythonAPI/parameters.md
@@ -26,6 +27,10 @@ nav:
     - examples/solar_system_one_mil_yrs.ipynb
   - 12 steps to N-body simulation:
     - "12 steps to N-body simulation": 12_steps_to_n_body_simulation/index.md
+    - Step 1: 12_steps_to_n_body_simulation/step1.md
+    - Step 2: 12_steps_to_n_body_simulation/step2.md
+    - Step 3: 12_steps_to_n_body_simulation/step3.md
+    - Step 4: 12_steps_to_n_body_simulation/step4.md
 theme:
   name: material
   logo: docs/orbit_logo.svg
@@ -63,21 +68,21 @@ theme:
       accent: purple
   
 markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.magiclink
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - admonition
   - pymdownx.arithmatex:
       generic: true
-  - footnotes
   - pymdownx.details:
   - pymdownx.superfences
   - pymdownx.blocks.tab:
       alternate_style: true
   - pymdownx.mark
-  - attr_list
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg

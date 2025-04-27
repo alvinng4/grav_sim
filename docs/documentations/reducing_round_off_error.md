@@ -1,6 +1,6 @@
 # Reducing rounding error with compensated summation
 
-A method known as compensated summation [@CompensatedSummation] is implemented for
+A method known as compensated summation[@CompensatedSummation] is implemented for
 all integrators in grav_sim except WHFast:
 
 When we advance our system by $\Delta t$, we have 
