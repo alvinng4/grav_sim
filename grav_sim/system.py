@@ -255,7 +255,7 @@ class System:
         return system
 
     def center_of_mass_correction(self) -> None:
-        """Set center of mass of position and V_CM to zero"""
+        """Set center of mass of position and velocity to zero"""
         r_cm = np.sum(self.m[:, np.newaxis] * self.x, axis=0) / np.sum(self.m)
         v_cm = np.sum(self.m[:, np.newaxis] * self.v, axis=0) / np.sum(self.m)
 
