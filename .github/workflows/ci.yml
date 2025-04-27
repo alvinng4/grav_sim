@@ -1,9 +1,8 @@
 name: ci 
 on:
-  push:
-    branches:
-      - master 
-      - main
+  release:
+    types:
+      - published
 permissions:
   contents: write
 jobs:
