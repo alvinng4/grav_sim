@@ -26,11 +26,14 @@ def load_c_lib(c_lib_path: Optional[str | Path] = None) -> ctypes.CDLL:
     """
     if not c_lib_path:
         search_path = Path(__file__).parent.parent
-        c_lib_files = [str(p) for p in search_path.rglob("*libgrav_sim*")]
-        if len(c_lib_files) == 0:
-            raise FileNotFoundError(f"C library not found from path: {search_path}")
+    else:
+        search_path = Path(c_lib_path).parent
 
-        c_lib_path = c_lib_files[0]
+    c_lib_files = [str(p) for p in search_path.rglob("*libgrav_sim*")]
+    if len(c_lib_files) == 0:
+        raise FileNotFoundError(f"C library not found from path: {search_path}")
+
+    c_lib_path = c_lib_files[0]
 
     return ctypes.cdll.LoadLibrary(str(c_lib_path))
 
