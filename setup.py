@@ -68,9 +68,15 @@ class CMakeBuild(build_ext):
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
+skip_cmake = os.environ.get("SKIP_CMAKE", "0") == "1"
+if skip_cmake:
+    ext_modules = []
+else:
+    ext_modules = [CMakeExtension("grav_sim", sourcedir="")]
+
 setup(
     packages=["grav_sim"],
-    ext_modules=[CMakeExtension("grav_sim", sourcedir="")],
+    ext_modules=ext_modules,
     cmdclass={"build_ext": CMakeBuild},
     package_data={"": ["src/*"]},
     include_package_data=True,

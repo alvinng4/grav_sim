@@ -21,17 +21,24 @@ Python packages: (Check `requirements.txt` for the latest version)
 
 There are multiple ways to install the package, depending on your use case.
 
-### Installing with pip and local compilation
+/// tab | Installing with pip and local compilation (MacOS / Linux)
 If you want to compile the package locally, you could run
 ```
-export CMAKE_ARGS="-DUSE_HDF5=ON -DUSE_OPENMP=ON -DUSE_FFTW3=ON -DCMAKE_C_COMPILER=gcc .." // Choose the options you want
+// Choose the options you want
+export CMAKE_ARGS="-DUSE_HDF5=ON -DUSE_OPENMP=ON -DUSE_FFTW3=ON -DCMAKE_C_COMPILER=gcc .."
+
 pip install grav_sim --no-binary grav_sim --no-cache-dir
 ```
+
+  * `-DUSE_OPENMP=ON -DUSE_FFTW3=ON -DUSE_HDF5=ON`: optional flags for the dependencies.
+  * `-DCMAKE_C_COMPILER=gcc`: optional flag to specify the C compiler.
+
 To check whether it is successfully installed, run
 ```
-python -m grav_sim
+python -m grav_sim [--path=c_lib_path]
 ```
-You should see the compilation information and the path to the
+where `--path=c_lib_path` is optional argument to specify the path
+to the compiled C library. You should see the compilation information and the path to the
 compiled library.
 ```
 -----------------------------------------------------------------
@@ -59,8 +66,9 @@ Compiler: GCC (version: 14)
 -----------------------------------------------------------------
 C library location: /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/libgrav_sim.dylib
 ```
+///
 
-### Compiling the C library directly from source
+/// tab | Compiling the C library directly from source
 
 This way should work on all platforms as long as you could get the
 C library compiled on your system.
@@ -90,44 +98,48 @@ libgrav_sim.dylib
 libgrav_sim.so
 libgrav_sim.dll
 ```
-This is the compiled C library. Navigate back to the parent directory and run the grav_sim
-that comes with the repository. The program will search for the file automatically as long
-as it is within the repository.
-```
-cd ..
-python -m grav_sim
-```
-You should see the compilation information and the path to the C library.
-```
------------------------------------------------------------------
-                                              __                   
-    __   _ __    __     __  __           ____/\_\    ___ ___       
-  /'_ `\/\`'__\/'__`\  /\ \/\ \         /',__\/\ \ /' __` __`\     
- /\ \L\ \ \ \//\ \L\.\_\ \ \_/ |       /\__, `\ \ \/\ \/\ \/\ \    
- \ \____ \ \_\\ \__/.\_\\ \___/        \/\____/\ \_\ \_\ \_\ \_\   
-  \/___L\ \/_/ \/__/\/_/ \/__/   _______\/___/  \/_/\/_/\/_/\/_/   
-    /\____/                     /\______\                          
-    \_/__/                      \/______/                          
+This is the compiled C library. You will need to keep track of the path to this file.
+
+5. Now you can install the Python wrapper either from PyPI or from source.
+    - To install from PyPI, run
+    ```
+    SKIP_CMAKE=1 pip install grav_sim
+    ```
+    - To install from source, navigate to the parent directory and run
+    ```
+    SKIP_CMAKE=1 pip install .
+    ```
+
+6. To check whether it is successfully installed, run
+  ```
+  python -m grav_sim --path=/path/to/compiled/c_lib
+  ```
+  where `--path=/path/to/compiled/c_lib` is the path to the compiled C library.
+  You should see the compilation information and the path to the compiled library.
+
+  ```
+  -----------------------------------------------------------------
+                                                __                   
+      __   _ __    __     __  __           ____/\_\    ___ ___       
+    /'_ `\/\`'__\/'__`\  /\ \/\ \         /',__\/\ \ /' __` __`\     
+  /\ \L\ \ \ \//\ \L\.\_\ \ \_/ |       /\__, `\ \ \/\ \/\ \/\ \    
+  \ \____ \ \_\\ \__/.\_\\ \___/        \/\____/\ \_\ \_\ \_\ \_\   
+    \/___L\ \/_/ \/__/\/_/ \/__/   _______\/___/  \/_/\/_/\/_/\/_/   
+      /\____/                     /\______\                          
+      \_/__/                      \/______/                          
 
 
-grav_sim version 0.0.4
+  grav_sim version 0.0.5
 
-Operating System: MacOS
-Compilation Info:
-  Compiled with OpenMP: true
-  Compiled with HDF5: true
-    Version: 1.14.6
-  Compiled with FFTW3: true
-    Version: fftw-3.3.10
+  Operating System: MacOS
+  Compilation Info:
+    Compiled with OpenMP: false
+    Compiled with HDF5: false
+    Compiled with FFTW3: false
 
-Build time: Apr 16 2025 20:39:29
-Compiler: GCC (version: 14)
------------------------------------------------------------------
-C library location: /Users/alvinng/Desktop/grav_sim/build/libgrav_sim.dylib
-```
-
-5. We are almost there. Install the required dependencies for Python.
-```
-pip install -r requirements.txt
-```
-Now you are good to go!
+  Build time: Apr 28 2025 17:06:18
+  Compiler: Clang (version: 15)
+  -----------------------------------------------------------------
+  C library location: /Users/alvinng/Desktop/cuhk/gravity-simulator/Final Project/grav_sim/build/lib.macosx-10.9-universal2-cpython-311/libgrav_sim.dylib
+  ```
+///

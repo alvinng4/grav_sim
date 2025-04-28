@@ -14,8 +14,11 @@ pip install grav_sim
 ```
 To check whether it is successfully installed, run
 ```
-python -m grav_sim
+python -m grav_sim [--path=c_lib_path]
 ```
+where `--path=c_lib_path` is optional argument to specify the path
+to the compiled C library.
+
 You should see the compilation information and the path to the
 compiled library. If not, you may need to refer
 to [Installation in Python](installation_in_python.md).
@@ -48,8 +51,7 @@ C library location: /Library/Frameworks/Python.framework/Versions/3.11/lib/pytho
 ///
 
 /// tab | Windows
-The package is available on PyPI. However, I am not sure if it would work
-on Windows. Try following the guides for MacOS / Linux.
-If it does not work, please refer to [Installation in Python](installation_in_python.md),
-or install WSL (Windows Subsystem for Linux).
+Installation is a bit complicated on Windows.
+You will need to compile the C library and then install the Python wrapper.
+You may follow the instructions in [Installation in Python](installation_in_python.md).
 ///
