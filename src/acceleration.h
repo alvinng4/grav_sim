@@ -72,15 +72,9 @@ ErrorStatus acceleration_barnes_hut(
 #ifdef USE_FFTW3
 ErrorStatus acceleration_PM(
     double *restrict a,
-    const int num_particles,
-    const double *restrict x,
-    const double *restrict m,
+    const CosmologicalSystem *restrict system,
     const double G,
-    const double *restrict box_center,
-    const double box_width,
-    const double mean_bkg_density,
-    const int pm_grid_size,
-    const double scale_factor
+    const int pm_grid_size
 );
 #endif
 

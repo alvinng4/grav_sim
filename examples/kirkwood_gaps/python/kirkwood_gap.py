@@ -11,9 +11,10 @@ gs = GravitySimulatorAPI()
 NUM_PARTICLES = 100
 DT = 180.0
 TF = 5000000.0 * 365.24
-OUTPUT_INTERVAL = 2500 * 365.24 # Stores 2000 snapshots
+OUTPUT_INTERVAL = 2500 * 365.24  # Stores 2000 snapshots
 OUTPUT_METHOD = "hdf5"
 OUTPUT_DIR = "../snapshots/"
+
 
 def main():
     # ---------- Initialization ---------- #
@@ -60,7 +61,10 @@ def main():
     output_param.velocity_output_dtype = "float"
     output_param.mass_output_dtype = "float"
 
-    gs.launch_simulation(system, acc_param, integrator_param, output_param, settings, TF)
-    
+    gs.launch_simulation(
+        system, acc_param, integrator_param, output_param, settings, TF
+    )
+
+
 if __name__ == "__main__":
     main()

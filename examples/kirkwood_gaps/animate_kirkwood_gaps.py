@@ -28,9 +28,10 @@ OUTPUT_FOLDER = Path("output/")
 FRAMES_FOLDER.mkdir(exist_ok=True)
 OUTPUT_FOLDER.mkdir(exist_ok=True)
 
+
 def main():
     if not SNAPSHOT_FOLDER.exists():
-        print(f"Snapshot folder \"{SNAPSHOT_FOLDER}\" not found!")
+        print(f'Snapshot folder "{SNAPSHOT_FOLDER}" not found!')
         print("Please run the simulation first.")
         return
 
@@ -48,7 +49,7 @@ def main():
     num_snapshots = len(snapshot_file_paths)
 
     if num_snapshots <= 0:
-        print(f"No snapshot files found in \"{SNAPSHOT_FOLDER}\"!")
+        print(f'No snapshot files found in "{SNAPSHOT_FOLDER}"!')
         print("Please run the simulation first.")
         return
 
@@ -65,9 +66,11 @@ def main():
             year = f["Header"].attrs["Time"][0] / 365.242189 / 1e6
             x = f["PartType0/Coordinates"][:]
             v = f["PartType0/Velocities"][:]
-            
+
             eccentricity = calculate_eccentricity(x[0:] - x[0], v[0:] - v[0], 0.0, G, M)
-            semi_major_axes = calculate_semi_major_axis(x[0:] - x[0], v[0:] - v[0], 0.0, G, M)
+            semi_major_axes = calculate_semi_major_axis(
+                x[0:] - x[0], v[0:] - v[0], 0.0, G, M
+            )
 
             # Scatter plot
             ax1.scatter(
@@ -140,8 +143,8 @@ def main():
 
             new_x = np.zeros((num_particles - 1, 3))
             for j in range(1, num_particles):
-                semi_major_axis, _, true_anomaly, _, arg_per, long_asc_nodes = cartesian_to_orbital_elements(
-                    0.0, M, x[j] - x[0], v[j] - v[0], G=G
+                semi_major_axis, _, true_anomaly, _, arg_per, long_asc_nodes = (
+                    cartesian_to_orbital_elements(0.0, M, x[j] - x[0], v[j] - v[0], G=G)
                 )
                 new_x[j - 1] = keplerian_to_cartesian(
                     semi_major_axis=semi_major_axis,
@@ -194,14 +197,15 @@ def main():
             # Set equal aspect ratio to prevent distortion
             ax2.set_aspect("equal")
 
-            ax2.set_title("2D scatter plot with correction\n(eccentricity = inclination = 0)")
+            ax2.set_title(
+                "2D scatter plot with correction\n(eccentricity = inclination = 0)"
+            )
 
             fig2.tight_layout()
 
             # Capture the frame
             plt.savefig(
-                FRAMES_FOLDER
-                / f"visualization_frames_{i:04d}.png",
+                FRAMES_FOLDER / f"visualization_frames_{i:04d}.png",
                 dpi=DPI,
             )
 
@@ -240,7 +244,7 @@ def main():
     )
 
     print(
-        f"Output completed! Please check \"{OUTPUT_FOLDER / 'Kirkwood_gap_semi_major_axes.gif'}\" and \"{OUTPUT_FOLDER / 'Kirkwood_gap_visualization.gif'}\""
+        f'Output completed! Please check "{OUTPUT_FOLDER / "Kirkwood_gap_semi_major_axes.gif"}" and "{OUTPUT_FOLDER / "Kirkwood_gap_visualization.gif"}"'
     )
     print()
 
@@ -270,6 +274,7 @@ def calculate_semi_major_axis(x, v, m, G, M):
     a = -0.5 * G * (m + M) / E_sp
 
     return a
+
 
 def cartesian_to_orbital_elements(
     mp,

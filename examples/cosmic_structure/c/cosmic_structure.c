@@ -6,35 +6,31 @@
 
 #define INIT_CONDITION_FILE "../../ics_swift.hdf5"
 #define A_FINAL 1.0 // Scale factor at the end of simulation
+#define NUM_STEPS 1000
 
 ErrorStatus read_init_condition(
     CosmologicalSystem *__restrict system,
-    int *__restrict pm_grid_size,
-    double *__restrict a_begin
+    int *__restrict pm_grid_size
 );
 
 int main(void)
 {
     CosmologicalSystem system;
     int pm_grid_size;
-    double a_begin;
     ErrorStatus error_status = WRAP_TRACEBACK(read_init_condition(
         &system,
-        &pm_grid_size,
-        &a_begin
+        &pm_grid_size
     ));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto error;
     }
 
-    double dt = (A_FINAL - a_begin) / 1000.0;
-
     /* Output parameters */
     OutputParam output_param = get_new_output_param();
     output_param.method = OUTPUT_METHOD_HDF5;
     output_param.output_dir = "snapshots/";
-    output_param.output_interval = (A_FINAL - a_begin) / 100.0;
+    output_param.output_interval = (A_FINAL - system.scale_factor) / 100.0;
     output_param.output_initial = true;
     output_param.coordinate_output_dtype = OUTPUT_DTYPE_FLOAT;
     output_param.velocity_output_dtype = OUTPUT_DTYPE_FLOAT;
@@ -52,9 +48,8 @@ int main(void)
         &output_param,
         &simulation_status,
         &settings,
-        dt,
-        a_begin,
         A_FINAL,
+        NUM_STEPS,
         pm_grid_size
     ));
     if (error_status.return_code != GRAV_SUCCESS)
@@ -75,8 +70,7 @@ error:
 
 ErrorStatus read_init_condition(
     CosmologicalSystem *__restrict system,
-    int *__restrict pm_grid_size,
-    double *__restrict a_begin
+    int *__restrict pm_grid_size
 )
 {
     ErrorStatus error_status;
@@ -158,23 +152,16 @@ ErrorStatus read_init_condition(
         error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to read omega_lambda from header");
         goto err_header_attr;
     }
-    if (H5Aread(redshift_attr, H5T_NATIVE_DOUBLE, a_begin) < 0)
+    double redshift;
+    if (H5Aread(redshift_attr, H5T_NATIVE_DOUBLE, &redshift) < 0)
     {
         error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to read redshift from header");
         goto err_header_attr;
     }
-    *a_begin = 1.0 / (*a_begin + 1.0);
-
     double h;
     if (H5Aread(h_attr, H5T_NATIVE_DOUBLE, &h) < 0)
     {
         error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to read Hubble parameter from header");
-        goto err_header_attr;
-    }
-    double temp_mass_arr[6];
-    if (H5Aread(mass_table_attr, H5T_NATIVE_DOUBLE, &temp_mass_arr) < 0)
-    {
-        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to read mass table from header");
         goto err_header_attr;
     }
     
@@ -190,13 +177,10 @@ ErrorStatus read_init_condition(
     system->box_center[0] = system->box_width;
     system->box_center[1] = system->box_width;
     system->box_center[2] = system->box_width;
+    system->scale_factor = 1.0 / (redshift + 1.0);
     system->omega_m = omega_m;
     system->omega_lambda = omega_lambda;
     system->h = h;
-    for (int i = 0; i < system->num_particles; i++)
-    {
-        system->m[i] = temp_mass_arr[1];
-    }
 
     /* Read units attributes */
     hid_t unit_length_attr = H5Aopen(units, "Unit length in cgs (U_L)", H5P_DEFAULT);

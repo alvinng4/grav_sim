@@ -192,6 +192,103 @@ WIN32DLL_API int launch_simulation_python(
     return 0;
 }
 
+WIN32DLL_API int launch_cosmological_simulation_python(
+    int32 *restrict num_particles,
+    int32 *particle_ids,
+    double *x,
+    double *v,
+    double *m,
+    int32 **new_particle_ids_ptr,
+    double **new_x_ptr,
+    double **new_v_ptr,
+    double **new_m_ptr,
+    const double h,
+    const double scale_factor,
+    const double omega_m,
+    const double omega_lambda,
+    const double *restrict box_center,
+    const double box_width,
+    const double unit_mass_in_cgs,
+    const double unit_length_in_cgs,
+    const double unit_time_in_cgs,
+    const int32 output_method,
+    char *output_dir,
+    const bool output_initial,
+    const double output_interval,
+    const int32 coordinate_output_dtype,
+    const int32 velocity_output_dtype,
+    const int32 mass_output_dtype,
+    const int32 verbose,
+    const bool enable_progress_bar,
+    bool *is_exit_ptr,
+    const double a_final,
+    const int32 num_steps,
+    const int32 pm_grid_size
+)
+{
+    /* CosmologicalSystem */
+    CosmologicalSystem system = get_new_cosmological_system();
+    system.num_particles = *num_particles;
+    system.particle_ids = particle_ids;
+    system.x = x;
+    system.v = v;
+    system.m = m;
+    system.h = h;
+    system.scale_factor = scale_factor;
+    system.omega_m = omega_m;
+    system.omega_lambda = omega_lambda;
+    system.box_center[0] = box_center[0];
+    system.box_center[1] = box_center[1];
+    system.box_center[2] = box_center[2];
+    system.box_width = box_width;
+    system.unit_mass = unit_mass_in_cgs;
+    system.unit_length = unit_length_in_cgs;
+    system.unit_time = unit_time_in_cgs;
+    
+    /* Output parameters */
+    OutputParam output_param = get_new_output_param();
+    output_param.method = output_method;
+    output_param.output_dir = output_dir;
+    output_param.output_interval = output_interval;
+    output_param.output_initial = output_initial;
+    output_param.coordinate_output_dtype = coordinate_output_dtype;
+    output_param.velocity_output_dtype = velocity_output_dtype;
+    output_param.mass_output_dtype = mass_output_dtype;
+
+    /* Simulation status */
+    SimulationStatus simulation_status;
+
+    /* Settings */
+    Settings settings = get_new_settings();
+    settings.verbose = verbose;
+    settings.enable_progress_bar = enable_progress_bar;
+    settings.is_exit_ptr = is_exit_ptr;
+
+    /* Launch simulation */
+    ErrorStatus error_status = WRAP_TRACEBACK(launch_cosmological_simulation(
+        &system,
+        &output_param,
+        &simulation_status,
+        &settings,
+        a_final,
+        num_steps,
+        pm_grid_size
+    ));
+    if (error_status.return_code != GRAV_SUCCESS)
+    {
+        print_and_free_traceback(&error_status);
+        return 1;
+    }
+
+    // Note: no need to free memory since the memory belongs to python
+    *new_particle_ids_ptr = system.particle_ids;
+    *new_x_ptr = system.x;
+    *new_v_ptr = system.v;
+    *new_m_ptr = system.m;
+
+    return 0;
+}
+
 WIN32DLL_API void compute_energy_python(
     double *restrict energy,
     const double G,

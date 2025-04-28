@@ -49,6 +49,7 @@ def initialize_c_lib(c_lib: ctypes.CDLL) -> None:
         If any C functions that should be available are not found in the C library
     """
     c_lib.launch_simulation_python.restype = int
+    c_lib.launch_cosmological_simulation_python.restype = int
     c_lib.compute_energy_python.restype = None
     c_lib.compute_linear_momentum_python.restype = None
     c_lib.compute_angular_momentum_python.restype = None

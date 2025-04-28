@@ -12,14 +12,15 @@ ACC_METHOD = "Barnes_Hut"
 OPENING_ANGLE = 0.5
 SOFTENING_LENGTH = 0.0
 
-TF = 4000000000 * 365.24 * 24 * 3600 # 4 billion years
+TF = 4000000000 * 365.24 * 24 * 3600  # 4 billion years
 
 INTEGRATOR = "Leapfrog"
 DT = TF / 2000
 
 OUTPUT_METHOD = "hdf5"
-OUTPUT_INTERVAL = TF / 500 # 500 snapshots
+OUTPUT_INTERVAL = TF / 500  # 500 snapshots
 OUTPUT_DIR = Path(__file__).parent / "snapshots/"
+
 
 def main():
     # Load the simulation data
@@ -50,9 +51,9 @@ def main():
 
     system = gs.get_new_system()
     system.add(
-        x = positions,
-        v = velocities,
-        m = masses,
+        x=positions,
+        v=velocities,
+        m=masses,
     )
 
     system.G = G_cgs * unit_mass_in_cgs * unit_time_in_cgs**2 / unit_length_in_cgs**3
@@ -79,7 +80,10 @@ def main():
     output_param.velocity_output_dtype = "float"
     output_param.mass_output_dtype = "float"
 
-    gs.launch_simulation(system, acc_param, integrator_param, output_param, settings, TF)
+    gs.launch_simulation(
+        system, acc_param, integrator_param, output_param, settings, TF
+    )
+
 
 if __name__ == "__main__":
     main()

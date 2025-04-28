@@ -14,7 +14,6 @@
 
 IN_FILE void cloud_in_cell(
     double *restrict delta,
-    const double mean_bkg_density,
     const double *restrict x,
     const double *restrict m,
     const int num_particles,
@@ -100,12 +99,9 @@ IN_FILE void cloud_in_cell(
     }
 
     const double cell_volume = cell_length * cell_length * cell_length;
-#ifdef USE_OPENMP
-    #pragma omp parallel for
-#endif
     for (int i = 0; i < grid_size_3; i++)
     {
-        delta[i] = (delta[i] / cell_volume) - mean_bkg_density;
+        delta[i] /= cell_volume;
     }
 }
 
@@ -273,21 +269,21 @@ IN_FILE void compute_acceleration_with_gradient(
 
 WIN32DLL_API ErrorStatus acceleration_PM(
     double *restrict a,
-    const int num_particles,
-    const double *restrict x,
-    const double *restrict m,
+    const CosmologicalSystem *restrict system,
     const double G,
-    const double *restrict box_center,
-    const double box_width,
-    const double mean_bkg_density,
-    const int pm_grid_size,
-    const double scale_factor
+    const int pm_grid_size
 )
 {
     ErrorStatus error_status;
 
     /* Declare variables */
+    const int num_particles = system->num_particles;
+    const double *restrict x = system->x;
+    const double *restrict m = system->m;
+    const double *restrict box_center = system->box_center;
+    const double box_width = system->box_width;
     const double box_length = box_width * 2.0;
+    const double scale_factor = system->scale_factor;
 
     const int grid_size_2 = pm_grid_size * pm_grid_size;
     const int grid_size_3 = pm_grid_size * pm_grid_size * pm_grid_size;
@@ -303,7 +299,7 @@ WIN32DLL_API ErrorStatus acceleration_PM(
     }
 
     /* Deposit mass onto the grid */
-    cloud_in_cell(delta, mean_bkg_density, x, m, num_particles, pm_grid_size, box_center, box_length);
+    cloud_in_cell(delta, x, m, num_particles, pm_grid_size, box_center, box_length);
 
     /* Compute the density perturbation in Fourier space */
     fftw_plan plan_forward = fftw_plan_dft_r2c_3d(pm_grid_size, pm_grid_size, pm_grid_size, delta, delta_fourier, FFTW_ESTIMATE);

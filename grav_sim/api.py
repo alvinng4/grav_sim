@@ -6,12 +6,10 @@ Usage:
     gs = GravitySimulatorAPI()
 """
 
-import copy
 import ctypes
-import sys
 import warnings
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -19,7 +17,7 @@ from . import plotting
 from . import utils
 from . import parameters
 from .simulator import Simulator
-from .system import System
+from .system import System, CosmologicalSystem
 
 
 class GravitySimulatorAPI:
@@ -53,12 +51,21 @@ class GravitySimulatorAPI:
         self.simulator = Simulator(c_lib=self.c_lib)
         self.DAYS_PER_YEAR = self.simulator.DAYS_PER_YEAR
         self.launch_simulation = self.simulator.launch_simulation
+        self.launch_cosmological_simulation = (
+            self.simulator.launch_cosmological_simulation
+        )
 
         # Parameters
-        self.AVAILABLE_ACCELERATION_METHODS = parameters.AccelerationParam.AVAILABLE_ACCELERATION_METHODS
+        self.AVAILABLE_ACCELERATION_METHODS = (
+            parameters.AccelerationParam.AVAILABLE_ACCELERATION_METHODS
+        )
         self.AVAILABLE_INTEGRATORS = parameters.IntegratorParam.AVAILABLE_INTEGRATORS
-        self.FIXED_STEP_SIZE_INTEGRATORS = parameters.IntegratorParam.FIXED_STEP_SIZE_INTEGRATORS
-        self.ADAPTIVE_STEP_SIZE_INTEGRATORS = parameters.IntegratorParam.ADAPTIVE_STEP_SIZE_INTEGRATORS
+        self.FIXED_STEP_SIZE_INTEGRATORS = (
+            parameters.IntegratorParam.FIXED_STEP_SIZE_INTEGRATORS
+        )
+        self.ADAPTIVE_STEP_SIZE_INTEGRATORS = (
+            parameters.IntegratorParam.ADAPTIVE_STEP_SIZE_INTEGRATORS
+        )
         self.AVAILABLE_OUTPUT_METHODS = parameters.OutputParam.AVAILABLE_OUTPUT_METHODS
         self.AVAILABLE_OUTPUT_DTYPE = parameters.OutputParam.AVAILABLE_OUTPUT_DTYPE
 
@@ -70,6 +77,15 @@ class GravitySimulatorAPI:
         System object
         """
         return System(c_lib=self.c_lib)
+
+    def get_new_cosmological_system(self) -> CosmologicalSystem:
+        """Create a cosmological system
+
+        Returns
+        -------
+        CosmologicalSystem object
+        """
+        return CosmologicalSystem(c_lib=self.c_lib)
 
     def load_system(
         self,
@@ -207,7 +223,9 @@ class GravitySimulatorAPI:
                 particle_ids = np.sort(particle_ids)
                 _, num_duplicates = np.unique(particle_ids, return_counts=True)
                 if np.any(num_duplicates > 1):
-                    raise ValueError(f"Particle IDs are not unique. Particle IDs: {particle_ids}")
+                    raise ValueError(
+                        f"Particle IDs are not unique. Particle IDs: {particle_ids}"
+                    )
 
             snapshot_particle_ids = data[:, 0].astype(np.int32)
 
@@ -246,7 +264,7 @@ class GravitySimulatorAPI:
             snapshot_file.unlink()
 
     def compute_energy(
-        self: ctypes.CDLL, sol_state: np.ndarray, G: float
+        self, sol_state: np.ndarray, G: float
     ) -> np.ndarray:
         """Compute the total energy of the system
 
@@ -286,7 +304,8 @@ class GravitySimulatorAPI:
         return energy
 
     def compute_linear_momentum(
-        self: ctypes.CDLL, sol_state: np.ndarray,
+        self,
+        sol_state: np.ndarray,
     ) -> np.ndarray:
         """Compute the total linear_momentum of the system
 
@@ -321,9 +340,10 @@ class GravitySimulatorAPI:
         )
 
         return linear_momentum
-    
+
     def compute_angular_momentum(
-        self: ctypes.CDLL, sol_state: np.ndarray,
+        self,
+        sol_state: np.ndarray,
     ) -> np.ndarray:
         """Compute the total angular_momentum of the system
 
@@ -358,7 +378,7 @@ class GravitySimulatorAPI:
         )
 
         return angular_momentum
-    
+
     @staticmethod
     def compute_eccentricity(
         G: float,
@@ -390,7 +410,7 @@ class GravitySimulatorAPI:
         num_snapshots = sol_state.shape[0]
         m_0 = sol_state[0, 0, 0]
         m = sol_state[0, 1:, 0]
-        
+
         eccentricity = np.zeros(num_snapshots)
 
         x = sol_state[:, 1:, 1:4].copy() - sol_state[:, 0, 1:4].reshape(-1, 1, 3)
@@ -418,7 +438,7 @@ class GravitySimulatorAPI:
         Returns
         -------
         np.ndarray
-            Inclination of the system at each time step, 
+            Inclination of the system at each time step,
             with shape (num_snapshots, num_particles - 1)
 
         Notes

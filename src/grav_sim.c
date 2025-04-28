@@ -35,25 +35,23 @@ IN_FILE void print_simulation_info(
     const double tf
 );
 
-#ifdef USE_FFTW3
+#if defined(USE_FFTW3) && defined(USE_HDF5)
 /**
  * \brief Print cosmological simulation information.
  * 
  * \param system Pointer to the cosmological system.
  * \param output_param Pointer to the output parameters.
  * \param settings Pointer to the settings.
- * \param dt Time step.
- * \param a_begin Initial scale factor.
  * \param a_final Final scale factor.
+ * \param num_steps Number of steps.
  * \param pm_grid_size Size of the PM grid.
  */
 IN_FILE void print_cosmological_simulation_info(
     const CosmologicalSystem *restrict system,
     const OutputParam *restrict output_param,
     const Settings *restrict settings,
-    const double dt,
-    const double a_begin,
     const double a_final,
+    const int num_steps,
     const int pm_grid_size
 );
 #endif
@@ -142,24 +140,22 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,
     Settings *restrict settings,
-    double dt,
-    const double a_begin,
     const double a_final,
+    const int num_steps,
     const int pm_grid_size
 )
 {
-#ifndef USE_FFTW3
+#if !defined(USE_FFTW3) || !defined(USE_HDF5)
     (void) system;
     (void) output_param;
     (void) simulation_status;
     (void) settings;
-    (void) dt;
-    (void) a_begin;
     (void) a_final;
+    (void) num_steps;
     (void) pm_grid_size;
     return WRAP_RAISE_ERROR(
         GRAV_VALUE_ERROR,
-        "FFTW3 are required for cosmological simulations. Please recompile with FFTW3 support."
+        "FFTW3 and HDF5 are required for cosmological simulations. Please recompile with FFTW3 and HDF5 support."
     );
 #else
     ErrorStatus error_status;
@@ -185,25 +181,7 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
         return error_status;
     }
 
-    /* Check dt */
-    if (dt < 0.0)
-    {
-        return WRAP_RAISE_ERROR_FMT(
-            GRAV_VALUE_ERROR,
-            "dt must be non=negative. Got: %g",
-            dt
-        );
-    }
-
-    /* Check a_begin and a_final */
-    if (a_begin <= 0.0)
-    {
-        return WRAP_RAISE_ERROR_FMT(
-            GRAV_VALUE_ERROR,
-            "a_begin must be positive. Got: %g",
-            a_begin
-        );
-    }
+    /* Check a_final */
     if (a_final <= 0.0)
     {
         return WRAP_RAISE_ERROR_FMT(
@@ -212,13 +190,23 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
             a_final
         );
     }
-    if (a_final < a_begin)
+    if (a_final < system->scale_factor)
     {
         return WRAP_RAISE_ERROR_FMT(
             GRAV_VALUE_ERROR,
-            "a_final must be greater or equal to a_begin. Got: %g, %g",
-            a_begin,
-            a_final
+            "a_final must be greater or equal to initial scale factor. Got: a_final=%g, system->scale_factor=%g",
+            a_final,
+            system->scale_factor
+        );
+    }
+
+    /* Check num_steps */
+    if (num_steps <= 0)
+    {
+        return WRAP_RAISE_ERROR_FMT(
+            GRAV_VALUE_ERROR,
+            "num_steps must be positive. Got: %d",
+            num_steps
         );
     }
 
@@ -239,9 +227,8 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
             system,
             output_param,
             settings,
-            dt,
-            a_begin,
             a_final,
+            num_steps,
             pm_grid_size
         );
     }
@@ -251,9 +238,8 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
         output_param,
         simulation_status,
         settings,
-        dt,
-        a_begin,
         a_final,
+        num_steps,
         pm_grid_size
     ));
 #endif
@@ -493,14 +479,13 @@ IN_FILE void print_simulation_info(
     fputs(straight_line, stdout);
 }
 
-#ifdef USE_FFTW3
+#if defined(USE_FFTW3) && defined(USE_HDF5)
 IN_FILE void print_cosmological_simulation_info(
     const CosmologicalSystem *restrict system,
     const OutputParam *restrict output_param,
     const Settings *restrict settings,
-    const double dt,
-    const double a_begin,
     const double a_final,
+    const int num_steps,
     const int pm_grid_size
 )
 {
@@ -522,9 +507,9 @@ IN_FILE void print_cosmological_simulation_info(
     printf("  Unit length in cgs: %g\n", system->unit_length);
     printf("  Unit time in cgs: %g\n", system->unit_time);
 
-    printf("  dt: %g\n", dt);
-    printf("  a_begin: %g\n", a_begin);
+    printf("  a_begin: %g\n", system->scale_factor);
     printf("  a_final: %g\n", a_final);
+    printf("  Number of steps: %d\n", num_steps);
 
     fputs(new_line, stdout);
 
