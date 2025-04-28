@@ -36,14 +36,12 @@ Project Homepage and documentations: https://alvinng4.github.io/grav_sim/
 <img src="./examples/media/Kirkwood_gap_visualization.png" alt="Image" width="225">
 
 ### Galaxy collision
-<!-- Note: Initial condition is taken from Gadget-2 by Volker Springel.
-Visualization is done with gadgetviewer. -->
 
 <img src="./examples/media/galaxy_collision.png" alt="Image" width="400">
 
 ### Cosmological structure formation
 
-Coming soon!
+<img src="./examples/media/cosmic_structure_a_1.0.png" alt="Image" width="400">
 
 ## Feedback and Bugs
 If you found any bugs or want to leave some feedback, please feel free to let me know by opening an issue or sending an email to alvinng324(at)gmail.com.
