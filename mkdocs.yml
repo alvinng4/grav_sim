@@ -103,7 +103,6 @@ plugins:
   - same-dir
   - mkdocstrings
   - meta
-  # - mkdocs-video
 
 extra_javascript:
   - docs/javascripts/mathjax.js
