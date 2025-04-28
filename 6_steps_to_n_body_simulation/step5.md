@@ -485,10 +485,10 @@ first see how to add new particles to our system using orbital elements.
 Then, I will show you how to make animations for the N-body simulations.
 
 ## Full script
-The full script is available at `12_steps_to_n_body_simulation/python/step5.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/12_steps_to_n_body_simulation/python/step5.py
+The full script is available at `6_steps_to_n_body_simulation/python/step5.py`,
+or https://github.com/alvinng4/grav_sim/blob/main/6_steps_to_n_body_simulation/python/step5.py
 
 ??? note "Code (Click to expand)"
     ```python linenums="1"
-    --8<-- "12_steps_to_n_body_simulation/python/step5.py"
+    --8<-- "6_steps_to_n_body_simulation/python/step5.py"
     ```
