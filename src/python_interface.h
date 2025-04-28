@@ -116,6 +116,40 @@ int launch_simulation_python(
     const double tf
 );
 
+WIN32DLL_API int launch_cosmological_simulation_python(
+    int32 *restrict num_particles,
+    int32 *particle_ids,
+    double *x,
+    double *v,
+    double *m,
+    int32 **new_particle_ids_ptr,
+    double **new_x_ptr,
+    double **new_v_ptr,
+    double **new_m_ptr,
+    const double h,
+    const double scale_factor,
+    const double omega_m,
+    const double omega_lambda,
+    const double *restrict box_center,
+    const double box_width,
+    const double unit_mass_in_cgs,
+    const double unit_length_in_cgs,
+    const double unit_time_in_cgs,
+    const int32 output_method,
+    char *output_dir,
+    const bool output_initial,
+    const double output_interval,
+    const int32 coordinate_output_dtype,
+    const int32 velocity_output_dtype,
+    const int32 mass_output_dtype,
+    const int32 verbose,
+    const bool enable_progress_bar,
+    bool *is_exit_ptr,
+    const double a_final,
+    const int32 num_steps,
+    const int32 pm_grid_size
+);
+
 /**
  * \brief Compute the energy from solution state
  * 

@@ -69,9 +69,10 @@ class System:
         else:
             num_new_particles = 1
 
-        max_id = self.particle_ids.max() if self.num_particles > 0 else -1
+        max_id = self.particle_ids.max() if len(self.particle_ids) > 0 else -1
         new_ids = np.arange(max_id + 1, max_id + 1 + num_new_particles, dtype=np.int32)
         self.particle_ids = np.hstack((self.particle_ids, new_ids))
+        print(self.num_particles, num_new_particles)
         self.num_particles += num_new_particles
 
     def add_keplerian(
@@ -392,3 +393,21 @@ class System:
             save_fig,
             save_fig_path,
         )
+
+
+class CosmologicalSystem(System):
+    """
+    Class to represent a cosmological system.
+    """
+
+    def __init__(self, c_lib: ctypes.CDLL) -> None:
+        super().__init__(c_lib)
+        self.scale_factor = -1.0
+        self.h = -1.0
+        self.omega_m = -1.0
+        self.omega_lambda = -1.0
+        self.box_center = np.zeros((3,), dtype=np.float64)
+        self.box_width = -1.0
+        self.unit_mass_in_cgs = -1.0
+        self.unit_length_in_cgs = -1.0
+        self.unit_time_in_cgs = -1.0

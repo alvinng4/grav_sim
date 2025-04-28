@@ -127,6 +127,7 @@ WIN32DLL_API CosmologicalSystem get_new_cosmological_system(void)
     system.v = NULL;
     system.m = NULL;
     system.h = -1.0;
+    system.scale_factor = -1.0;
     system.omega_m = -1.0;
     system.omega_lambda = -1.0;
     system.box_center[0] = 0.0;
@@ -208,6 +209,15 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
             GRAV_VALUE_ERROR,
             "Hubble parameter system->h must be positive. Got: %g",
             system->h
+        );
+    }
+
+    if (system->scale_factor <= 0.0)
+    {
+        return WRAP_RAISE_ERROR_FMT(
+            GRAV_VALUE_ERROR,
+            "Scale factor must be positive. Got: %g",
+            system->scale_factor
         );
     }
 

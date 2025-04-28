@@ -38,8 +38,8 @@ FPS = 30
 DPI = 200
 N_FRAMES = 500
 
-TF = 5.0 # Number of years
-DT = 0.1 # Time step in days
+TF = 5.0  # Number of years
+DT = 0.1  # Time step in days
 
 ACC_METHOD = "massless"
 INTEGRATOR = "rk4"
@@ -51,14 +51,15 @@ SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 FRAMES_DIR = Path("frames/")
 FRAMES_DIR.mkdir(parents=True, exist_ok=True)
 
-DELETE_SNAPSHOTS = True # Delete snapshots after creating the gif
+DELETE_SNAPSHOTS = True  # Delete snapshots after creating the gif
+
 
 def main():
     # ---------- Initialization ---------- #
     print("Initializing the system...", end="")
-    
+
     gs = GravitySimulatorAPI()
-    
+
     system = gs.get_built_in_system("solar_system")
     system.remove([1, 7, 8])  # Remove Mercury, Uranus, and Neptune
     objects_name = ["Sun", "Venus", "Earth", "Mars", "Jupiter", "Saturn"]
@@ -140,7 +141,9 @@ def main():
     output_param.output_initial = OUTPUT_INITIAL
     output_param.output_dir = SNAPSHOTS_DIR
 
-    gs.launch_simulation(system, acc_param, integrator_param, output_param, settings, tf)
+    gs.launch_simulation(
+        system, acc_param, integrator_param, output_param, settings, tf
+    )
 
     # ---------- Animation ---------- #
     print("Drawing frames...", end="")
@@ -254,7 +257,7 @@ def main():
 
     print(f"Output completed! Please check {FRAMES_DIR / 'asteroid_belt.gif'}")
     print()
-    
+
     if DELETE_SNAPSHOTS:
         gs.delete_snapshots(output_dir=SNAPSHOTS_DIR)
 

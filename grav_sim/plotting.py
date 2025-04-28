@@ -240,6 +240,7 @@ def plot_3d_trajectory(
         plt.show()
     plt.close("all")
 
+
 def plot_quantity_against_time(
     quantity: np.ndarray,
     sol_time: np.ndarray,
@@ -296,7 +297,7 @@ def plot_quantity_against_time(
             labels_i = labels[i]
         else:
             labels_i = None
-    
+
         ax.plot(sol_time, quantity[:, i], color=colors_i, label=labels_i)
 
     if is_log_y:
