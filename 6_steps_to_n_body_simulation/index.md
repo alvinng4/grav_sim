@@ -16,15 +16,7 @@ can be skipped if it is too difficult for the reader.
 - [Step 4: Higher-order algorithms](step4.md)
 - [Step 5: Adaptive time-stepping](step5.md)
 - [Step 6a: Keplerian orbital elements]
-- [Step 6b: Animations (Optional)]
-- [Step 7: Test particles]
-- [Step 8: Introduction to large-scale simulations]
-- [Step 9: Barnes-Hut algorithm (Part 1)]
-- [Step 10: Barnes-Hut algorithm (Part 2)]
-- [Step 11: Particle-Mesh algorithm (Part 1)]
-- [Step 12: Particle-Mesh algorithm (Part 2)]
-
-
+- [Step 6b: Animations]
 
 ## References
 1. @CFDPython
