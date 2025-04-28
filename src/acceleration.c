@@ -88,7 +88,10 @@ WIN32DLL_API ErrorStatus finalize_acceleration_param(
     /* Check the softening length */
     if (acceleration_param->softening_length < 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Softening length is negative. Got: %.3g",
             acceleration_param->softening_length
@@ -101,7 +104,10 @@ WIN32DLL_API ErrorStatus finalize_acceleration_param(
         && acceleration_param->opening_angle < 0.0
     )
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Opening angle is negative. Got: %.3g",
             acceleration_param->opening_angle
@@ -117,7 +123,10 @@ WIN32DLL_API ErrorStatus finalize_acceleration_param(
         }
         else if (acceleration_param->max_num_particles_per_leaf < 1)
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
                 GRAV_VALUE_ERROR,
                 "Maximum number of particles per leaf must be positive. Got: %d",
                 acceleration_param->max_num_particles_per_leaf
@@ -144,7 +153,10 @@ WIN32DLL_API ErrorStatus acceleration(
             return acceleration_barnes_hut(a, system, acceleration_param);
         default:
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
                 GRAV_VALUE_ERROR,
                 "Unknown acceleration method. Got: %d",
                 acceleration_param->method
@@ -163,7 +175,10 @@ IN_FILE ErrorStatus check_acceleration_method(const int acceleration_method)
             break;
         default:
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
                 GRAV_VALUE_ERROR,
                 "Unknown acceleration method. Got: %d",
                 acceleration_method
@@ -478,7 +493,10 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
                 fputs("    Method: Barnes-Hut\n", stdout);
                 break;
             default:
-                error_status = WRAP_RAISE_ERROR_FMT(
+                error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
                     GRAV_VALUE_ERROR,
                     "Unknown acceleration method. Got: %d",
                     acceleration_param->method

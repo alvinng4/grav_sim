@@ -114,8 +114,7 @@ int main(void)
     Settings settings = get_new_settings();
     settings.verbose = GRAV_VERBOSITY_VERBOSE;
 
-    printf("Launching simulation...\n");
-    error_status = WRAP_TRACEBACK(launch_simulation(
+    int return_code = launch_simulation(
         &system,
         &integrator_param,
         &acceleration_param,
@@ -123,12 +122,16 @@ int main(void)
         &simulation_status,
         &settings,
         TF
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
+    );
+    if (return_code != 0)
     {
+        free_system(&system);
+        error_status = WRAP_RAISE_ERROR(
+            GRAV_FAILURE,
+            "Simulation failed."
+        );
         goto error;
     }
-    printf("Done!\n");
 
     /* Free memory */
     free_system(&system);

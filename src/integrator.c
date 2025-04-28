@@ -148,7 +148,10 @@ WIN32DLL_API ErrorStatus finalize_integration_param(IntegratorParam *restrict in
         && integration_param->integrator != INTEGRATOR_WHFAST
     )
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Unknown integrator. Got: %d",
             integration_param->integrator
@@ -165,7 +168,10 @@ WIN32DLL_API ErrorStatus finalize_integration_param(IntegratorParam *restrict in
     {
         if (integration_param->dt <= 0.0)
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_VALUE_ERROR,
                 "dt must be positive. Got: %g",
                 integration_param->dt
@@ -177,7 +183,10 @@ WIN32DLL_API ErrorStatus finalize_integration_param(IntegratorParam *restrict in
     {
         if (integration_param->tolerance <= 0.0)
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_VALUE_ERROR,
                 "tolerance must be positive. Got: %g",
                 integration_param->tolerance

@@ -168,7 +168,7 @@ WIN32DLL_API int launch_simulation_python(
     settings.is_exit_ptr = is_exit_ptr;
 
     /* Launch simulation */
-    ErrorStatus error_status = WRAP_TRACEBACK(launch_simulation(
+    int return_code = launch_simulation(
         &system,
         &integrator_param,
         &acceleration_param,
@@ -176,11 +176,10 @@ WIN32DLL_API int launch_simulation_python(
         &simulation_status,
         &settings,
         tf
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
+    );
+    if (return_code != 0)
     {
-        print_and_free_traceback(&error_status);
-        return 1;
+        return return_code;
     }
 
     // Note: no need to free memory since the memory belongs to python
@@ -265,7 +264,7 @@ WIN32DLL_API int launch_cosmological_simulation_python(
     settings.is_exit_ptr = is_exit_ptr;
 
     /* Launch simulation */
-    ErrorStatus error_status = WRAP_TRACEBACK(launch_cosmological_simulation(
+    int return_code = launch_cosmological_simulation(
         &system,
         &output_param,
         &simulation_status,
@@ -273,11 +272,10 @@ WIN32DLL_API int launch_cosmological_simulation_python(
         a_final,
         num_steps,
         pm_grid_size
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
+    );
+    if (return_code != 0)
     {
-        print_and_free_traceback(&error_status);
-        return 1;
+        return return_code;
     }
 
     // Note: no need to free memory since the memory belongs to python

@@ -365,7 +365,10 @@ IN_FILE ErrorStatus binary_search_num_particles_per_octant(
 
             if (mid_octant > 7 || mid_octant < 0)
             {
-                return WRAP_RAISE_ERROR_FMT(
+                return raise_error_fmt(
+                    __FILE__,
+                    __LINE__,
+                    __func__,
                     GRAV_VALUE_ERROR,
                     "Morton index %d is out of range [0, 7]",
                     mid_octant

@@ -76,7 +76,10 @@ WIN32DLL_API ErrorStatus finalize_system(System *restrict system)
 
     if (system->num_particles <= 0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Number of particles must be positive. Got: %d",
             system->num_particles
@@ -100,7 +103,10 @@ WIN32DLL_API ErrorStatus finalize_system(System *restrict system)
     }
     if (system->G <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Gravitational constant G must be positive. Got: %g",
             system->G
@@ -181,7 +187,10 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
 
     if (system->num_particles <= 0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Number of particles must be positive. Got: %d",
             system->num_particles
@@ -205,7 +214,10 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
     }
     if (system->h <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Hubble parameter system->h must be positive. Got: %g",
             system->h
@@ -214,7 +226,10 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
 
     if (system->scale_factor <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Scale factor must be positive. Got: %g",
             system->scale_factor
@@ -223,7 +238,10 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
 
     if (system->omega_m <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "omega_m must be positive. Got: %g",
             system->omega_m
@@ -232,7 +250,10 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
 
     if (system->omega_lambda <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "omega_lambda must be positive. Got: %g",
             system->omega_lambda
@@ -241,7 +262,10 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
 
     if (system->box_width <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Box width must be positive. Got: %g",
             system->box_width
@@ -1094,7 +1118,10 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
     }
     else
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "System name not recognized. Got: \"%s\".",
             system_name
