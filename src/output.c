@@ -112,7 +112,10 @@ IN_FILE ErrorStatus check_output_method(const int output_method)
 #endif
         default:
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_VALUE_ERROR,
                 "Unknown output method. Got: %d",
                 output_method
@@ -144,7 +147,10 @@ WIN32DLL_API ErrorStatus finalize_output_param(
     /* Check storing interval */
     if (output_param->output_interval <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        return raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "Output interval must be positive. Got: %.17g",
             output_param->output_interval
@@ -170,7 +176,10 @@ WIN32DLL_API ErrorStatus finalize_output_param(
     {
         if (output_param->output_dir[strlen(output_param->output_dir) - 1] != '/')
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_VALUE_ERROR,
                 "Directory path for storing snapshots must end with a trailing slash (\"/\"). Got: \"%s\".",
                 output_param->output_dir
@@ -184,7 +193,10 @@ WIN32DLL_API ErrorStatus finalize_output_param(
     {
         if (GetFileAttributes(output_param->output_dir) == INVALID_FILE_ATTRIBUTES)
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_OS_ERROR,
                 "Failed to access path for storing snapshots: \"%s\".",
                 output_param->output_dir
@@ -195,7 +207,10 @@ WIN32DLL_API ErrorStatus finalize_output_param(
             && (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO)
         )
         {
-            error_status = WRAP_RAISE_WARNING_FMT(
+            error_status = raise_warning_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 "Directory for storing snapshots already exists. The files will be overwritten. Directory: \"%s\".",
                 output_param->output_dir
             );
@@ -211,7 +226,10 @@ WIN32DLL_API ErrorStatus finalize_output_param(
     {
         if(stat(output_param->output_dir, &st) != 0)
         {
-            return WRAP_RAISE_ERROR_FMT(
+            return raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_OS_ERROR,
                 "Failed to access path for storing snapshots: \"%s\".",
                 output_param->output_dir
@@ -223,7 +241,10 @@ WIN32DLL_API ErrorStatus finalize_output_param(
             && (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO)
         )
         {
-            error_status = WRAP_RAISE_WARNING_FMT(
+            error_status = raise_warning_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 "Directory for storing snapshots already exists. The files will be overwritten. Directory: \"%s\".",
                 output_param->output_dir
             );
@@ -331,7 +352,10 @@ WIN32DLL_API ErrorStatus output_snapshot_cosmology(
             break;
 #endif
         default:
-            error_status = WRAP_RAISE_ERROR_FMT(
+            error_status = raise_error_fmt(
+                __FILE__,
+                __LINE__,
+                __func__,
                 GRAV_VALUE_ERROR,
                 "Unknown output method. Got: %d",
                 output_param->method
@@ -398,7 +422,10 @@ IN_FILE ErrorStatus output_snapshot_csv(
     FILE *file = fopen(file_path, "w");
     if (!file)
     {
-        error_status = WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_OS_ERROR,
             "Failed to open file for storing snapshots: \"%s\".",
             file_path
@@ -537,7 +564,10 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     hid_t file = H5Fcreate(file_path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (!file)
     {
-        error_status = WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_OS_ERROR,
             "Failed to create HDF5 file for storing snapshots: \"%s\".",
             file_path
@@ -747,7 +777,10 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
     hid_t file = H5Fcreate(file_path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (!file)
     {
-        error_status = WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_OS_ERROR,
             "Failed to create HDF5 snapshot file: \"%s\".",
             file_path

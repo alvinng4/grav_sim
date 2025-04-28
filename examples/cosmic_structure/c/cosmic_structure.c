@@ -43,7 +43,7 @@ int main(void)
     Settings settings = get_new_settings();
     settings.verbose = GRAV_VERBOSITY_NORMAL;
 
-    error_status = WRAP_TRACEBACK(launch_cosmological_simulation(
+    int return_code = launch_cosmological_simulation(
         &system,
         &output_param,
         &simulation_status,
@@ -51,10 +51,14 @@ int main(void)
         A_FINAL,
         NUM_STEPS,
         pm_grid_size
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
+    );
+    if (return_code != 0)
     {
         free_cosmological_system(&system);
+        error_status = WRAP_RAISE_ERROR(
+            GRAV_FAILURE,
+            "Simulation failed."
+        );
         goto error;
     }
 

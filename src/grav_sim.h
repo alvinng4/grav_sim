@@ -42,9 +42,9 @@
  * \param settings Pointer to the settings.
  * \param tf Simulation time.
  * 
- * \return Error status.
+ * \return Error code.
  */
-ErrorStatus launch_simulation(
+int launch_simulation(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -65,9 +65,9 @@ ErrorStatus launch_simulation(
  * \param num_steps Number of steps.
  * \param pm_grid_size Particle mesh grid size.
  * 
- * \return Error status.
+ * \return Error code.
  */
-ErrorStatus launch_cosmological_simulation(
+int launch_cosmological_simulation(
     CosmologicalSystem *restrict system,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,

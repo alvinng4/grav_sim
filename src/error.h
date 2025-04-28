@@ -44,17 +44,6 @@ typedef struct ErrorStatus
     raise_warning(__FILE__, __LINE__, __func__, error_msg)
 
 /**
- * \brief Wrapper for raise_warning function with formatted message.
- * 
- * \param format Format string.
- * \param ... Additional arguments for the format string.
- * 
- * \return ErrorStatus
- */
-#define WRAP_RAISE_WARNING_FMT(format, ...) \
-    raise_warning_fmt(__FILE__, __LINE__, __func__, format, ##__VA_ARGS__)
-
-/**
  * \brief Wrapper for raise_error function.
  * 
  * \param error_code Error code
@@ -64,18 +53,6 @@ typedef struct ErrorStatus
  */
 #define WRAP_RAISE_ERROR(error_code, error_msg) \
     raise_error(__FILE__, __LINE__, __func__, error_code, error_msg)
-
-/**
- * \brief Wrapper for raise_error function with formatted message.
- * 
- * \param error_code Error code
- * \param format Format string
- * \param ... Additional arguments for the format string
- * 
- * \return ErrorStatus
- */
-#define WRAP_RAISE_ERROR_FMT(error_code, format, ...) \
-    raise_error_fmt(__FILE__, __LINE__, __func__, error_code, format, ##__VA_ARGS__)
 
 /**
  * \brief Wrapper for traceback function.

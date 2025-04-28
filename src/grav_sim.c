@@ -56,7 +56,7 @@ IN_FILE void print_cosmological_simulation_info(
 );
 #endif
 
-WIN32DLL_API ErrorStatus launch_simulation(
+WIN32DLL_API int launch_simulation(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -72,38 +72,42 @@ WIN32DLL_API ErrorStatus launch_simulation(
     error_status = WRAP_TRACEBACK(finalize_system(system));
     if (error_status.return_code != GRAV_SUCCESS)
     {
-        return error_status;
+        goto error;
     }
 
     /* Check acceleration parameters */
     error_status = WRAP_TRACEBACK(finalize_acceleration_param(acceleration_param));
     if (error_status.return_code != GRAV_SUCCESS)
     {
-        return error_status;
+        goto error;
     }
 
     /* Check integrator parameters */
     error_status = WRAP_TRACEBACK(finalize_integration_param(integrator_param));
     if (error_status.return_code != GRAV_SUCCESS)
     {
-        return error_status;
+        goto error;
     }
 
     /* Check output parameters */
     error_status = WRAP_TRACEBACK(finalize_output_param(output_param, settings));
     if (error_status.return_code != GRAV_SUCCESS)
     {
-        return error_status;
+        goto error;
     }
 
     /* Check tf */
     if (tf < 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "tf must be non-negative. Got: %g",
             tf
         );
+        goto error;
     }
 
     /* Print message */
@@ -120,11 +124,12 @@ WIN32DLL_API ErrorStatus launch_simulation(
         );
     }
 
-    if (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO)
+    if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         fputs("Launching simulation...\n", stdout);
     }
-    return WRAP_TRACEBACK(integrator_launch_simulation(
+    const double start_time = grav_get_current_time();
+    error_status = WRAP_TRACEBACK(integrator_launch_simulation(
         system,
         integrator_param,
         acceleration_param,
@@ -133,9 +138,24 @@ WIN32DLL_API ErrorStatus launch_simulation(
         settings,
         tf
     ));
+    if (error_status.return_code != GRAV_SUCCESS)
+    {
+        goto error;
+    }
+    const double end_time = grav_get_current_time();
+    if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
+    {
+        printf("Done! Runtime: %.3g s\n", end_time - start_time);
+    }
+
+    return 0;
+
+error:
+    print_and_free_traceback(&error_status);
+    return 1;
 }
 
-WIN32DLL_API ErrorStatus launch_cosmological_simulation(
+WIN32DLL_API int launch_cosmological_simulation(
     CosmologicalSystem *restrict system,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,
@@ -153,10 +173,12 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
     (void) a_final;
     (void) num_steps;
     (void) pm_grid_size;
-    return WRAP_RAISE_ERROR(
+    ErrorStatus error_status = WRAP_RAISE_ERROR(
         GRAV_VALUE_ERROR,
         "FFTW3 and HDF5 are required for cosmological simulations. Please recompile with FFTW3 and HDF5 support."
     );
+    print_and_free_traceback(&error_status);
+    return 1;
 #else
     ErrorStatus error_status;
 
@@ -164,60 +186,77 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
     error_status = WRAP_TRACEBACK(finalize_cosmological_system(system));
     if (error_status.return_code != GRAV_SUCCESS)
     {
-        return error_status;
+        goto error;
     }
 
     /* Check output parameters */
     if (output_param->method == OUTPUT_METHOD_CSV)
     {
-        return WRAP_RAISE_ERROR(
+        error_status = WRAP_RAISE_ERROR(
             GRAV_VALUE_ERROR,
             "CSV output is not supported for cosmological simulations. Please use HDF5 output format."
         );
+        goto error;
     }
     error_status = WRAP_TRACEBACK(finalize_output_param(output_param, settings));
     if (error_status.return_code != GRAV_SUCCESS)
     {
-        return error_status;
+        goto error;
     }
 
     /* Check a_final */
     if (a_final <= 0.0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "a_final must be positive. Got: %g",
             a_final
         );
+        goto error;
     }
     if (a_final < system->scale_factor)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "a_final must be greater or equal to initial scale factor. Got: a_final=%g, system->scale_factor=%g",
             a_final,
             system->scale_factor
         );
+        goto error;
     }
 
     /* Check num_steps */
     if (num_steps <= 0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "num_steps must be positive. Got: %d",
             num_steps
         );
+        goto error;
     }
 
     /* Check pm_grid_size */
     if (pm_grid_size <= 0)
     {
-        return WRAP_RAISE_ERROR_FMT(
+        error_status = raise_error_fmt(
+            __FILE__,
+            __LINE__,
+            __func__,
             GRAV_VALUE_ERROR,
             "pm_grid_size must be positive. Got: %d",
             pm_grid_size
         );
+        goto error;
     }
 
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
@@ -233,7 +272,12 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
         );
     }
 
-    return WRAP_TRACEBACK(leapfrog_cosmology(
+    if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
+    {
+        fputs("Launching simulation...\n", stdout);
+    }
+    const double start_time = grav_get_current_time();
+    error_status = WRAP_TRACEBACK(leapfrog_cosmology(
         system,
         output_param,
         simulation_status,
@@ -242,6 +286,21 @@ WIN32DLL_API ErrorStatus launch_cosmological_simulation(
         num_steps,
         pm_grid_size
     ));
+    if (error_status.return_code != GRAV_SUCCESS)
+    {
+        goto error;
+    }
+    const double end_time = grav_get_current_time();
+    if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
+    {
+        printf("Done! Runtime: %.3g s\n", end_time - start_time);
+    }
+
+    return 0;
+
+error:
+    print_and_free_traceback(&error_status);
+    return 1;
 #endif
 }
 

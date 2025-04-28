@@ -72,7 +72,6 @@ class System:
         max_id = self.particle_ids.max() if len(self.particle_ids) > 0 else -1
         new_ids = np.arange(max_id + 1, max_id + 1 + num_new_particles, dtype=np.int32)
         self.particle_ids = np.hstack((self.particle_ids, new_ids))
-        print(self.num_particles, num_new_particles)
         self.num_particles += num_new_particles
 
     def add_keplerian(
