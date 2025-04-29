@@ -5,13 +5,12 @@ You may wonder why I chose C instead of Python. There are a few reasons:
     This one is obvious. As a low-level language, C is much faster than Python, and performance
     is essential for large-scale / long time scale simulations. Some may argue that Python could
     also be fast, with the help of Cython or Numba, but I just figured that it would be simpler
-    to just write in plain C. Besides, it is tempting to write fast but obscure Python code, which
-    I have observed in some projects, but readability is a priority for me.
+    and faster to just write in plain C. Besides, it is tempting to write fast but obscure Python
+    code, which I have observed in some projects, but readability is a priority for me.
 
     At the very beginning, the project is written in Python with NumPy. As I rewrote the code
     in C, I have achieved a 400x - 1000x speedup. The difference has shrunk to 50x - 100x after 
-    vectorizing the acceleration kernel (that computes gravitational acceleration) to avoid the
-    overhead from Python for loops. But in my opinion, this obscures the code and makes it hard to read.
+    vectorizing the acceleration function to avoid the overhead from Python for loops.
 
 2. Readability
 

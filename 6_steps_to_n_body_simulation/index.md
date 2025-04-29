@@ -15,8 +15,7 @@ can be skipped if it is too difficult for the reader.
 - [Step 3: Your first N-body program](step3.md)
 - [Step 4: Higher-order algorithms](step4.md)
 - [Step 5: Adaptive time-stepping](step5.md)
-- [Step 6a: Keplerian orbital elements]
-- [Step 6b: Animations]
+- [Step 6: Final project](step6.md)
 
 ## References
 1. @CFDPython
