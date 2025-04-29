@@ -93,11 +93,11 @@ $$
     s = \varepsilon + \varepsilon \times \max{(|x_n|, |x_{n +1}|)},
 $$
 
-where the maximum is taken element-wise (i.e. $s$ will have the same shape as $x$ which is `(N, 3)`).
+where the maximum is taken element-wise (i.e. $\mathbf{s}$ will have the same shape as $x$ which is `(N, 3)`).
 Finally, we compute the error by taking the "norm":
 
 $$
-    \text{error} = \sqrt{\overline{\sum_i \left( \frac{\Delta x'}{s_i} \right)^2}}.
+    \text{error} = \sqrt{\overline{\left( \frac{\Delta x'}{\mathbf{s}} \right)^2}}.
 $$
 
 The bar over the sum means that we take the average over all elements we summed over.
@@ -480,9 +480,7 @@ the RK4 simulation.
 
 In this step, we have implemented the RKF4(5) method with adaptive time-stepping.
 It is very efficient and allow us to save computational time, especially for
-chaotic systems or systems with close encounters. In the next step, we will
-first see how to add new particles to our system using orbital elements.
-Then, I will show you how to make animations for the N-body simulations.
+chaotic systems or systems with close encounters.
 
 ## Full script
 The full script is available at `6_steps_to_n_body_simulation/python/step5.py`,
