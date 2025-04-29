@@ -13,7 +13,7 @@ python --version
 ```
 
 Two packages are required for this tutorial: `numpy` and `matplotlib`.
-They are commonly used packages in Python for scientific computing and data visualization.
+They are popular packages in Python for scientific computing and data visualization.
 You can install them using `pip`:
 ```
 pip install numpy matplotlib
@@ -58,60 +58,102 @@ $$
     \mathbf{v}_{\mathrm{com}} = \frac{1}{M} \sum_{i=1}^{N} m_i \mathbf{v}_i.
 $$
 
-where $M$ is the total mass of the system, $m_i$, $\mathbf{r}_i$, and $\mathbf{v}_i$ are the mass, position, and velocity of the $i$-th particle respectively.
-To compute the center of mass terms, we first compute $m_i \mathbf{r}_i$ by
-```
-self.m[:, np.newaxis] * self.x
-```
-where `np.newaxis` is used to "broadcast" the mass array to the shape of the position array.
-By adding `np.newaxis`, the mass array is reshaped from `(N,)` to `(N, 1)`, i.e. expanded along
-axis 1 (column).
-
-$$
-    \begin{bmatrix}
-        m_{1} \\
-        m_{2} \\
-        \vdots \\
-        m_{N}
-    \end{bmatrix}
-    \to
-    \begin{bmatrix}
-        m_{1} \dots \\
-        m_{2} \dots \\
-        \vdots  \\
-        m_{N} \dots
-    \end{bmatrix}
-$$
-
-
-The shape of `self.m[:, np.newaxis]` is now `(N, 1)` and the shape of `self.x` is `(N, 3)`.
-The multiplication is then done element-wise as
-
-$$
-    \begin{bmatrix}
-        m_{1} r_{1,1} & m_{1} r_{1,2} & m_{1} r_{1,3} \\
-        m_{2} r_{2,1} & m_{2} r_{2,2} & m_{2} r_{2,3} \\
-        \vdots & \vdots & \vdots \\
-        m_{N} r_{N,1} & m_{N} r_{N,2} & m_{N} r_{N,3}
-    \end{bmatrix}
-$$
-
-Then, we perform the summation along the axis 0 (row) with length `N` by
-```
-np.sum(self.m[:, np.newaxis] * self.x, axis=0)
-```
-Putting it all together, we have the following code:
-```python 
+where $M$ is the total mass of the system, $m_i$, $\mathbf{r}_i$, and $\mathbf{v}_i$ are the mass,
+position, and velocity of the $i$-th particle respectively. If you don't care about the 
+performance, you may just use a for loop to iterate over all particles. By the way,
+`x_cm` is a 3D vector, `m[i]` is a scalar, and `self.x[i]` is a 3D vector.
+```python
 class System:
     ...
     def center_of_mass_correction(self) -> None:
         """Set center of mass of position and velocity to zero"""
-        r_cm = np.sum(self.m[:, np.newaxis] * self.x, axis=0) / np.sum(self.m)
-        v_cm = np.sum(self.m[:, np.newaxis] * self.v, axis=0) / np.sum(self.m)
+        x_cm = np.zeros(3)
+        v_cm = np.zeros(3)
+        M = 0.0
+        for i in range(self.num_particles):
+            x_cm += self.m[i] * self.x[i]
+            v_cm += self.m[i] * self.v[i]
+            M += self.m[i]
 
-        self.x -= r_cm
+        x_cm /= M
+        v_cm /= M
+        self.x -= x_cm
         self.v -= v_cm
 ```
+
+!!! Tip "Optimization"
+    Python loops are very slow. 
+    Here, we introduce a more efficient approach using `numpy`'s broadcasting feature.
+    First, we compute $m_i \mathbf{r}_i$ as
+    ```python
+    self.m[:, np.newaxis] * self.x
+    ```
+    where `np.newaxis` is used to "broadcast" the mass array along axis 1 (column).
+
+    $$
+        \begin{bmatrix}
+            m_{1} \\
+            m_{2} \\
+            \vdots \\
+            m_{N}
+        \end{bmatrix}
+        \to
+        \begin{bmatrix}
+            m_{1} \dots \\
+            m_{2} \dots \\
+            \vdots  \\
+            m_{N} \dots
+        \end{bmatrix}
+    $$
+
+
+    The shape of `self.m[:, np.newaxis]` is now `(N, 1)` and the shape of `self.x` is `(N, 3)`.
+    The multiplication is then done element-wise as
+
+    $$
+        \begin{bmatrix}
+            m_{1} r_{1,1} & m_{1} r_{1,2} & m_{1} r_{1,3} \\
+            m_{2} r_{2,1} & m_{2} r_{2,2} & m_{2} r_{2,3} \\
+            \vdots & \vdots & \vdots \\
+            m_{N} r_{N,1} & m_{N} r_{N,2} & m_{N} r_{N,3}
+        \end{bmatrix}
+    $$
+
+    Then, to get $\sum_{i = 1}^N m_i \mathbf{r}_i$ we perform the summation along the axis 0 (row) with length `N` by
+    ```python
+    np.sum(self.m[:, np.newaxis] * self.x, axis=0)
+    ```
+    Finally, the total mass $M$ can be simply computed as
+    ```python
+    np.sum(self.m)
+    ```
+    Full line of code:
+    ```python
+    x_cm = np.sum(self.m[:, np.newaxis] * self.x, axis=0) / np.sum(self.m)
+    ```
+    A even faster way is to use `np.einsum`. 
+    ```python
+    x_cm = np.einsum("i,ij->j", self.m, self.x) / np.sum(self.m)
+    ```
+    Why `i,ij->j`? Denote the axis 0 and 1 as $i$ and $j$ respectively.
+
+    * `m` is a 1D vector broadcasted along axis 1: $i$
+    * `x` is a 2D vector: $ij$
+    * Final sum is done along axis 0: $ij \to j$
+
+    Putting it all together, we have the following code:
+    ```python 
+    class System:
+        ...
+        def center_of_mass_correction(self) -> None:
+            """Set center of mass of position and velocity to zero"""
+            M = np.sum(self.m)
+            x_cm = np.einsum("i,ij->j", self.m, self.x) / M
+            v_cm = np.einsum("i,ij->j", self.m, self.v) / M
+
+            self.x -= x_cm
+            self.v -= v_cm
+    ```
 
 ## Initial conditions (Solar System)
 With the System class ready, we can now implement a function to get the initial conditions.

@@ -15,6 +15,11 @@ Project Homepage and documentations: https://alvinng4.github.io/grav_sim/
 * Barnes-Hut algorithm with linear octree
 * Particle-Mesh method for cosmological structure formation
 * Multiple sample projects
+* Tutorial: 6 steps to N-body simulation
+
+## 6 steps to N-body simulation
+
+Homepage: https://alvinng4.github.io/grav_sim/6_steps_to_n_body_simulation/
 
 <img src="./examples/media/solar_plus_3d.png" alt="Image" width="300">
 <img src="./examples/media/rel_energy.png" alt="Image" width="300">

@@ -1,12 +1,18 @@
-Coming soon! This is not ready yet. Revisit this page later.
-
-
 This is a series of tutorials inspired by the course "CFD Python: 12 steps to Navier-Stokes".
 The goal is to teach beginners how to write fast and clean N-body gravity simulations code in Python.
 
-Although basic knowledge in Python is assumed, everything is explained in detail so 
-beginners should be able to follow along. Advanced topics would be introduced but they
-can be skipped if it is too difficult for the reader.
+Although basic knowledge in Python and Calculus is assumed, everything is explained in detail so 
+beginners should be able to follow along. After completing this tutorial, you would be able to
+write your own N-body simulation code in Python, with the help of NumPy and matplotlib.
+At the end of the tutorial, you are encouraged to make your own project related to N-body simulation.
+
+The source code for the python scripts and the markdown files are available on
+
+* https://github.com/alvinng4/grav_sim/tree/main/6_steps_to_n_body_simulation
+
+but I recommend reading this tutorial on our webpage: 
+
+* https://alvinng4.github.io/grav_sim/6_steps_to_n_body_simulation/
 
 **Content**
 
