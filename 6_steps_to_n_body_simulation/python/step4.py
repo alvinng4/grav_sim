@@ -94,6 +94,12 @@ def main() -> None:
         colors=COLORS,
         legend=LEGEND,
     )
+    plot_3d_trajectory(
+        sol_x=sol_x,
+        labels=LABELS,
+        colors=COLORS,
+        legend=LEGEND,
+    )
 
     # Compute and plot relative energy error
     rel_energy_error = compute_rel_energy_error(sol_x, sol_v, system)
@@ -377,6 +383,93 @@ def plot_trajectory(
     if legend:
         fig.legend(loc="center right", borderaxespad=0.2)
         fig.tight_layout()
+
+    plt.show()
+
+
+def set_3d_axes_equal(ax: plt.Axes) -> None:
+    """
+    Make axes of 3D plot have equal scale
+
+    Parameters
+    ----------
+    ax : matplotlib axis
+        The axis to set equal scale
+
+    Reference
+    ---------
+    karlo, https://stackoverflow.com/questions/13685386/how-to-set-the-equal-aspect-ratio-for-all-axes-x-y-z
+    """
+
+    x_limits = ax.get_xlim3d()  # type: ignore
+    y_limits = ax.get_ylim3d()  # type: ignore
+    z_limits = ax.get_zlim3d()  # type: ignore
+
+    x_range = abs(x_limits[1] - x_limits[0])
+    x_middle = np.mean(x_limits)
+    y_range = abs(y_limits[1] - y_limits[0])
+    y_middle = np.mean(y_limits)
+    z_range = abs(z_limits[1] - z_limits[0])
+    z_middle = np.mean(z_limits)
+
+    # The plot bounding box is a sphere in the sense of the infinity
+    # norm, hence I call half the max range the plot radius.
+    plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+    ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])  # type: ignore
+    ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])  # type: ignore
+    ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])  # type: ignore
+
+
+def plot_3d_trajectory(
+    sol_x: np.ndarray,
+    labels: list,
+    colors: list,
+    legend: bool,
+) -> None:
+    """
+    Plot the 3D trajectory.
+
+    Parameters
+    ----------
+    sol_x : np.ndarray
+        Solution position array with shape (N_steps, num_particles, 3).
+    labels : list
+        List of labels for the particles.
+    colors : list
+        List of colors for the particles.
+    legend : bool
+        Whether to show the legend.
+    """
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    ax.set_xlabel("$x$ (AU)")
+    ax.set_ylabel("$y$ (AU)")
+    ax.set_zlabel("$z$ (AU)") # type: ignore
+
+    for i in range(sol_x.shape[1]):
+        traj = ax.plot(
+            sol_x[:, i, 0],
+            sol_x[:, i, 1],
+            sol_x[:, i, 2],
+            color=colors[i],
+        )
+        # Plot the last position with marker
+        ax.plot(
+            sol_x[-1, i, 0],
+            sol_x[-1, i, 1],
+            sol_x[-1, i, 2],
+            marker="o",
+            color=traj[0].get_color(),
+            label=labels[i],
+        )
+
+    set_3d_axes_equal(ax)
+
+    if legend:
+        ax.legend(loc="center right", bbox_to_anchor=(1.325, 0.5))
+        fig.subplots_adjust(right=0.7)
 
     plt.show()
 

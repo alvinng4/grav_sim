@@ -10,7 +10,7 @@ The source code for the python scripts and the markdown files are available on
 
 * https://github.com/alvinng4/grav_sim/tree/main/6_steps_to_n_body_simulation
 
-but I recommend reading this tutorial on our webpage: 
+but I strongly recommend reading this tutorial on our webpage: 
 
 * https://alvinng4.github.io/grav_sim/6_steps_to_n_body_simulation/
 

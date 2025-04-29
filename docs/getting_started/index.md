@@ -14,10 +14,8 @@ pip install grav_sim
 ```
 To check whether it is successfully installed, run
 ```
-python -m grav_sim [--path=c_lib_path]
+python -m grav_sim
 ```
-where `--path=c_lib_path` is optional argument to specify the path
-to the compiled C library.
 
 You should see the compilation information and the path to the
 compiled library. If not, you may need to refer
