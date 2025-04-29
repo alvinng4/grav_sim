@@ -49,15 +49,15 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
     const double output_interval = output_param->output_interval;
     double next_output_time = output_interval;
 
-    const double t0 = system->scale_factor;
-    const double tf = a_final;
+    const double t0 = log(system->scale_factor);
+    const double tf = log(a_final);
     double *restrict t_ptr = &(simulation_status->t);
     *t_ptr = t0;
     int64 *restrict num_steps_ptr = &(simulation_status->num_steps);
 
     const bool enable_progress_bar = settings->enable_progress_bar;
 
-    double da;
+    double H_a;
 
     /* Allocate memory */
     double *restrict momentum = malloc(num_particles * 3 * sizeof(double));
@@ -100,7 +100,7 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
     {
         for (int j = 0; j < 3; j++)
         {
-            momentum[i * 3 + j] = (*t_ptr) * (*t_ptr) * v[i * 3 + j];
+            momentum[i * 3 + j] = (system->scale_factor) * (system->scale_factor) * v[i * 3 + j];
         }
     }
 
@@ -118,7 +118,7 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
 
     /* Main Loop */
     double dt = (tf - t0) / num_steps;
-    int64 total_num_steps = (int64) ceil((a_final - system->scale_factor) / dt);
+    int64 total_num_steps = (int64) ceil((tf - t0) / dt);
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
@@ -141,24 +141,24 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
         simulation_status->dt = dt;
 
         /* Kick (p_1/2) */
-        da = compute_da(*t_ptr, H0, omega_m, omega_lambda);
+        H_a = compute_H(system->scale_factor, H0, omega_m, omega_lambda);
         for (int i = 0; i < num_particles; i++)
         {
             for (int j = 0; j < 3; j++)
             {
-                momentum[i * 3 + j] -= (0.5 * dt) * a[i * 3 + j] / da;
+                momentum[i * 3 + j] -= (0.5 * dt) * a[i * 3 + j] / H_a;
             }
         }
         *t_ptr += 0.5 * dt;
-        system->scale_factor = *t_ptr;
+        system->scale_factor = exp(*t_ptr);
 
         /* Drift (x_1) */
-        da = compute_da(*t_ptr, H0, omega_m, omega_lambda);
+        H_a = compute_H(system->scale_factor, H0, omega_m, omega_lambda);
         for (int i = 0; i < num_particles; i++)
         {
             for (int j = 0; j < 3; j++)
             {
-                x[i * 3 + j] += dt * momentum[i * 3 + j] / ((*t_ptr) * (*t_ptr) * da);
+                x[i * 3 + j] += dt * momentum[i * 3 + j] / ((system->scale_factor) * (system->scale_factor) * H_a);
             }
         }
 
@@ -181,23 +181,23 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
         {
             for (int j = 0; j < 3; j++)
             {
-                momentum[i * 3 + j] -= (0.5 * dt) * a[i * 3 + j] / da;
+                momentum[i * 3 + j] -= (0.5 * dt) * a[i * 3 + j] / H_a;
             }
         }
 
         (*num_steps_ptr)++;
         *t_ptr = t0 + (*num_steps_ptr) * dt;
-        system->scale_factor = *t_ptr;
+        system->scale_factor = exp(*t_ptr);
 
         /* Store solution */
-        if (is_output && *t_ptr >= next_output_time)
+        if (is_output && system->scale_factor >= next_output_time)
         {
             /* Get velocity from momentum */
             for (int i = 0; i < num_particles; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    v[i * 3 + j] = momentum[i * 3 + j] / ((*t_ptr) * (*t_ptr));
+                    v[i * 3 + j] = momentum[i * 3 + j] / (system->scale_factor * system->scale_factor);
                 }
             }
             error_status = WRAP_TRACEBACK(output_snapshot_cosmology(

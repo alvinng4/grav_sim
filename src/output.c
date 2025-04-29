@@ -910,7 +910,7 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
     H5Awrite(header_attr_num_part_this_file, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_num_part_total, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_time, H5T_NATIVE_DOUBLE, &(simulation_status->t));
-    const double z = 1.0 / simulation_status->t - 1.0;
+    const double z = 1.0 / system->scale_factor - 1.0;
     H5Awrite(header_attr_redshift, H5T_NATIVE_DOUBLE, &z);
     H5Awrite(header_attr_omega_m, H5T_NATIVE_DOUBLE, &(system->omega_m));
     H5Awrite(header_attr_omega_lambda, H5T_NATIVE_DOUBLE, &(system->omega_lambda));
