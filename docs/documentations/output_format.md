@@ -49,7 +49,7 @@ For the HDF5 format, we output snapshots with file names in the format of `snaps
 It has three groups: `Header`, `PartType0` and `Units`. Below is a tree structure of the HDF5 file:
 
 ```
-HDF5 File
+snapshot_%05d.hdf5
 ├── Header
 │   ├── Attribute: NumFilesPerSnapshot
 │   ├── Attribute: NumPart_ThisFile
