@@ -1,6 +1,6 @@
 # Step 1: Initial setup
 
-Welcome to the first step of "12 steps to N-body simulation"! 
+Welcome to the first step of "5 steps to N-body simulation"! 
 This is a series of tutorials with the goal of teaching beginners
 how to write fast and clean N-body gravity simulations code in Python.
 In this step, we will set up the required python environment and

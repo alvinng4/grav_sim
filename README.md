@@ -16,11 +16,11 @@ Project Homepage and documentations: https://alvinng4.github.io/grav_sim/
 * Particle-Mesh method for cosmological structure formation
 * Multiple sample projects
 
-## 6 steps to N-body simulation
+## 5 steps to N-body simulation
 
 A short course to teach beginners how to write fast and clean N-body gravity simulations code in Python.
 
-Homepage: https://alvinng4.github.io/grav_sim/6_steps_to_n_body_simulation/
+Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 
 <img src="./examples/media/solar_plus_3d.png" alt="Image" width="300">
 <img src="./examples/media/rel_energy.png" alt="Image" width="300">

@@ -25,14 +25,14 @@ nav:
   - Examples:
     - examples/index.md
     - examples/solar_system_one_mil_yrs.ipynb
-  - 6 steps to N-body simulation:
-    - "6 steps to N-body simulation": 6_steps_to_n_body_simulation/index.md
-    - Step 1: 6_steps_to_n_body_simulation/step1.md
-    - Step 2: 6_steps_to_n_body_simulation/step2.md
-    - Step 3: 6_steps_to_n_body_simulation/step3.md
-    - Step 4: 6_steps_to_n_body_simulation/step4.md
-    - Step 5: 6_steps_to_n_body_simulation/step5.md
-    - Step 6: 6_steps_to_n_body_simulation/step6.md
+  - 5 steps to N-body simulation:
+    - "5 steps to N-body simulation": 5_steps_to_n_body_simulation/index.md
+    - Step 1: 5_steps_to_n_body_simulation/step1.md
+    - Step 2: 5_steps_to_n_body_simulation/step2.md
+    - Step 3: 5_steps_to_n_body_simulation/step3.md
+    - Step 4: 5_steps_to_n_body_simulation/step4.md
+    - Step 5: 5_steps_to_n_body_simulation/step5.md
+    - Conclusion: 5_steps_to_n_body_simulation/conclusion.md
 theme:
   name: material
   logo: docs/orbit_logo.svg

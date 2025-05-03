@@ -70,6 +70,10 @@ def acceleration_1(
             a[i] += G * m[j] * R / (np.linalg.norm(R) ** 3)
 ```
 
+!!! tip "Where is the return statement?"
+    Actually, there is no need to return the acceleration array `a` because
+    we are modifying the memory in-place.
+
 ## Implementation 2
 
 To optimize the code, we utilize the fact that the distance between particles $i$ and $j$ is the same:
@@ -422,15 +426,16 @@ The vectorized implementation is about 10 - 20 times faster than the naive imple
 As for the error check, the small relative difference is likely due to rounding errors,
 which could be ignored. (For 64-bit floating point numbers, the machine epsilon is about $10^{-16}$.)
 
-By the way, if you are interested in the performance in C,
-below is a benchmark using our `grav_sim` package written in C:
-```
-Test 0:    Method: Pairwise
-    Number of times: 10000000
-    Avg time: 2.06e-07 (+- 4.12e-07) s
-```
-This is about 58 times faster than the vectorized NumPy implementation. But beware that
-this may not be totally accurate as the run time for each run is too small.
+!!! Tip "Performance in C"
+    By the way, if you are interested in the performance in C,
+    below is a benchmark using our `grav_sim` package written in C:
+    ```
+    Test 0:    Method: Pairwise
+        Number of times: 10000000
+        Avg time: 2.06e-07 (+- 4.12e-07) s
+    ```
+    This is about 58 times faster than the vectorized NumPy implementation. But beware that
+    this may not be totally accurate as the run time for each run is too small.
 
 ## Full script
 The full script is available at `6_steps_to_n_body_simulation/python/step2.py`,

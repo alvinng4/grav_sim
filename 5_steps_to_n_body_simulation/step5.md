@@ -6,10 +6,20 @@ to the RK4 method we implemented in the previous step.
 
 ## RKF4(5) method
 
-To achieve adaptive time-stepping, we will need to use two RK methods
-of different orders to estimate the error. This error can then give
-us a reliable estimation of the new time step. For RKF4(5), we use a fifth-order
-method 
+To achieve adaptive time-stepping, we need some way to determine the 
+error of each time step in order to adjust the time step accordingly.
+For RKF4(5), we have a fourth-order method that is used for the actual update
+
+$$
+    x_{n + 1} 
+    = x_n
+    + \left( \frac{25}{216} k_1 
+    + \frac{1408}{2565} k_3
+    + \frac{2197}{4104} k_4
+    - \frac{1}{5} k_5 \right) \Delta t,
+$$
+
+and a fifth-order method 
 
 $$
     \tilde{x}_{n + 1} 
@@ -18,21 +28,10 @@ $$
     + \frac{6656}{12825} k_3
     + \frac{28561}{56430} k_4
     - \frac{9}{50} k_5
-    + \frac{2}{55} k_6 \right) \Delta t,
+    + \frac{2}{55} k_6 \right) \Delta t.
 $$
 
-to estimate the local error for the fourth-order method that is used
-for the actual update
-
-$$
-    x_{n + 1} 
-    = x_n
-    + \left( \frac{25}{216} k_1 
-    + \frac{1408}{2565} k_3
-    + \frac{2197}{4104} k_4
-    - \frac{1}{5} k_5 \right) \Delta t.
-$$
-
+The difference between these two methods can then gives us an error estimation.
 Since the $k$ between both methods mostly overlaps, we 
 are able to obtain a error estimation with a very small additional cost.
 They are given as follows:
@@ -59,7 +58,6 @@ This gives the following code:
         [439.0 / 216.0, -8.0, 3680.0 / 513.0, -845.0 / 4104.0, 0.0],
         [-8.0 / 27.0, 2.0, -3544.0 / 2565.0, 1859.0 / 4104.0, -11.0 / 40.0],
     ))
-    # fmt: on
     weights = np.array(
         [25.0 / 216.0, 0.0, 1408.0 / 2565.0, 2197.0 / 4104.0, -1.0 / 5.0, 0.0]
     )
@@ -81,27 +79,34 @@ This gives the following code:
 
 First, let us define a tolerance parameter $\varepsilon$. This is a user-defined
 parameter to control the time step (Smaller $\varepsilon$ means smaller time step).
-Now, we define a $\Delta x'$ (we call it `error_estimation_delta` in our code) as the difference between the two RK methods
+Now, we define a $\Delta x'$ as the difference between the two RK methods
+(we call it `error_estimation_delta` in our code)
 
 $$
     \Delta x' = \Delta x - \Delta \tilde{x}.
 $$
 
-Then, we compute $s$ (we call it `tolerance_scale` in our code) as follows:
+In addition, $x_{n + 1}$ is calculated by $x_{n} + \Delta x$.
+Then, we compute $\mathbf{s}$ as follows (we call it `tolerance_scale` in our code):
 
 $$
-    s = \varepsilon + \varepsilon \times \max{(|x_n|, |x_{n +1}|)},
+    \mathbf{s}_{i} = \varepsilon + \varepsilon \times
+    \begin{bmatrix}
+        \max(|x_{n, i}|, |x_{n +1, i}|) \\
+        \max(|y_{n, i}|, |y_{n +1, i}|) \\
+        \max(|z_{n, i}|, |z_{n +1, i}|)
+    \end{bmatrix},
+    \quad i = 1, \ldots, N.
 $$
 
-where the maximum is taken element-wise (i.e. $\mathbf{s}$ will have the same shape as $x$ which is `(N, 3)`).
 Finally, we compute the error by taking the "norm":
 
 $$
     \text{error} = \sqrt{\overline{\left( \frac{\Delta x'}{\mathbf{s}} \right)^2}}.
 $$
 
-The bar over the sum means that we take the average over all elements we summed over.
-This gives us the code below. The denominator in the final line is `system.num_particles * 3.0 * 2.0` because we have $N$ particles, each with 3 dimensions, and we have two arrays $\mathbf{r}$ and $\mathbf{v}$.
+The bar over the sum means that we take the average over all elements we summed over (In case I am not clear, just look at the code below).
+The denominator in the final line of code is `system.num_particles * 3.0 * 2.0` because we have $N$ particles, each with 3 dimensions, and we have two arrays $\mathbf{r}$ and $\mathbf{v}$.
 
 ```python
 # Calculate x_1, v_1 and also delta x, delta v for error estimation
@@ -187,11 +192,10 @@ if current_time < TF and current_time + dt > TF:
 ```
 
 ## Initial dt
-The final thing we need is to set the initial time step. There are methods to 
-estimate the initial time step automatically. However, to keep it simple, we will
-simply set it manually. Personally, I found it the best to just run
-the simulation for a short time and see how the time step evolves. This could
-even be more accurate than using an automatic method.
+The final thing we need is to set the initial time step. I found it easiest
+and most accurate by setting it manually. First, just set it to some arbitrary
+small value such as 1.0 days. Then, simulate for a short period and observe 
+how the time step corrects itself. Finally, choose a new time step and restart the simulation.
 
 ## Putting it all together
 Now, we can put everything together. The final code is given below.
