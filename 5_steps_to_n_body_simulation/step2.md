@@ -438,10 +438,10 @@ which could be ignored. (For 64-bit floating point numbers, the machine epsilon 
     this may not be totally accurate as the run time for each run is too small.
 
 ## Full script
-The full script is available at `6_steps_to_n_body_simulation/python/step2.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/6_steps_to_n_body_simulation/python/step2.py
+The full script is available at `5_steps_to_n_body_simulation/python/step2.py`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step2.py
 
 ??? note "Code (Click to expand)"
     ```python linenums="1"
-    --8<-- "6_steps_to_n_body_simulation/python/step2.py"
+    --8<-- "5_steps_to_n_body_simulation/python/step2.py"
     ```

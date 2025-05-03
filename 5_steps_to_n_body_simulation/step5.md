@@ -487,10 +487,10 @@ It is very efficient and allow us to save computational time, especially for
 chaotic systems or systems with close encounters.
 
 ## Full script
-The full script is available at `6_steps_to_n_body_simulation/python/step5.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/6_steps_to_n_body_simulation/python/step5.py
+The full script is available at `5_steps_to_n_body_simulation/python/step5.py`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step5.py
 
 ??? note "Code (Click to expand)"
     ```python linenums="1"
-    --8<-- "6_steps_to_n_body_simulation/python/step5.py"
+    --8<-- "5_steps_to_n_body_simulation/python/step5.py"
     ```

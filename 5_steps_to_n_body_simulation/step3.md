@@ -301,10 +301,10 @@ However, we can see that the results are not very accurate, especially for those
 In the next step, we will implement some higher-order integrators to improve the accuracy.
 
 ## Full script
-The full script is available at `6_steps_to_n_body_simulation/python/step3.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/6_steps_to_n_body_simulation/python/step3.py
+The full script is available at `5_steps_to_n_body_simulation/python/step3.py`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step3.py
 
 ??? note "Code (Click to expand)"
     ```python linenums="1"
-    --8<-- "6_steps_to_n_body_simulation/python/step3.py"
+    --8<-- "5_steps_to_n_body_simulation/python/step3.py"
     ```

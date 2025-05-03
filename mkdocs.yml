@@ -14,7 +14,9 @@ nav:
   - Documentations:
     - docs/documentations/index.md
     - Barnes-Hut algorithm: docs/documentations/barnes_hut.md
+    - "Comoving coordinates": docs/documentations/comoving_coordinates.md
     - Particle-Mesh algorithm: docs/documentations/particle_mesh.md
+    - Output format: docs/documentations/output_format.md
     - Reducing round off error: docs/documentations/reducing_round_off_error.md
     - Why C?: docs/documentations/why_c.md
     - Python API:

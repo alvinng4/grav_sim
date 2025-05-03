@@ -9,11 +9,11 @@ At the end of the tutorial, you are encouraged to make your own project related 
 ## How to use this tutorial? 
 The source code for the python scripts and the markdown files are available on
 
-* https://github.com/alvinng4/grav_sim/tree/main/6_steps_to_n_body_simulation
+* https://github.com/alvinng4/grav_sim/tree/main/5_steps_to_n_body_simulation
 
 but I strongly recommend reading this tutorial on our website: 
 
-* https://alvinng4.github.io/grav_sim/6_steps_to_n_body_simulation/
+* https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 
 Snippets of the code will be shown as we progress, but you don't have to copy them one by one as the full code is always available at the end of each step. However,
 I do recommend you to translate it into your own code in order to have a better understanding.

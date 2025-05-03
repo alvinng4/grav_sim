@@ -533,10 +533,10 @@ You should also see the following plot:
 
 
 ## Full script
-The full script is available at `6_steps_to_n_body_simulation/python/step1.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/6_steps_to_n_body_simulation/python/step1.py
+The full script is available at `5_steps_to_n_body_simulation/python/step1.py`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step1.py
 
 ??? note "Code (Click to expand)"
     ```python linenums="1"
-    --8<-- "6_steps_to_n_body_simulation/python/step1.py"
+    --8<-- "5_steps_to_n_body_simulation/python/step1.py"
     ```
