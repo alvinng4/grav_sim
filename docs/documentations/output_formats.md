@@ -1,3 +1,8 @@
+??? Note "Source code (Click to expand)"
+    ```c linenums="1"
+    --8<-- "src/output.c"
+    ```
+
 In our project, we support two output formats: CSV and HDF5.
 
 ## Regular simulations

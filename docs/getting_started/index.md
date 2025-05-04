@@ -52,4 +52,6 @@ C library location: /Library/Frameworks/Python.framework/Versions/3.11/lib/pytho
 Installation is a bit complicated on Windows.
 You will need to compile the C library and then install the Python wrapper.
 You may follow the instructions in [Installation in Python](installation_in_python.md).
+
+Personally, I recommend using WSL (Windows Subsystem for Linux) to run grav_sim directly.
 ///

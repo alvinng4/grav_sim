@@ -1,8 +1,38 @@
+## Table of Contents
+
+### Documentations
+- [Barnes-Hut algorithm](barnes_hut.md)
+- [Comoving coordinates](comoving_coordinates.md)
+- [Particle-Mesh algorithm](particle_mesh.md)
+- [Massless acceleration](massless_acceleration.md)
+- [Output formats](output_formats.md)
+- [Force softening](force_softening.md)
+- [Reducing round off error](reducing_round_off_error.md)
+- [Why C?](why_c.md)
+
+### Python API
+- [GravitySimulatorAPI](PythonAPI/GravitySimulatorAPI.md)
+- [Parameters](PythonAPI/parameters.md)
+- [System](PythonAPI/System.md)
+- [Simulator](PythonAPI/Simulator.md)
+
+### C API
+- [Grav sim](CAPI/grav_sim.md)
+
+
+
 
 ## Project File Structure
 
 ```
 grav_sim/
+├── docs/                           # Documentation
+├── examples/                       # Example scripts
+├── grav_sim/                       # Python wrapper
+├── overrides/                      # Mkdocs overrides
+├── pcg/                            # PCG random number generator
+├── src/                            # C source code
+├── 5_steps_to_n_body_simulation/   # 5 steps to n-body simulation
 ├── .gitignore
 ├── CMakeLists.txt
 ├── FindFFTW3.cmake
@@ -13,12 +43,5 @@ grav_sim/
 ├── README.md            
 ├── requirements.txt             
 ├── setup.py      
-├── .github/   
-├── 5_steps_to_n_body_simulation/
-├── docs/                           # Documentation
-├── examples/                       # Example scripts
-├── grav_sim/                       # Python wrapper
-├── overrides/                      # Mkdocs overrides
-├── pcg/                            # PCG random number generator
-└── src/                            # C source code
+└── .github/   
 ```

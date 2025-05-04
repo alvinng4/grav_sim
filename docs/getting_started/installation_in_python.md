@@ -101,14 +101,30 @@ libgrav_sim.dll
 This is the compiled C library. You will need to keep track of the path to this file.
 
 5. Now you can install the Python wrapper either from PyPI or from source.
-    - To install from PyPI, run
-    ```
-    SKIP_CMAKE=1 pip install grav_sim
-    ```
-    - To install from source, navigate to the parent directory and run
-    ```
-    SKIP_CMAKE=1 pip install .
-    ```
+
+    /// tab | MacOS / Linux
+      - To install from PyPI, run
+      ```
+      SKIP_CMAKE=1 pip install grav_sim
+      ```
+      - To install from source, navigate to the parent directory and run
+      ```
+      SKIP_CMAKE=1 pip install .
+      ```
+    ///
+
+    /// tab | Windows
+      - To install from PyPI, run
+      ```
+      set SKIP_CMAKE=1
+      pip install grav_sim
+      ```
+      - To install from source, navigate to the parent directory and run
+      ```
+      set SKIP_CMAKE=1
+      pip install .
+      ```
+    ///
 
 6. To check whether it is successfully installed, run
   ```

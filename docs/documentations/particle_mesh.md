@@ -1,3 +1,8 @@
+??? Note "Source code (Click to expand)"
+    ```c linenums="1"
+    --8<-- "src/acceleration_PM.c"
+    ```
+
 For cosmological simulations, we are usually interested in a large domain with
 periodic boundary conditions. Interestingly, grid-based algorithm
 like the Particle Mesh method naturally provides periodic boundary conditions

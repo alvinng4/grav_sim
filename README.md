@@ -22,6 +22,15 @@ A short course to teach beginners how to write fast and clean N-body gravity sim
 
 Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 
+**Contents**
+
+- Step 1: Initial setup
+- Step 2: Acceleration
+- Step 3: Your first N-body program
+- Step 4: Higher-order algorithms
+- Step 5: Adaptive time-stepping
+- Conclusion and Final Project
+
 <img src="./examples/media/solar_plus_3d.png" alt="Image" width="300">
 <img src="./examples/media/rel_energy.png" alt="Image" width="300">
 
@@ -32,7 +41,7 @@ Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 <img src="./examples/media/eccentricity.png" alt="Image" width="300">
 <img src="./examples/media/inclination.png" alt="Image" width="300">
 
-### Asteroid belt simulation
+### Asteroid belt animation
 
 <img src="./examples/media/asteroid_belt.png" alt="Image" width="300">
 

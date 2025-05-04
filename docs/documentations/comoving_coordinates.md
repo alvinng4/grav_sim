@@ -1,3 +1,8 @@
+??? Note "Source code (Click to expand)"
+    ```c linenums="1"
+    --8<-- "src/integrator_cosmology_leapfrog.c"
+    ```
+
 To account for cosmological expansion, we need to use comoving coordinates.
 We first review particle motion in comoving coordinates following LSSU[@LSSU].
 In comoving coordinates, we have

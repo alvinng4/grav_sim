@@ -25,7 +25,6 @@ I do recommend you to translate it into your own code in order to have a better 
 - [Step 3: Your first N-body program](step3.md)
 - [Step 4: Higher-order algorithms](step4.md)
 - [Step 5: Adaptive time-stepping](step5.md)
-- [Step 6: Barnes-Hut algorithm](step6.md)
 - [Conclusion and Final Project](conclusion.md)
 
 ## References

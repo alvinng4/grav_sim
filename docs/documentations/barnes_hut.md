@@ -18,9 +18,19 @@ mass or number of particles in the cluster.
 
 ## Linear octree construction
 
+??? Note "Source code (Click to expand)"
+    ```c linenums="1"
+    --8<-- "src/linear_octree.c"
+    ```
+
+<figure style="text-align: center;">
+  <img src="../../../examples/media/morton_curve.png" alt="Morton curve" width="400" style="display: block; margin: auto;" />
+</figure>
+Figure 2: Morton curve for Morton index 0 to 7. This is the full curve for level 1,
+        or the first \(\frac{1}{8}\) of the full curve at level 2, etc.
+
 Here, we provide a detailed description on constructing a static linear octree
 using only linear arrays and Morton indices.
-
 To build a linear octree, we utilize the idea of Morton code (also known as Z-order
 or Morton space filling curve). Figure 2 shows a Morton curve at level 1
 of the tree. The Morton index is calculated by encoding the spatial coordinate in binary
@@ -51,12 +61,6 @@ The magic numbers are generated using the script by [@morton_index_stackoverflow
 Morton index on each level can then be retrieved with bit-shift operations.
 
 <figure style="text-align: center;">
-  <img src="../../../examples/media/morton_curve.png" alt="Morton curve" width="400" style="display: block; margin: auto;" />
-</figure>
-Figure 2: Morton curve for Morton index 0 to 7. This is the full curve for level 1,
-        or the first \(\frac{1}{8}\) of the full curve at level 2, etc.
-
-<figure style="text-align: center;">
   <img src="../../../examples/media/linear_octree.png" alt="Linear octree" width="800" style="display: block; margin: auto;" />
 </figure>
 Figure 3: Graphical illustration of linear octree. On the top, there are multiple aligned
@@ -84,7 +88,7 @@ corresponds to one internal node. An illustration of the linear octree is provid
         
         - If not, instantiate a new child node for that suboctant by assigning a tree index.
             Backpropogate the mass and coordinate all the way to the root node.
-        - Otherwise, traverse deeper into the child node, and repeat step 3.2.
+        - Otherwise, traverse deeper into the child node.
 
 Side note: We do not know beforehand how many internal nodes there will be.
 Therefore, the arrays might become full during construction. By using a dynamic array
@@ -92,6 +96,11 @@ Therefore, the arrays might become full during construction. By using a dynamic 
 nodes as needed.
 
 ## Tree traversal
+
+??? Note "Source code (Click to expand)"
+    ```c linenums="1"
+    --8<-- "src/acceleration_barnes_hut.c"
+    ```
 
 To compute the acceleration, we use a stack to traverse the tree recursively:
 
