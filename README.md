@@ -43,20 +43,22 @@ Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 
 ### Asteroid belt animation
 
-<img src="./examples/media/asteroid_belt.png" alt="Image" width="300">
+[![Asteroid belt animation 0](https://img.youtube.com/vi/C45ceYja0jE/0.jpg)](https://www.youtube.com/watch?v=C45ceYja0jE)  
+[![Asteroid belt animation 1](https://img.youtube.com/vi/eg7plHjP1eg/0.jpg)](https://www.youtube.com/watch?v=eg7plHjP1eg)  
+[![Asteroid belt animation 2](https://img.youtube.com/vi/HMv7OwqAmBY/0.jpg)](https://www.youtube.com/watch?v=HMv7OwqAmBY)
 
 ### Formation of Kirkwood gaps
 
-<img src="./examples/media/Kirkwood_gap_semi_major_axes.png" alt="Image" width="300">
-<img src="./examples/media/Kirkwood_gap_visualization.png" alt="Image" width="225">
+[![Kirkwood gaps 1](https://img.youtube.com/vi/AEyjIF-8zT0/0.jpg)](https://www.youtube.com/watch?v=AEyjIF-8zT0)  
+[![Kirkwood gaps 2](https://img.youtube.com/vi/jHLLr7ACvDQ/0.jpg)](https://www.youtube.com/watch?v=jHLLr7ACvDQ)
 
 ### Galaxy collision
 
-<img src="./examples/media/galaxy_collision.png" alt="Image" width="400">
+[![Galaxy collision](https://img.youtube.com/vi/nXTUdjLXwtI/0.jpg)](https://www.youtube.com/watch?v=nXTUdjLXwtI)
 
 ### Cosmological structure formation
 
-<img src="./examples/media/cosmic_structure_a_1.0.png" alt="Image" width="400">
+[![Cosmological structure formation](https://img.youtube.com/vi/yof2x_0IeOA/0.jpg)](https://www.youtube.com/watch?v=yof2x_0IeOA)
 
 ## Feedback and Bugs
 If you found any bugs or want to leave some feedback, please feel free to let me know by opening an issue or sending an email to alvinng324(at)gmail.com.
