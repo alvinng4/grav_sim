@@ -112,7 +112,7 @@ endif()
 if(DEFINED VERSION_INFO)
     target_compile_definitions(grav_sim PRIVATE VERSION_INFO="${VERSION_INFO}")
 else()
-    target_compile_definitions(grav_sim PRIVATE VERSION_INFO="0.0.8")
+    target_compile_definitions(grav_sim PRIVATE VERSION_INFO="0.0.9")
 endif()
 
 target_link_libraries(grav_sim PRIVATE m)
