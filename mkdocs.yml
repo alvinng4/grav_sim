@@ -13,6 +13,7 @@ nav:
     - Tutorial (Python): examples/tutorial.ipynb
   - Documentations:
     - docs/documentations/index.md
+    - Integrators: docs/documentations/integrators.md
     - Barnes-Hut algorithm: docs/documentations/barnes_hut.md
     - "Comoving coordinates": docs/documentations/comoving_coordinates.md
     - Particle-Mesh algorithm: docs/documentations/particle_mesh.md
@@ -24,6 +25,7 @@ nav:
     - Python API:
         - docs/documentations/PythonAPI/GravitySimulatorAPI.md
         - docs/documentations/PythonAPI/parameters.md
+        - docs/documentations/PythonAPI/plotting.md
         - docs/documentations/PythonAPI/System.md
         - docs/documentations/PythonAPI/Simulator.md
     - C API:

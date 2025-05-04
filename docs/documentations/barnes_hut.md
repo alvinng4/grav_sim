@@ -125,6 +125,8 @@ with \(\theta = 1\) and \(\theta = 0.5\) spent \(7.94\) s on \(N = 10^6\) and
 \(18.2\) s on \(N = 10^7\) respectively. This shows that Barnes-Hut algorithm could handle 10-100 times more particles
 than the brute force algorithm.
 
+(For the benchmark, the particles are uniformly distributed where $\{x, y, z\} \sim U(-1, 1)$)
+
 <figure style="text-align: center;">
   <img src="../../../examples/media/barnes_hut_benchmark.png" alt="Baranes-Hut benchmark" width="600" style="display: block; margin: auto;" />
 </figure>

@@ -1,10 +1,11 @@
 ## Table of Contents
 
 ### Documentations
-- [Barnes-Hut algorithm](barnes_hut.md)
-- [Comoving coordinates](comoving_coordinates.md)
-- [Particle-Mesh algorithm](particle_mesh.md)
+- [Integrators](integrators.md)
 - [Massless acceleration](massless_acceleration.md)
+- [Barnes-Hut algorithm](barnes_hut.md)
+- [Particle-Mesh algorithm](particle_mesh.md)
+- [Comoving coordinates](comoving_coordinates.md)
 - [Output formats](output_formats.md)
 - [Force softening](force_softening.md)
 - [Reducing round off error](reducing_round_off_error.md)
@@ -13,6 +14,7 @@
 ### Python API
 - [GravitySimulatorAPI](PythonAPI/GravitySimulatorAPI.md)
 - [Parameters](PythonAPI/parameters.md)
+- [Plotting](PythonAPI/plotting.md)
 - [System](PythonAPI/System.md)
 - [Simulator](PythonAPI/Simulator.md)
 
