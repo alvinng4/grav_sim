@@ -4,7 +4,7 @@ import timeit
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Default units is AU, days, and M_sun
+# # Default units is AU, days, and M_sun
 # INITIAL_CONDITION = "solar_system"
 # TF = 200.0 * 365.24  # 200 years to days
 # TOLERANCE = 1e-8
@@ -299,7 +299,6 @@ def plot_rel_energy_error(rel_energy_error: np.ndarray, sol_t: np.ndarray) -> No
     plt.yscale("log")
     plt.xlabel("Time step")
     plt.ylabel("Relative Energy Error")
-    plt.title("Relative Energy Error vs Time Step")
     plt.show()
 
 
@@ -316,9 +315,8 @@ def plot_dt(sol_dt: np.ndarray, sol_t: np.ndarray) -> None:
     """
     plt.figure()
     plt.semilogy(sol_t, sol_dt)
-    plt.xlabel("Time step")
-    plt.ylabel("Time step (days)")
-    plt.title("Time Step vs Time Step")
+    plt.xlabel("Time")
+    plt.ylabel("dt")
     plt.show()
 
 

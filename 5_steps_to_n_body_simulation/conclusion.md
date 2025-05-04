@@ -21,6 +21,16 @@ but you can also come up with your own project.
     N-body simulation using Matplotlib in Python. Simply draw the
     frames, save them as images and then combine them into a video.
 
+- **Large-scale simulation**: So far, we have only focused on systems
+    with a few objects. What about large-scale systems with thousands
+    or millions of objects? Turns out it is not so easy because the 
+    computation of gravity scales as $\mathcal{O}(N^2)$. Have a look
+    at Barnes-Hut algorithm to see how to speed up the simulation.
+    In fact, we have documentations about it on this website as well.
+    Try to implement it in some low-level language like C or C++!
+
+    <img src="../../examples/media/galaxy_collision.png" alt="Galaxy Collision" width="400"/>
+
 - **Reproducing observations**: If you are not interested in
     writing low-level simulation code, you can still do some interesting projects
     using our `grav_sim` project written in C. One example is reproducing the

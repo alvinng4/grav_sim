@@ -1,5 +1,5 @@
 The classic Barnes-Hut algorithm[@barnes_hierarchical_1986]
-provides a way to approximate forces without losing accuracy at close range.
+provides a way to approximate forces in $\mathcal{O}(N \log N)$ without losing accuracy at close range.
 Because gravity decays at a quadratic rate, the accuracy of long range interactions
 are less important. Therefore, it is reasonable to approximate a far cluster of 
 particles as a single particle with mass \(m = m_{\textnormal{cluster}} \)
