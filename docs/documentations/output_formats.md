@@ -36,7 +36,9 @@ snapshot_%05d.hdf5
 │   ├── Attribute: NumFilesPerSnapshot
 │   ├── Attribute: NumPart_ThisFile
 │   ├── Attribute: NumPart_Total
-│   └── Attribute: Time
+│   ├── Attribute: Time
+│   ├── Attribute: G
+│   └── Attribute: dt
 └── PartType0
     ├── Dataset: ParticleIDs
     ├── Dataset: Masses
@@ -65,9 +67,9 @@ snapshot_%05d.hdf5
 │   └── Attribute: OmegaLambda
 ├── PartType0
 │   ├── Dataset: ParticleIDs
-│   ├── Dataset: Masses (float or double)
-│   ├── Dataset: Coordinates (float or double)
-│   └── Dataset: Velocities (float or double)
+│   ├── Dataset: Masses
+│   ├── Dataset: Coordinates
+│   └── Dataset: Velocities
 └── Units
     ├── Attribute: Unit current in cgs (U_I)
     ├── Attribute: Unit length in cgs (U_L)

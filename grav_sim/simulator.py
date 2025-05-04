@@ -119,7 +119,7 @@ class Simulator:
         ret_val = queue.get()
         if ret_val != 0:
             raise RuntimeError(
-                f"Simulation failed. Please check the C library traceback."
+                "Simulation failed. Please check the C library traceback."
             )
 
         # Update system with new data (just to be safe since
@@ -243,7 +243,7 @@ class Simulator:
         ret_val = queue.get()
         if ret_val != 0:
             raise RuntimeError(
-                f"Simulation failed. Please check the C library traceback."
+                "Simulation failed. Please check the C library traceback."
             )
 
         # Update system with new data (just to be safe since

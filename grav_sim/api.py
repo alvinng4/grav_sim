@@ -11,6 +11,7 @@ import warnings
 from pathlib import Path
 from typing import Optional, Tuple
 
+import h5py
 import numpy as np
 
 from . import plotting
@@ -245,6 +246,70 @@ class GravitySimulatorAPI:
         return G, time, dt, particle_ids, sol_state
 
     @staticmethod
+    def read_hdf5_data(
+        output_dir: str | Path,
+    ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Read HDF5 snapshots from the output directory,
+        assuming number of particles and particle_ids
+        stays the same
+
+        Parameters
+        ----------
+        output_dir : str | Path
+            Output directory path
+
+        Returns
+        -------
+        G : float
+            Gravitational constant
+        time : np.ndarray
+            Simulation time of each snapshot
+        dt : np.ndarray
+            Time step of each snapshot
+        particle_ids : np.ndarray
+            1D array of Particle IDs
+        sol_state : np.ndarray
+            3D array of solution state for each snapshot, with shape
+            (num_snapshots, num_particles, 7) being
+            [m, x, y, z, vx, vy, vz]
+        """
+        output_dir = Path(output_dir)
+        if not output_dir.is_dir():
+            raise FileNotFoundError(f"Output directory not found: {output_dir}")
+
+        snapshot_files = sorted(output_dir.glob("snapshot_*.hdf5"))
+        if len(snapshot_files) == 0:
+            raise FileNotFoundError(f"No snapshot files found in: {output_dir}")
+
+        G = -1.0
+        time = np.zeros(len(snapshot_files), dtype=np.float64)
+        dt = np.zeros(len(snapshot_files), dtype=np.float64)
+
+        for i, snapshot_file in enumerate(snapshot_files):
+            # Read the metadata
+            with h5py.File(snapshot_file, "r") as file:
+                num_particles = file["Header"].attrs["NumPart_Total"][0]
+                G = file["Header"].attrs["G"][0]
+                time[i] = file["Header"].attrs["Time"][0]
+                dt[i] = file["Header"].attrs["dt"][0]
+
+        # Read the data
+        particle_ids = np.zeros(num_particles, dtype=np.int32)
+        sol_state = np.zeros((len(snapshot_files), num_particles, 7), dtype=np.float64)
+        for i, snapshot_file in enumerate(snapshot_files):
+            with h5py.File(snapshot_file, "r") as file:
+                particle_ids = file["PartType0"]["ParticleIDs"][()]
+                m = file["PartType0"]["Masses"][()]
+                x = file["PartType0"]["Coordinates"][()]
+                v = file["PartType0"]["Velocities"][()]
+
+                sol_state[i, :, 0] = m
+                sol_state[i, :, 1:4] = x
+                sol_state[i, :, 4:7] = v
+
+        return G, time, dt, particle_ids, sol_state
+
+    @staticmethod
     def delete_snapshots(
         output_dir: str | Path,
     ):
@@ -259,13 +324,15 @@ class GravitySimulatorAPI:
         if not output_dir.is_dir():
             raise FileNotFoundError(f"Output directory not found: {output_dir}")
 
-        snapshot_files = sorted(output_dir.glob("snapshot_*.csv"))
-        for snapshot_file in snapshot_files:
+        snapshot_files_csv = sorted(output_dir.glob("snapshot_*.csv"))
+        for snapshot_file in snapshot_files_csv:
             snapshot_file.unlink()
 
-    def compute_energy(
-        self, sol_state: np.ndarray, G: float
-    ) -> np.ndarray:
+        snapshot_files_hdf5 = sorted(output_dir.glob("snapshot_*.hdf5"))
+        for snapshot_file in snapshot_files_hdf5:
+            snapshot_file.unlink()
+
+    def compute_energy(self, sol_state: np.ndarray, G: float) -> np.ndarray:
         """Compute the total energy of the system
 
         Parameters

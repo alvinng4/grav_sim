@@ -608,11 +608,15 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     hid_t header_attr_num_part_this_file = H5Acreate(header_group, "NumPart_ThisFile", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
     hid_t header_attr_num_part_total = H5Acreate(header_group, "NumPart_Total", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
     hid_t header_attr_time = H5Acreate(header_group, "Time", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_dt = H5Acreate(header_group, "dt", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_G = H5Acreate(header_group, "G", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
     if (
         header_attr_num_files_per_snapshot == H5I_INVALID_HID
         || header_attr_num_part_this_file == H5I_INVALID_HID
         || header_attr_num_part_total == H5I_INVALID_HID
         || header_attr_time == H5I_INVALID_HID
+        || header_attr_dt == H5I_INVALID_HID
+        || header_attr_G == H5I_INVALID_HID
     )
     {
         error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 attribute for header.");
@@ -669,6 +673,8 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     H5Awrite(header_attr_num_part_this_file, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_num_part_total, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_time, H5T_NATIVE_DOUBLE, &simulation_status->t);
+    H5Awrite(header_attr_dt, H5T_NATIVE_DOUBLE, &simulation_status->dt);
+    H5Awrite(header_attr_G, H5T_NATIVE_DOUBLE, &system->G);
 
     /* Write data to HDF5 dataset */
     H5Dwrite(part_type_0_dataset_part_ids, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, particle_ids);
@@ -686,6 +692,8 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     H5Aclose(header_attr_num_part_this_file);
     H5Aclose(header_attr_num_part_total);
     H5Aclose(header_attr_time);
+    H5Aclose(header_attr_dt);
+    H5Aclose(header_attr_G);
 
     H5Sclose(dataspace_1d_1);
     H5Sclose(dataspace_1d_objects_count);
@@ -707,6 +715,8 @@ err_create_hdf5_datasets:
     H5Aclose(header_attr_num_part_this_file);
     H5Aclose(header_attr_num_part_total);
     H5Aclose(header_attr_time);
+    H5Aclose(header_attr_dt);
+    H5Aclose(header_attr_G);
 err_create_hdf5_header_attr:
     H5Sclose(dataspace_1d_1);
     H5Sclose(dataspace_1d_objects_count);

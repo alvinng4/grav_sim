@@ -8,8 +8,6 @@ from typing import Optional
 import numpy as np
 import matplotlib.pyplot as plt
 
-from . import utils
-
 SOLAR_SYSTEM_COLORS = {
     "Sun": "orange",
     "Mercury": "slategrey",
