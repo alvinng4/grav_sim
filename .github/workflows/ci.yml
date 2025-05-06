@@ -1,5 +1,8 @@
-name: ci 
+name: ci
 on:
+  push:
+    branches:
+      - update_website
   release:
     types:
       - published
