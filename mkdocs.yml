@@ -44,6 +44,7 @@ nav:
     - Step 3: 5_steps_to_n_body_simulation/step3.md
     - Step 4: 5_steps_to_n_body_simulation/step4.md
     - Step 5: 5_steps_to_n_body_simulation/step5.md
+    - Extra: 5_steps_to_n_body_simulation/extra.md
     - Conclusion: 5_steps_to_n_body_simulation/conclusion.md
 theme:
   name: material

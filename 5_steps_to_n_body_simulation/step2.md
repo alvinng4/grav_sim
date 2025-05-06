@@ -1,9 +1,9 @@
-# Step 2: Acceleration
+# Step 2: Gravity
 
-In this step, we will work on computing the gravitational acceleration.
-This is the most important part of the simulation as it represent the underlying physics.
-Turns out that this is also the most expensive part of N-body simulations. So, we will spend
-some time optimizing the computation.
+Welcome to step 2. This is the most important step &mdash;
+computing the gravitational acceleration.
+Turns out this is also the most expensive part in N-body simulation, 
+so we will spend some time on optimization.
 
 ## Newton's law of gravitation
 I believe most of you are familiar with Newton's law of gravitation
@@ -21,7 +21,7 @@ $$
 $$
 
 In practice, we are only interested in the acceleration. To compute the acceleration of
-particle $i$, we have
+particle $i \in \{1, \dots, N\}$, we have
 
 $$
     \mathbf{a}_{i} = \sum_{i \neq j} \frac{G m_j}{r_{ij}^3} \mathbf{r}_{ij},
@@ -79,8 +79,11 @@ def acceleration_1(
 To optimize the code, we utilize the fact that the distance between particles $i$ and $j$ is the same:
 
 $$
-    \mathbf{r}_{ij} = - \mathbf{r}_{ji} 
+    \mathbf{r}_{ij} = - \mathbf{r}_{ji} \implies r_{ij} = r_{ji}.
 $$
+
+!!! Note
+    In our notation, the lowercase, non-bold $r_{ij}$ is the vector norm, which is always positive.
 
 This allows us to effectively reduce half of the distance calculations.
 (Calculating the distance is quite expensive as it involves the computation of `sqrt`.)
@@ -132,7 +135,6 @@ The above implementation is still quite slow because we are using Python loops
 to iterate over the particles. NumPy is (partly) implemented in C, which
 makes it much faster than Python operations. If we were able to avoid 
 Python loops completely, we can achieve a significant speedup.
-
 This can be done by vectorizing the code. Note that this would be quite difficult
 for beginners, but learning this could help you understand a lot about NumPy arrays.
 
@@ -155,7 +157,7 @@ for beginners, but learning this could help you understand a lot about NumPy arr
     shape $(N, N)$. It is computed by taking the norm along the last axis with length 3
     (`r_norm = np.linalg.norm(r_ij, axis=2)`).
 
-3. We compute $1 / r_{ij}^3$.
+3. We compute $1 / \mathbf{R}_\text{norm}^3$ (element-wise).
     Because the diagonal elements are all zero, the division will produce
     undefined values along the diagonal. Therefore, we want to silence the warnings from NumPy
     and set the diagonal elements to zero.
@@ -168,10 +170,6 @@ for beginners, but learning this could help you understand a lot about NumPy arr
     # Set diagonal elements to 0 to avoid self-interaction
     np.fill_diagonal(inv_r_cubed, 0.0)
     ```
-    
-    !!! Note
-        In our notation, the lowercase, non-bold $r_{ij}$ is the vector norm, which is always positive.
-        Therefore, $r_{ij} = r_{ji} = \lVert \mathbf{r}_{ij} \rVert$.
 
 4. We compute the acceleration by 
 
@@ -210,7 +208,7 @@ $$
     \end{bmatrix}.
 $$
 
-The element-wise multiplication gives
+The element-wise multiplication of $\mathbf{M}$ with $\mathbf{R}$ divided by $\mathbf{R}_\text{norm}^3$ gives
 
 $$
     \begin{bmatrix}
@@ -349,16 +347,24 @@ def acceleration_4(
 ## Benchmark
 
 To benchmark the performance, we will use the `timeit` module and 
-repeat each function 10000 times.
+repeat each function 10000 times. We will take the mean with standard
+error = $\sigma / \sqrt{N_\text{repeats}}$.
 
-```python
+```python title="step2.py"
+import math
 import timeit
 
+import numpy as np
+
+import common
+
+INITIAL_CONDITION = "solar_system"
 NUM_REPEATS = 10000
+
 
 def main() -> None:
     # Get initial conditions
-    system = get_initial_conditions()
+    system, _, _, _ = common.get_initial_conditions(INITIAL_CONDITION)
 
     ### Benchmark ###
     print("Benchmarking with 10000 repetitions")
@@ -375,8 +381,9 @@ def main() -> None:
         end = timeit.default_timer()
         run_time_1[i] = end - start
     print(
-        f"acceleration_1: {run_time_1.mean():.6f} +- {run_time_1.std(ddof=1):.3g} seconds"
+        f"acceleration_1: {run_time_1.mean():.6f} +- {run_time_1.std(ddof=1) / math.sqrt(NUM_REPEATS):.3g} seconds"
     )
+
 
     ... # (Repeat for acceleration_2, 3, and 4)
 ```
@@ -412,10 +419,10 @@ The results are as follows:
 ```
 Benchmarking with 10000 repetitions
 
-acceleration_1: 0.000206 +- 3.51e-05 seconds
-acceleration_2: 0.000161 +- 1.26e-05 seconds
-acceleration_3: 0.000014 +- 3.77e-06 seconds
-acceleration_4: 0.000012 +- 9.22e-06 seconds
+acceleration_1: 0.000203 +- 8.08e-08 seconds
+acceleration_2: 0.000164 +- 1.25e-06 seconds
+acceleration_3: 0.000013 +- 2.21e-08 seconds
+acceleration_4: 0.000012 +- 1.38e-08 seconds
 
 Error check: (relative difference from acceleration_1)
 acceleration_2: 0
@@ -425,6 +432,7 @@ acceleration_4: 1.31e-15
 The vectorized implementation is about 10 - 20 times faster than the naive implementation!
 As for the error check, the small relative difference is likely due to rounding errors,
 which could be ignored. (For 64-bit floating point numbers, the machine epsilon is about $10^{-16}$.)
+By the way, since `acceleration_4` is the fastest, we put it into `common.py`.
 
 !!! Tip "Performance in C"
     By the way, if you are interested in the performance in C,
@@ -432,16 +440,21 @@ which could be ignored. (For 64-bit floating point numbers, the machine epsilon 
     ```
     Test 0:    Method: Pairwise
         Number of times: 10000000
-        Avg time: 2.06e-07 (+- 4.12e-07) s
+        Avg time: 2.06e-07 (+- 1.30e-10) s
     ```
     This is about 58 times faster than the vectorized NumPy implementation. But beware that
     this may not be totally accurate as the run time for each run is too small.
 
-## Full script
-The full script is available at `5_steps_to_n_body_simulation/python/step2.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step2.py
+## Full scripts
+The full scripts are available at `5_steps_to_n_body_simulation/python/`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/
 
-??? note "Code (Click to expand)"
-    ```python linenums="1"
+??? note "step2.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/step2.py"
     --8<-- "5_steps_to_n_body_simulation/python/step2.py"
+    ```
+
+??? note "common.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/common.py"
+    --8<-- "5_steps_to_n_body_simulation/python/common.py"
     ```

@@ -1,6 +1,6 @@
 # Step 1: Initial setup
 
-Welcome to the first step of "5 steps to N-body simulation"! 
+Welcome to the first step of 5 steps to N-body simulation! 
 This is a series of tutorials with the goal of teaching beginners
 how to write fast and clean N-body gravity simulations code in Python.
 In this step, we will set up the required python environment and
@@ -19,8 +19,14 @@ You can install them using `pip`:
 pip install numpy matplotlib
 ```
 
-Now we are ready to start coding. First, let us import the required packages:
-```python
+Now we are ready to start coding. First, let us create two files:
+
+- `common.py`: This file will contain the common functions and classes
+  used in all steps.
+- `step1.py`: This file will contain the code for this step.
+
+We first focus on `common.py`. Import the required packages:
+```python title="common.py"
 import numpy as np
 import matplotlib.pyplot as plt
 ```
@@ -35,7 +41,7 @@ to represent the N-body system. It has the following attributes:
 - `m (np.ndarray)`: Masses of the particles (shape: (N,)).
 - `G (float)`: Gravitational constant.
 
-```python
+```python title="common.py"
 class System:
     def __init__(
         self, num_particles: int, x: np.ndarray, v: np.ndarray, m: np.ndarray, G: float
@@ -59,10 +65,10 @@ $$
 $$
 
 where $M$ is the total mass of the system, $m_i$, $\mathbf{r}_i$, and $\mathbf{v}_i$ are the mass,
-position, and velocity of the $i$-th particle respectively. If you don't care about the 
+position, and velocity of the i-th particle respectively. If you don't care about the 
 performance, you may just use a for loop to iterate over all particles. By the way,
 `x_cm` is a 3D vector, `m[i]` is a scalar, and `self.x[i]` is a 3D vector.
-```python
+```python title="common.py"
 class System:
     ...
     def center_of_mass_correction(self) -> None:
@@ -123,17 +129,9 @@ class System:
     ```python
     np.sum(self.m[:, np.newaxis] * self.x, axis=0)
     ```
-    Finally, the total mass $M$ can be simply computed as
-    ```python
-    np.sum(self.m)
-    ```
-    Full line of code:
-    ```python
-    x_cm = np.sum(self.m[:, np.newaxis] * self.x, axis=0) / np.sum(self.m)
-    ```
     A even faster way is to use `np.einsum`. 
     ```python
-    x_cm = np.einsum("i,ij->j", self.m, self.x) / np.sum(self.m)
+    np.einsum("i,ij->j", self.m, self.x)
     ```
     Why `i,ij->j`? Denote the axis 0 and 1 as $i$ and $j$ respectively.
 
@@ -141,8 +139,12 @@ class System:
     * `x` is a 2D vector: $ij$
     * Final sum is done along axis 0: $ij \to j$
 
+    Finally, the total mass $M$ can be simply computed as
+    ```python
+    M = np.sum(self.m)
+    ```
     Putting it all together, we have the following code:
-    ```python 
+    ```python title="common.py"
     class System:
         ...
         def center_of_mass_correction(self) -> None:
@@ -156,41 +158,52 @@ class System:
     ```
 
 ## Initial conditions (Solar System)
-With the System class ready, we can now implement a function to get the initial conditions.
-In our tutorial, we will use the solar system as our N-body system. The initial conditions
-at 1/Jan/2024 are generated using the JPL Horizons System[@Horizons]. Gravitational constant
-and masses of the solar system objects are calculated using the data from R.S. Park, et. al.[@Park2021].
+With the `System` class ready, we can now implement a function to get the initial conditions.
+Since it is tedious to prepare the initial conditions, I have prepared the data for you.
+Simply input the name of the system and it will return the initial conditions and information
+for plotting.
 
-Also, note that in our tutorial, we will stick with the following units:
+!!! Note "Data Sources"
+    The Solar System initial conditions at 1/Jan/2024 are generated using the 
+    JPL Horizons System[@Horizons]. Gravitational constant
+    and masses of the solar system objects are calculated using 
+    the data from R.S. Park, et. al.[@Park2021].
 
-- Length: AU (Astronomical Unit), i.e. the distance from the Earth to the Sun.
-- Mass: $M_\odot$ (Solar mass)
-- Time: days
+!!! Tip Units
+    In our tutorial, we will stick with the following units:
 
-They are convenient units for solar system simulations.
-If you want to use different units, make sure to convert all data to the same units
-and be consistent.
+    - Length: AU (Astronomical Unit), i.e. the distance from the Earth to the Sun.
+    - Mass: $M_\odot$ (Solar mass)
+    - Time: days
+
+    They are convenient units for solar system simulations.
+    If you want to use different units, make sure to convert all data to the same units
+    and be consistent.
 
 ??? note "Code (Click to expand)"
-    ```python
-    def get_initial_conditions() -> System:
+    ```python title="common.py"
+    def get_initial_conditions(
+        initial_condition: str,
+    ) -> Tuple[System, List[Optional[str]], List[Optional[str]], bool]:
         """
         Returns the initial conditions for solar system,
         with units AU, days, and M_sun.
 
+        Parameters
+        ----------
+        initial_condition : str
+            Name for the initial condition.
+
         Returns
         -------
-        x : np.ndarray
-            Initial positions of the solar system bodies,
-            with shape (N, 3).
-        v : np.ndarray
-            Initial velocities of the solar system bodies,
-            with shape (N, 3).
-        m : np.ndarray
-            Masses of the solar system bodies,
-            with shape (N,).
-        G : float
-            Gravitational constant.
+        system: System
+            System object with initial conditions.
+        labels: list
+            Labels for the particles.
+        colors: list
+            Colors for the particles.
+        legend: bool
+            Whether to show the legend.
         """
         # Conversion factor from km^3 s^-2 to AU^3 d^-2
         CONVERSION_FACTOR = (86400**2) / (149597870.7**3)
@@ -337,103 +350,242 @@ and be consistent.
             ],
         }
 
-        m = np.array(
-            [
-                SOLAR_SYSTEM_MASSES["Sun"],
-                SOLAR_SYSTEM_MASSES["Mercury"],
-                SOLAR_SYSTEM_MASSES["Venus"],
-                SOLAR_SYSTEM_MASSES["Earth"],
-                SOLAR_SYSTEM_MASSES["Mars"],
-                SOLAR_SYSTEM_MASSES["Jupiter"],
-                SOLAR_SYSTEM_MASSES["Saturn"],
-                SOLAR_SYSTEM_MASSES["Uranus"],
-                SOLAR_SYSTEM_MASSES["Neptune"],
-            ]
-        )
+        SOLAR_SYSTEM_COLORS = {
+            "Sun": "orange",
+            "Mercury": "slategrey",
+            "Venus": "wheat",
+            "Earth": "skyblue",
+            "Mars": "red",
+            "Jupiter": "darkgoldenrod",
+            "Saturn": "gold",
+            "Uranus": "paleturquoise",
+            "Neptune": "blue",
+        }
 
-        R1 = np.array(SOLAR_SYSTEM_POS["Sun"])
-        R2 = np.array(SOLAR_SYSTEM_POS["Mercury"])
-        R3 = np.array(SOLAR_SYSTEM_POS["Venus"])
-        R4 = np.array(SOLAR_SYSTEM_POS["Earth"])
-        R5 = np.array(SOLAR_SYSTEM_POS["Mars"])
-        R6 = np.array(SOLAR_SYSTEM_POS["Jupiter"])
-        R7 = np.array(SOLAR_SYSTEM_POS["Saturn"])
-        R8 = np.array(SOLAR_SYSTEM_POS["Uranus"])
-        R9 = np.array(SOLAR_SYSTEM_POS["Neptune"])
+        SOLAR_SYSTEM_PLUS_COLORS = {
+            "Sun": "orange",
+            "Mercury": "slategrey",
+            "Venus": "wheat",
+            "Earth": "skyblue",
+            "Mars": "red",
+            "Jupiter": "darkgoldenrod",
+            "Saturn": "gold",
+            "Uranus": "paleturquoise",
+            "Neptune": "blue",
+            "Pluto": None,
+            "Ceres": None,
+            "Vesta": None,
+        }
 
-        V1 = np.array(SOLAR_SYSTEM_VEL["Sun"])
-        V2 = np.array(SOLAR_SYSTEM_VEL["Mercury"])
-        V3 = np.array(SOLAR_SYSTEM_VEL["Venus"])
-        V4 = np.array(SOLAR_SYSTEM_VEL["Earth"])
-        V5 = np.array(SOLAR_SYSTEM_VEL["Mars"])
-        V6 = np.array(SOLAR_SYSTEM_VEL["Jupiter"])
-        V7 = np.array(SOLAR_SYSTEM_VEL["Saturn"])
-        V8 = np.array(SOLAR_SYSTEM_VEL["Uranus"])
-        V9 = np.array(SOLAR_SYSTEM_VEL["Neptune"])
+        if initial_condition == "pyth-3-body":
+            # Pythagorean 3-body problem
+            R1 = np.array([1.0, 3.0, 0.0])
+            R2 = np.array([-2.0, -1.0, 0.0])
+            R3 = np.array([1.0, -1.0, 0.0])
+            V1 = np.array([0.0, 0.0, 0.0])
+            V2 = np.array([0.0, 0.0, 0.0])
+            V3 = np.array([0.0, 0.0, 0.0])
 
-        x = np.array(
-            [
-                R1,
-                R2,
-                R3,
-                R4,
-                R5,
-                R6,
-                R7,
-                R8,
-                R9,
-            ]
-        )
-        v = np.array(
-            [
-                V1,
-                V2,
-                V3,
-                V4,
-                V5,
-                V6,
-                V7,
-                V8,
-                V9,
-            ]
-        )
+            x = np.array([R1, R2, R3])
+            v = np.array([V1, V2, V3])
+            m = np.array([3.0 / G, 4.0 / G, 5.0 / G])
 
-        system = System(
-            num_particles=len(m),
-            x=x,
-            v=v,
-            m=m,
-            G=G,
-        )
-        system.center_of_mass_correction()
+            system = System(
+                num_particles=len(m),
+                x=x,
+                v=v,
+                m=m,
+                G=G,
+            )
+            system.center_of_mass_correction()
 
-        return system
+            labels: List[Optional[str]] = [None, None, None]
+            colors: List[Optional[str]] = [None, None, None]
+            legend = False
+
+            return system, labels, colors, legend
+
+        elif initial_condition == "solar_system":
+            m = np.array(
+                [
+                    SOLAR_SYSTEM_MASSES["Sun"],
+                    SOLAR_SYSTEM_MASSES["Mercury"],
+                    SOLAR_SYSTEM_MASSES["Venus"],
+                    SOLAR_SYSTEM_MASSES["Earth"],
+                    SOLAR_SYSTEM_MASSES["Mars"],
+                    SOLAR_SYSTEM_MASSES["Jupiter"],
+                    SOLAR_SYSTEM_MASSES["Saturn"],
+                    SOLAR_SYSTEM_MASSES["Uranus"],
+                    SOLAR_SYSTEM_MASSES["Neptune"],
+                ]
+            )
+
+            R1 = np.array(SOLAR_SYSTEM_POS["Sun"])
+            R2 = np.array(SOLAR_SYSTEM_POS["Mercury"])
+            R3 = np.array(SOLAR_SYSTEM_POS["Venus"])
+            R4 = np.array(SOLAR_SYSTEM_POS["Earth"])
+            R5 = np.array(SOLAR_SYSTEM_POS["Mars"])
+            R6 = np.array(SOLAR_SYSTEM_POS["Jupiter"])
+            R7 = np.array(SOLAR_SYSTEM_POS["Saturn"])
+            R8 = np.array(SOLAR_SYSTEM_POS["Uranus"])
+            R9 = np.array(SOLAR_SYSTEM_POS["Neptune"])
+
+            V1 = np.array(SOLAR_SYSTEM_VEL["Sun"])
+            V2 = np.array(SOLAR_SYSTEM_VEL["Mercury"])
+            V3 = np.array(SOLAR_SYSTEM_VEL["Venus"])
+            V4 = np.array(SOLAR_SYSTEM_VEL["Earth"])
+            V5 = np.array(SOLAR_SYSTEM_VEL["Mars"])
+            V6 = np.array(SOLAR_SYSTEM_VEL["Jupiter"])
+            V7 = np.array(SOLAR_SYSTEM_VEL["Saturn"])
+            V8 = np.array(SOLAR_SYSTEM_VEL["Uranus"])
+            V9 = np.array(SOLAR_SYSTEM_VEL["Neptune"])
+
+            x = np.array(
+                [
+                    R1,
+                    R2,
+                    R3,
+                    R4,
+                    R5,
+                    R6,
+                    R7,
+                    R8,
+                    R9,
+                ]
+            )
+            v = np.array(
+                [
+                    V1,
+                    V2,
+                    V3,
+                    V4,
+                    V5,
+                    V6,
+                    V7,
+                    V8,
+                    V9,
+                ]
+            )
+
+            system = System(
+                num_particles=len(m),
+                x=x,
+                v=v,
+                m=m,
+                G=G,
+            )
+            system.center_of_mass_correction()
+
+            labels = list(SOLAR_SYSTEM_POS.keys())
+            colors = list(SOLAR_SYSTEM_COLORS.values())
+            legend = True
+
+            return system, labels, colors, legend
+
+        elif initial_condition == "solar_system_plus":
+            m = np.array(
+                [
+                    SOLAR_SYSTEM_MASSES["Sun"],
+                    SOLAR_SYSTEM_MASSES["Mercury"],
+                    SOLAR_SYSTEM_MASSES["Venus"],
+                    SOLAR_SYSTEM_MASSES["Earth"],
+                    SOLAR_SYSTEM_MASSES["Mars"],
+                    SOLAR_SYSTEM_MASSES["Jupiter"],
+                    SOLAR_SYSTEM_MASSES["Saturn"],
+                    SOLAR_SYSTEM_MASSES["Uranus"],
+                    SOLAR_SYSTEM_MASSES["Neptune"],
+                    SOLAR_SYSTEM_MASSES["Pluto"],
+                    SOLAR_SYSTEM_MASSES["Ceres"],
+                    SOLAR_SYSTEM_MASSES["Vesta"],
+                ]
+            )
+
+            R1 = np.array(SOLAR_SYSTEM_POS["Sun"])
+            R2 = np.array(SOLAR_SYSTEM_POS["Mercury"])
+            R3 = np.array(SOLAR_SYSTEM_POS["Venus"])
+            R4 = np.array(SOLAR_SYSTEM_POS["Earth"])
+            R5 = np.array(SOLAR_SYSTEM_POS["Mars"])
+            R6 = np.array(SOLAR_SYSTEM_POS["Jupiter"])
+            R7 = np.array(SOLAR_SYSTEM_POS["Saturn"])
+            R8 = np.array(SOLAR_SYSTEM_POS["Uranus"])
+            R9 = np.array(SOLAR_SYSTEM_POS["Neptune"])
+            R10 = np.array(SOLAR_SYSTEM_POS["Pluto"])
+            R11 = np.array(SOLAR_SYSTEM_POS["Ceres"])
+            R12 = np.array(SOLAR_SYSTEM_POS["Vesta"])
+
+            V1 = np.array(SOLAR_SYSTEM_VEL["Sun"])
+            V2 = np.array(SOLAR_SYSTEM_VEL["Mercury"])
+            V3 = np.array(SOLAR_SYSTEM_VEL["Venus"])
+            V4 = np.array(SOLAR_SYSTEM_VEL["Earth"])
+            V5 = np.array(SOLAR_SYSTEM_VEL["Mars"])
+            V6 = np.array(SOLAR_SYSTEM_VEL["Jupiter"])
+            V7 = np.array(SOLAR_SYSTEM_VEL["Saturn"])
+            V8 = np.array(SOLAR_SYSTEM_VEL["Uranus"])
+            V9 = np.array(SOLAR_SYSTEM_VEL["Neptune"])
+            V10 = np.array(SOLAR_SYSTEM_VEL["Pluto"])
+            V11 = np.array(SOLAR_SYSTEM_VEL["Ceres"])
+            V12 = np.array(SOLAR_SYSTEM_VEL["Vesta"])
+
+            x = np.array(
+                [
+                    R1,
+                    R2,
+                    R3,
+                    R4,
+                    R5,
+                    R6,
+                    R7,
+                    R8,
+                    R9,
+                    R10,
+                    R11,
+                    R12,
+                ]
+            )
+            v = np.array(
+                [
+                    V1,
+                    V2,
+                    V3,
+                    V4,
+                    V5,
+                    V6,
+                    V7,
+                    V8,
+                    V9,
+                    V10,
+                    V11,
+                    V12,
+                ]
+            )
+
+            system = System(
+                num_particles=len(m),
+                x=x,
+                v=v,
+                m=m,
+                G=G,
+            )
+            system.center_of_mass_correction()
+
+            labels = list(SOLAR_SYSTEM_POS.keys())
+            colors = list(SOLAR_SYSTEM_PLUS_COLORS.values())
+            legend = True
+
+            return system, labels, colors, legend
+
+        else:
+            raise ValueError(f"Initial condition not recognized: {initial_condition}.")
     ```
 
 ## Plotting initial conditions
 Finally, we will implement a function to plot the initial conditions of the solar system.
 We will use the `matplotlib` package to plot the positions of the particles in 2D.
 Colors and labels are optional, but they make the plot look nicer.
-
 If `plt.show()` does not work in your environment, you may need to change it to
 `plt.savefig(file_name)` to save the plot.
 
-```python hl_lines="52 53"
-SOLAR_SYSTEM_COLORS = {
-    "Sun": "orange",
-    "Mercury": "slategrey",
-    "Venus": "wheat",
-    "Earth": "skyblue",
-    "Mars": "red",
-    "Jupiter": "darkgoldenrod",
-    "Saturn": "gold",
-    "Uranus": "paleturquoise",
-    "Neptune": "blue",
-}
-LABELS = list(SOLAR_SYSTEM_COLORS.keys())
-COLORS = list(SOLAR_SYSTEM_COLORS.values())
-LEGEND = True
-
+```python hl_lines="33 34" title="common.py"
 def plot_initial_conditions(
     system: System,
     labels: list,
@@ -459,12 +611,8 @@ def plot_initial_conditions(
     ax.set_ylabel("$y$ (AU)")
 
     for i in range(system.num_particles):
-        ax.plot(
-            system.x[i, 0],
-            system.x[i, 1],
-            marker = "o",
-            color=colors[i],
-            label=labels[i]
+        ax.scatter(
+            system.x[i, 0], system.x[i, 1], marker="o", color=colors[i], label=labels[i]
         )
 
     if legend:
@@ -474,12 +622,17 @@ def plot_initial_conditions(
                # plt.show() does not work in your environment. 
 ```
 
-## Main function
-Now we can put everything together in the `main` function.
-```python
+## Test the code
+Now we could try to run the code with `step1.py`.
+```python title="step1.py" linenums="1"
+import common
+
+INITIAL_CONDITION = "solar_system"
+
+
 def main():
     # Get initial conditions
-    system = get_initial_conditions()
+    system, labels, colors, legend = common.get_initial_conditions(INITIAL_CONDITION)
     print("Number of particles:", system.num_particles)
     print("Initial positions (AU):\n", system.x)
     print("Initial velocities (AU/day):\n", system.v)
@@ -487,18 +640,20 @@ def main():
     print("Gravitational constant (AU^3 / day^2 / M_sun):", system.G)
 
     # Plot the initial conditions
-    plot_initial_conditions(
-        system,
-        labels=LABELS,
-        colors=COLORS,
-        legend=LEGEND,
+    common.plot_initial_conditions(
+        system=system,
+        labels=labels,
+        colors=colors,
+        legend=legend,
     )
+
 
 if __name__ == "__main__":
     main()
+
 ```
 
-Now, as you run the code, you should see:
+As you run the code, you should see the following output:
 ```
 Number of particles: 9
 Initial positions (AU):
@@ -532,11 +687,16 @@ You should also see the following plot:
 <img src="../figures/step1/initial_conditions.png" alt="Initial Condition" width="500">
 
 
-## Full script
-The full script is available at `5_steps_to_n_body_simulation/python/step1.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step1.py
+## Full scripts
+The full scripts are available at `5_steps_to_n_body_simulation/python/`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/
 
-??? note "Code (Click to expand)"
-    ```python linenums="1"
+??? note "step1.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/step1.py"
     --8<-- "5_steps_to_n_body_simulation/python/step1.py"
+    ```
+
+??? note "common.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/common.py"
+    --8<-- "5_steps_to_n_body_simulation/python/common.py"
     ```

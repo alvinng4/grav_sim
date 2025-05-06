@@ -2,7 +2,7 @@
 
 In the last step, we implemented a simple Euler method to integrate
 the solar system for 200 years. The poor accuracy is expected, because
-we are only using a simple first order algorithm with global error $\mathcal{O}(\Delta t)$.
+we used a simple first order algorithm with global error $\mathcal{O}(\Delta t)$.
 In this step, we will implement 3 new algorithms to improve our simulation.
 
 ## Relative energy error
@@ -26,8 +26,8 @@ $$
 
 This gives the following code:
 
-```python
-def compute_energy_error(
+```python title="common.py"
+def compute_rel_energy_error(
     sol_x: np.ndarray, sol_v: np.ndarray, system: System
 ) -> np.ndarray:
     """
@@ -80,7 +80,7 @@ def compute_energy_error(
 Now, we can plot the relative energy error with the following code, where
 y-axis is in log scale.
 
-```python
+```python title="common.py"
 def plot_rel_energy_error(rel_energy_error: np.ndarray, sol_t: np.ndarray) -> None:
     """
     Plot the relative energy error.
@@ -101,9 +101,10 @@ def plot_rel_energy_error(rel_energy_error: np.ndarray, sol_t: np.ndarray) -> No
     plt.show()
 ```
 
-We add the following code to the end of the `main` function in step 3:
+We copy `step3.py` to `step4.py` and add the following code to the
+end of the `main` function:
 
-```python
+```python title="step4.py"
 def main() -> None:
     ...
     # Compute and plot relative energy error
@@ -141,7 +142,7 @@ error is still $\mathcal{O}(\Delta t)$, it is a *symplectic* method, which impli
 the energy error over time is bounded. This is a very useful property for long time-scale
 simulations. We have the following code:
 
-```python
+```python title="common.py"
 def euler_cromer(a: np.ndarray, system: System, dt: float) -> None:
     """
     Advance one step with the Euler-Cromer method.
@@ -170,17 +171,22 @@ bounded at $\sim 10^{-4}$. This provides long term stability for the simulation.
 
 !!! Note "Energy conservation $\iff$ Higher accuracy?"
     Although it seems like energy conservation implies higher accuracy,
-    it is not neccessarily true. Recall that the global error for Euler-Cromer method
+    this is not neccessarily true. Recall that the global error for Euler-Cromer method
     is still $\mathcal{O}(\Delta t)$, even though its energy error is bounded over time. 
     Therefore, we can only state the opposite direction: Higher accuracy $\implies$ Energy conservation.
 
 ## Runge-Kutta method
 
 The Runge-Kutta method is a family of ODE solvers. First, let us look at a 
-second order variation called the midpoint method. In the Euler method, we are using
+second order variation called the midpoint method. 
+
+* In the Euler method, we are using
 the slope evaluated at the beginning of the interval to update the position and velocity.
-In the Euler-Cromer method, we are using the slope evaluated at the end instead for the
-position update. What about using the slope evaluated at the center of the interval?
+
+* In the Euler-Cromer method, for the
+position update, we are using the slope evaluated at the end instead.
+
+What about using the slope evaluated at the center of the interval?
 We can approximate the position and velocity at the midpoint using one Euler step,
 then perform the updates using the midpoint values. This gives us the following updates:
 
@@ -233,7 +239,7 @@ $$
 
 for the final update. The code is given as follows:
 
-```python
+```python title="common.py"
 def rk4(a: np.ndarray, system: System, dt: float) -> None:
     """
     Advance one step with the RK4 method.
@@ -302,7 +308,7 @@ the error is growing over time, so this may not be a good choice for long term s
 
 Our final algorithm is the leapfrog method, which is a second-order symplectic method.
 Similar to the Euler-Cromer method, it conserves energy over time. We will implement the 
-Kick-Drift-Kick variant (KDK), which is given by a velocity kick for half time step,
+Kick-Drift-Kick (KDK) variant, which is given by a velocity kick for half time step,
 
 $$
     \mathbf{v}_{n+1/2} = \mathbf{v}_n + \frac{1}{2} \mathbf{a}(\mathbf{r}_n) \Delta t,
@@ -321,9 +327,9 @@ $$
 $$
 
 !!! Tip
-    For optimization, you can combine the final velocity kick with the first velocity kick.
+    For optimization, you can combine the final velocity kick from the last time step with the first velocity kick.
     However, you need to be careful because now the velocity and position is not synchronized.
-    There is also a synchronized version of the leapfrog method called velocity Verlet.
+    There is also a synchronized version of the leapfrog method called the velocity Verlet method.
 
 The implementation is simple:
 
@@ -359,106 +365,6 @@ Running the simulation again, we have the relative energy error plot:
 
 The relative energy error is bounded at $\sim 10^{-6}$, which is better than the Euler-Cromer method!
 
-## Extra: Plotting in 3D
-It would be nice to plot the trajectory in 3D. To do this, we will need two functions,
-one to set the 3D axes in equal aspect ratio, and one to plot the trajectory in 3D.
-
-??? Note "Code (Click to expand)"
-    ```python
-    def set_3d_axes_equal(ax: plt.Axes) -> None:
-        """
-        Make axes of 3D plot have equal scale
-
-        Parameters
-        ----------
-        ax : matplotlib axis
-            The axis to set equal scale
-
-        Reference
-        ---------
-        karlo, https://stackoverflow.com/questions/13685386/how-to-set-the-equal-aspect-ratio-for-all-axes-x-y-z
-        """
-
-        x_limits = ax.get_xlim3d()  # type: ignore
-        y_limits = ax.get_ylim3d()  # type: ignore
-        z_limits = ax.get_zlim3d()  # type: ignore
-
-        x_range = abs(x_limits[1] - x_limits[0])
-        x_middle = np.mean(x_limits)
-        y_range = abs(y_limits[1] - y_limits[0])
-        y_middle = np.mean(y_limits)
-        z_range = abs(z_limits[1] - z_limits[0])
-        z_middle = np.mean(z_limits)
-
-        # The plot bounding box is a sphere in the sense of the infinity
-        # norm, hence I call half the max range the plot radius.
-        plot_radius = 0.5 * max([x_range, y_range, z_range])
-
-        ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])  # type: ignore
-        ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])  # type: ignore
-        ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])  # type: ignore
-
-    def plot_3d_trajectory(
-        sol_x: np.ndarray,
-        labels: list,
-        colors: list,
-        legend: bool,
-    ) -> None:
-        """
-        Plot the 3D trajectory.
-
-        Parameters
-        ----------
-        sol_x : np.ndarray
-            Solution position array with shape (N_steps, num_particles, 3).
-        labels : list
-            List of labels for the particles.
-        colors : list
-            List of colors for the particles.
-        legend : bool
-            Whether to show the legend.
-        """
-        
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        ax.set_xlabel("$x$ (AU)")
-        ax.set_ylabel("$y$ (AU)")
-        ax.set_zlabel("$z$ (AU)")
-
-        for i in range(sol_x.shape[1]):
-            traj = ax.plot(
-                sol_x[:, i, 0],
-                sol_x[:, i, 1],
-                sol_x[:, i, 2],
-                color=colors[i],
-            )
-            # Plot the last position with marker
-            ax.plot(
-                sol_x[-1, i, 0],
-                sol_x[-1, i, 1],
-                sol_x[-1, i, 2],
-                marker="o",
-                color=traj[0].get_color(),
-                label=labels[i],
-            )
-
-        set_3d_axes_equal(ax)
-
-        if legend:
-            ax.legend(loc="center right", bbox_to_anchor=(1.325, 0.5))
-            fig.subplots_adjust(
-                right=0.7
-            )
-
-        plt.show()
-    ```
-
-To make the plot look better, I added a few dwarf planets like Pluto
-(the initial condition can be found in the `grav_sim` package for the `solar_plus_3d` system).
-The plot is shown below:
-
-<img src="../../examples/media/solar_plus_3d.png" alt="3D Trajectory" width="400"/>
-
 ## Which algorithm should I choose?
 
 To choose between RK4 and LeapFrog, below are some
@@ -467,12 +373,12 @@ factors that you may consider:
 * **Time scale**: If you are simulating a long time scale, LeapFrog should be better as it conserves energy.
 * **Accuracy**: If accuracy matters to you, then RK4 is a better choice since it is higher order.
 * **Computational cost**:
-    RK4 is very expensive as it requires 4 evaluations of the acceleration per step.
-    In contrast, LeapFrog only requires 1 evaluation although it is second order.
+    RK4 is very expensive as it requires 4 acceleration evaluations per step.
+    In contrast, LeapFrog only requires 1 acceleration evaluation although it is second order.
 * **Experiment**:
     If you are not sure which one to choose, you can always experiment and compare the results.
     Below is a relative energy error plot I made for the solar system simulation using both RK4 
-    and LeapFrog. I chose a very small dt but also ensured that the runtime is the same for both methods.
+    and LeapFrog. I chose two very small dt while ensuring that the runtime is the same for both methods.
     In terms of the results, seems like RK4 is better in this case, but note that I used some techniques
     to remove the rounding error. (See [Reducing round off error](../docs/documentations/reducing_round_off_error.md))
 
@@ -487,11 +393,16 @@ for chaotic systems with close encounters. It is also a headache to tune the tim
 In the next step, we will implement an adaptive time-stepping method which uses a tolerance
 parameter to control the time step instead.
 
-## Full script
-The full script is available at `5_steps_to_n_body_simulation/python/step4.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step4.py
+## Full scripts
+The full scripts are available at `5_steps_to_n_body_simulation/python/`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/
 
-??? note "Code (Click to expand)"
-    ```python linenums="1"
+??? note "step4.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/step4.py"
     --8<-- "5_steps_to_n_body_simulation/python/step4.py"
+    ```
+
+??? note "common.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/common.py"
+    --8<-- "5_steps_to_n_body_simulation/python/common.py"
     ```

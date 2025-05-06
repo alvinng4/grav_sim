@@ -24,12 +24,13 @@ Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 
 **Contents**
 
-- Step 1: Initial setup
-- Step 2: Acceleration
-- Step 3: Your first N-body program
-- Step 4: Higher-order algorithms
-- Step 5: Adaptive time-stepping
-- Conclusion and Final Project
+- [Step 1: Initial setup](5_steps_to_n_body_simulation/step1.md)
+- [Step 2: Gravity](5_steps_to_n_body_simulation/step2.md)
+- [Step 3: Your first N-body program](5_steps_to_n_body_simulation/step3.md)
+- [Step 4: Higher-order algorithms](5_steps_to_n_body_simulation/step4.md)
+- [Step 5: Adaptive time-stepping](5_steps_to_n_body_simulation/step5.md)
+- [Extra: Plotting and animation](5_steps_to_n_body_simulation/extra.md)
+- [Conclusion and Final Project](5_steps_to_n_body_simulation/conclusion.md)
 
 <img src="./examples/media/solar_plus_3d.png" alt="Image" width="300">
 <img src="./examples/media/rel_energy.png" alt="Image" width="300">

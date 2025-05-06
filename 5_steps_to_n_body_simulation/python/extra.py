@@ -1,11 +1,16 @@
 import math
 import timeit
+from pathlib import Path
 
 import numpy as np
+import PIL
+import matplotlib.pyplot as plt
 
 import common
 
-OPTION = 0
+OPTION = 2
+FRAMES_DIR = Path(__file__).parent.parent / "figures" / "frames"
+FRAMES_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default units is AU, days, and M_sun
 
@@ -25,8 +30,17 @@ elif OPTION == 1:
     OUTPUT_INTERVAL = 0.001
     INITIAL_DT = 0.01
 
+elif OPTION == 2:
+    INITIAL_CONDITION = "solar_system_plus"
+    TF = 250.0 * 365.24  # 200 years to days
+    TOLERANCE = 1e-8
+    OUTPUT_INTERVAL = 0.5 * 365.24  # 0.5 year to days
+    INITIAL_DT = 1.0
+
 else:
-    raise ValueError("Invalid option. Choose 0 for solar system or 1 for Pyth-3-body.")
+    raise ValueError(
+        "Invalid option. Choose 0 for solar system, 1 for Pyth-3-body, or 2 for solar system plus."
+    )
 
 
 def main() -> None:
@@ -198,18 +212,77 @@ def main() -> None:
 
     print()
     print(f"Done! Runtime: {end - start:.3g} seconds, Solution size: {output_count}")
-    common.plot_trajectory(
-        sol_x=sol_x,
-        labels=labels,
-        colors=colors,
-        legend=legend,
+
+    print("Drawing frames...")
+    x_min, x_max = np.min(sol_x[:, :, 0]), np.max(sol_x[:, :, 0])
+    y_min, y_max = np.min(sol_x[:, :, 1]), np.max(sol_x[:, :, 1])
+    z_min, z_max = np.min(sol_x[:, :, 2]), np.max(sol_x[:, :, 2])
+    xyz_min = np.min([x_min, y_min, z_min])
+    xyz_max = np.max([x_max, y_max, z_max])
+
+    for n in range(output_count):
+        print(f"Progress: {n + 1} / {output_count}", end="\r")
+
+        # Draw the trajectory
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.set_xlabel("$x$ (AU)")
+        ax.set_ylabel("$y$ (AU)")
+        ax.set_zlabel("$z$ (AU)")  # type: ignore
+
+        for i in range(sol_x.shape[1]):
+            traj = ax.plot(
+                sol_x[:n, i, 0],
+                sol_x[:n, i, 1],
+                sol_x[:n, i, 2],
+                color=colors[i],
+            )
+            # Plot the last position with marker
+            ax.scatter(
+                sol_x[n, i, 0],
+                sol_x[n, i, 1],
+                sol_x[n, i, 2],
+                marker="o",
+                color=traj[0].get_color(),
+                label=labels[i],
+            )
+
+        ax.set_xlim3d(xyz_min, xyz_max) # type: ignore
+        ax.set_ylim3d(xyz_min, xyz_max) # type: ignore
+        ax.set_zlim3d(xyz_min, xyz_max) # type: ignore
+
+        # Set equal aspect ratio to prevent distortion
+        ax.set_aspect("equal")
+
+        if legend:
+            ax.legend(loc="center right", bbox_to_anchor=(1.325, 0.5))
+            fig.subplots_adjust(right=0.7)
+
+        plt.savefig(FRAMES_DIR / f"frames_{n:05d}.png")
+        plt.close("all")
+    print("\nDone!")
+
+    print("Combining frames to gif...")
+
+    def frames_generator():
+        for i in range(output_count):
+            yield PIL.Image.open(FRAMES_DIR / f"frames_{i:05d}.png")
+
+    fps = 30
+    frames = frames_generator()
+    next(frames).save(
+        FRAMES_DIR / "animation.gif",
+        save_all=True,
+        append_images=frames,
+        loop=0,
+        duration=(1000 // fps),
     )
 
-    # Compute and plot relative energy error
-    rel_energy_error = common.compute_rel_energy_error(sol_x, sol_v, system)
-    print(f"Relative energy error: {rel_energy_error[-1]:.3g}")
-    common.plot_rel_energy_error(rel_energy_error, sol_t / 365.24)
-    common.plot_dt(sol_dt, sol_t)
+    for i in range(output_count):
+        (FRAMES_DIR / f"frames_{i:05d}.png").unlink()
+
+    print(f"Output completed! Please check {FRAMES_DIR / 'animation.gif'}")
+    print()
 
 
 if __name__ == "__main__":

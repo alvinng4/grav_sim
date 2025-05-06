@@ -21,10 +21,11 @@ I do recommend you to translate it into your own code in order to have a better 
 **Contents**
 
 - [Step 1: Initial setup](step1.md)
-- [Step 2: Acceleration](step2.md)
+- [Step 2: Gravity](step2.md)
 - [Step 3: Your first N-body program](step3.md)
 - [Step 4: Higher-order algorithms](step4.md)
 - [Step 5: Adaptive time-stepping](step5.md)
+- [Extra: Plotting and animation](extra.md)
 - [Conclusion and Final Project](conclusion.md)
 
 ## References

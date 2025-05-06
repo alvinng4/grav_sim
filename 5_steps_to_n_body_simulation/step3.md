@@ -1,10 +1,10 @@
 # Step 3: Your first N-body program
 
-In this step, we will write our first N-body program! 
+In this step, we will write our first N-body program.
 We have set up the initial conditions in step 1 and 
 the acceleration function in step 2. Now, we will need to
 solve the equations of motion for the particles.
-For Newtonian machanics, we have the following coupled equations:
+For Newtonian mechanics, we have the following coupled equations:
 
 $$
     \frac{\mathrm{d}\textbf{r}}{\mathrm{d}t} 
@@ -13,7 +13,7 @@ $$
     = \textbf{a}(\textbf{r}) \left( = \frac{\textbf{F}(\textbf{r})}{m} \right).
 $$
 
-They are ordinary differential equations (ODEs), and to solve them, we will
+They are ordinary differential equations (ODEs). To solve them, we will
 need a ODE solver. 
 
 ## Euler method
@@ -26,13 +26,13 @@ $$
 $$
 
 where $\Delta t$ is the time step.
-By taylor expansion, we can see that this is a first-order approximation,
+By Taylor expansion, we can see that this is a first-order approximation,
 
 $$
     x(t + \Delta t) = x(t) + x'(t) \Delta t + \mathcal{O}(\Delta t^2),
 $$
 
-where $\mathcal{O}(\Delta t^2)$ is the local truncation error. 
+where $\mathcal{O}(\Delta t^2)$ is the local truncation error if $\Delta t \to 0$. 
 Because the total number of steps scales with $1/\Delta t$, the global error is 
 
 $$
@@ -42,7 +42,8 @@ $$
 $$
 
 If you are not familiar with the big-O notation, you can think of it
-as the error is bounded by a polynomial in the order of $\Delta t$ if $\Delta t \to 0$.
+as the error is being bounded by a polynomial in the order 
+of $\Delta t$.
 
 Implementing the Euler integrator is very easy. With
 
@@ -53,23 +54,23 @@ $$
 
 we have the following code:
 
-```python
-    def euler(a: np.ndarray, system: System, dt: float) -> None:
-        """
-        Advance one step with the Euler's method.
+```python title="common.py"
+def euler(a: np.ndarray, system: System, dt: float) -> None:
+    """
+    Advance one step with the Euler's method.
 
-        Parameters
-        ----------
-        a : np.ndarray
-            Gravitational accelerations array with shape (N, 3).
-        system : System
-            System object.
-        dt : float
-            Time step.
-        """
-        acceleration(a, system)
-        system.x += system.v * dt
-        system.v += a * dt
+    Parameters
+    ----------
+    a : np.ndarray
+        Gravitational accelerations array with shape (N, 3).
+    system : System
+        System object.
+    dt : float
+        Time step.
+    """
+    acceleration(a, system)
+    system.x += system.v * dt
+    system.v += a * dt
 ```
 
 Now, we will build all the components we need for our N-body program.
@@ -84,12 +85,11 @@ In our simulation, we will use a output interval of 0.1 years. For a simulation 
 200 years, we will have 2000 time steps.
 
 !!! Tip
-    For solar system, we only have 9 particles and it takes very little memory to store. 
-    So, you don't need to worry too much about the solution size. Just be careful
-    and don't set the output interval too small.
+    For the Solar system, we only have 9 particles and it takes very little memory to store. So, you don't need to worry too much about the solution size. 
+    Just be careful and don't set the output interval too small.
 
 Before the simulation, we will need to set up the output array and store the initial conditions.
-```python
+```python title="step3.py"
 OUTPUT_INTERVAL = 0.1 * 365.24  # years to days
 
 def main() -> None:
@@ -106,7 +106,7 @@ def main() -> None:
 ```
 
 Also, we need to calculate the output time.
-```python
+```python title="step3.py"
 def main() -> None:
     ...
     for i in range(NUM_STEPS):
@@ -121,7 +121,7 @@ def main() -> None:
 ```
 
 Finally, we resize the arrays to the actual size.
-```python
+```python title="step3.py"
 def main() -> None:
     ...
     sol_x = sol_x[:output_count]
@@ -132,7 +132,7 @@ def main() -> None:
 ## Putting it all together
 
 Let's put everything together. We first need to setup the simulation parameters.
-```python
+```python title="step3.py"
 # Default units is AU, days, and M_sun
 TF = 200.0 * 365.24  # years to days
 DT = 1.0 
@@ -142,30 +142,37 @@ NUM_STEPS = int(TF / DT)
 
 Before running the simulation, it is a good idea to print
 the simulation information.
-```python
-def print_simulation_info(system: System, sol_size: int) -> None:
+```python title="common.py"
+def print_simulation_info_fixed_step_size(
+    system: System,
+    tf: float,
+    dt: float,
+    num_steps: int,
+    output_interval: float,
+    sol_size: int,
+) -> None:
     print("----------------------------------------------------------")
     print("Simulation Info:")
     print(f"num_particles: {system.num_particles}")
     print(f"G: {system.G}")
-    print(f"tf: {TF} days (Actual tf = dt * num_steps = {DT * NUM_STEPS} days)")
-    print(f"dt: {DT} days")
-    print(f"Num_steps: {NUM_STEPS}")
+    print(f"tf: {tf} days (Actual tf = dt * num_steps = {dt * num_steps} days)")
+    print(f"dt: {dt} days")
+    print(f"Num_steps: {num_steps}")
     print()
-    print(f"Output interval: {OUTPUT_INTERVAL} days")
+    print(f"Output interval: {output_interval} days")
     print(f"Estimated solution size: {sol_size}")
     print("----------------------------------------------------------")
 ```
 
 Finally, we have the main function that runs the main simulation loop.
 I have added a timer to measure the runtime, and a print statement
-to show the simulation progress everytime we save a solution. The `\r` at the end
+to show the simulation progress every time we save a solution. The `\r` at the end
 of the print statement should overwrite the previous line, but you can remove
 the print statement if it is spamming your terminal.
-```python hl_lines="34"
+```python hl_lines="36" title="step3.py"
 def main() -> None:
     # Get initial conditions
-    system = get_initial_conditions()
+    system, labels, colors, legend = common.get_initial_conditions(INITIAL_CONDITION)
 
     # Initialize memory
     a = np.zeros((system.num_particles, 3))
@@ -181,11 +188,13 @@ def main() -> None:
     output_count = 1
 
     # Launch simulation
-    print_simulation_info(system, sol_size)
+    common.print_simulation_info_fixed_step_size(
+        system, TF, DT, NUM_STEPS, OUTPUT_INTERVAL, sol_size
+    )
     next_output_time = output_count * OUTPUT_INTERVAL
     start = timeit.default_timer()
     for i in range(NUM_STEPS):
-        euler(a, system, DT)
+        common.euler(a, system, DT)
 
         current_time = i * DT
         if current_time >= next_output_time:
@@ -229,10 +238,10 @@ Done! Runtime: 1.1 seconds, Solution size: 2000
 ## Plotting the trajectory
 
 To visualize the trajectory, we have the following function. Notice that we 
-have two `ax.plot` calls. The first one is to plot the trajectory, and the second one
-is to plot the final position as a circle marker.
+have one `ax.plot` and one `ax.scatter` calls. The first one is to plot the 
+trajectory, and the second one is to plot the final position with a circle marker.
 
-```python
+```python title="common.py"
 def plot_trajectory(
     sol_x: np.ndarray,
     labels: list,
@@ -265,7 +274,7 @@ def plot_trajectory(
             color=colors[i],
         )
         # Plot the last position with marker
-        ax.plot(
+        ax.scatter(
             sol_x[-1, i, 0],
             sol_x[-1, i, 1],
             marker="o",
@@ -281,13 +290,13 @@ def plot_trajectory(
 ```
 
 Then, we add the function call to the end of the main function.
-```python
-plot_trajectory(
-    sol_x=sol_x,
-    labels=LABELS,
-    colors=COLORS,
-    legend=LEGEND,
-)
+```python title="step3.py"
+    common.plot_trajectory(
+        sol_x=sol_x,
+        labels=labels,
+        colors=colors,
+        legend=legend,
+    )
 ```
 
 You should see the following plot:
@@ -300,11 +309,16 @@ However, we can see that the results are not very accurate, especially for those
 
 In the next step, we will implement some higher-order integrators to improve the accuracy.
 
-## Full script
-The full script is available at `5_steps_to_n_body_simulation/python/step3.py`,
-or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/step3.py
+## Full scripts
+The full scripts are available at `5_steps_to_n_body_simulation/python/`,
+or https://github.com/alvinng4/grav_sim/blob/main/5_steps_to_n_body_simulation/python/
 
-??? note "Code (Click to expand)"
-    ```python linenums="1"
+??? note "step3.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/step3.py"
     --8<-- "5_steps_to_n_body_simulation/python/step3.py"
+    ```
+
+??? note "common.py (Click to expand)"
+    ```python linenums="1" title="5_steps_to_n_body_simulation/python/common.py"
+    --8<-- "5_steps_to_n_body_simulation/python/common.py"
     ```
