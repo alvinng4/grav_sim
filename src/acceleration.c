@@ -505,7 +505,7 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
         }
         
         printf("    Number of times: %d\n", num_times);
-        printf("    Avg time: %.3g (+- %.3g) s\n", compute_mean(run_time, num_times), compute_std(run_time, num_times, 1));
+        printf("    Avg time: %.3g (+- %.3g) s\n", compute_mean(run_time, num_times), compute_std(run_time, num_times, 1) / sqrt(num_times));
         printf("    MAE: %.3g\n", mae);
         printf("\n");
 
