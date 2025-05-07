@@ -110,7 +110,7 @@ Animations generally consists of two steps:
 Since you already know how to generate the frames, we
 have already solved the first step. First, let us
 copy `step5.py` to `extra.py` and modify it slightly to include
-`solar_system_plus`. We also need to import `matplotlib`.
+`solar_system_plus`.
 
 ??? Note "Code (Click to expand)"
     ```python title="extra.py"
@@ -208,6 +208,7 @@ Note that we need to set the min and max values for the axes.
         if legend:
             ax.legend(loc="center right", bbox_to_anchor=(1.325, 0.5))
             fig.subplots_adjust(right=0.7)
+            fig.tight_layout()
 
         plt.savefig(FRAMES_DIR / f"frames_{n:05d}.png")
         plt.close("all")
@@ -250,7 +251,7 @@ animation is done, we delete all frames by using `Path.unlink()`.
 
 You should see the animation:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/qtCLYpzPxBM?si=p-xXf4mE0DGPLxOS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/8y9CubaVGLk?si=G1XDDJ8SgQ9qK4OS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Conclusion
 

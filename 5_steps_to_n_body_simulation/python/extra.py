@@ -257,6 +257,7 @@ def main() -> None:
         if legend:
             ax.legend(loc="center right", bbox_to_anchor=(1.325, 0.5))
             fig.subplots_adjust(right=0.7)
+            fig.tight_layout()
 
         plt.savefig(FRAMES_DIR / f"frames_{n:05d}.png")
         plt.close("all")
