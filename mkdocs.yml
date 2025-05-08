@@ -28,6 +28,7 @@ nav:
         - docs/documentations/PythonAPI/plotting.md
         - docs/documentations/PythonAPI/System.md
         - docs/documentations/PythonAPI/Simulator.md
+        - docs/documentations/PythonAPI/utils.md
     - C API:
         - docs/documentations/CAPI/grav_sim.md
   - Examples:
