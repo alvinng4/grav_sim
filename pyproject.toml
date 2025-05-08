@@ -1,6 +1,6 @@
 [project]
 name = "grav_sim"
-version = "0.0.9"
+version = "1.0.0"
 description="Gravity Simulator"
 requires-python = ">= 3.9"
 readme = "README.md"
