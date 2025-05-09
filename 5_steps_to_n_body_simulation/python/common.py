@@ -319,7 +319,7 @@ def get_initial_conditions(
         )
         system.center_of_mass_correction()
 
-        labels = list(SOLAR_SYSTEM_POS.keys())
+        labels = list(SOLAR_SYSTEM_COLORS.keys())
         colors = list(SOLAR_SYSTEM_COLORS.values())
         legend = True
 
@@ -411,7 +411,7 @@ def get_initial_conditions(
         )
         system.center_of_mass_correction()
 
-        labels = list(SOLAR_SYSTEM_POS.keys())
+        labels = list(SOLAR_SYSTEM_PLUS_COLORS.keys())
         colors = list(SOLAR_SYSTEM_PLUS_COLORS.values())
         legend = True
 
