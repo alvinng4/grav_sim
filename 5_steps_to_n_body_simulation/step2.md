@@ -24,7 +24,7 @@ In practice, we are only interested in the acceleration. To compute the accelera
 particle $i \in \{1, \dots, N\}$, we have
 
 $$
-    \mathbf{a}_{i} = \sum_{i \neq j} \frac{G m_j}{r_{ij}^3} \mathbf{r}_{ij},
+    \mathbf{a}_{i} = \sum_{j \neq i} \frac{G m_j}{r_{ij}^3} \mathbf{r}_{ij},
 $$
 
 which can be easily done as this only involve simple vector operations.

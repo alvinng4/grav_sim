@@ -18,7 +18,7 @@ how to write fast and clean N-body gravity simulations code in Python.
 In this step, we will set up the required python environment and
 implement some basic functions to be used in the following steps.
 
-First of all, make sure you have Python 3.9 or later installed. You
+First of all, make sure you have Python 3 installed (to be safe, I recommend Python 3.9 or later). You
 can check the installation by running the following command in your terminal:
 ```
 python --version
