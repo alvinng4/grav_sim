@@ -174,7 +174,7 @@ for beginners, but learning this could help you understand a lot about NumPy arr
 4. We compute the acceleration by 
 
 $$
-    \mathbf{a}_{i} = \sum_{i \neq j} \frac{G m_j}{r_{ij}^3} \mathbf{r}_{ij},
+    \mathbf{a}_{i} = \sum_{j \neq i} \frac{G m_j}{r_{ij}^3} \mathbf{r}_{ij},
 $$
 
 The last step can be done by using NumPy's broadcasting feature. The resulting
@@ -224,7 +224,7 @@ We are summing along the axis 0 (row). For particle $i$, we have
 $$
     \mathbf{a}_{i, 0} = G \left[m_1 \frac{\mathbf{x}_{i1}}{x_{i1}^3} + m_2 \frac{\mathbf{x}_{i2}}{x_{i2}^3}
     + \cdots + 0 + \cdots + m_N \frac{\mathbf{x}_{iN}}{x_{iN}^3} \right]
-    = \sum_{i \neq j} \frac{G m_j}{x_{ij}^3} \mathbf{x}_{ij}
+    = \sum_{j \neq i} \frac{G m_j}{x_{ij}^3} \mathbf{x}_{ij}
 $$
 
 This is exactly what we want! Now, to also include the last dimension with length 3,
