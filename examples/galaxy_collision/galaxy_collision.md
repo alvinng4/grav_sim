@@ -8,6 +8,10 @@
     --8<-- "examples/galaxy_collision/python/galaxy_collision.py"
     ```
 
+Related topics: 
+
+* [Barnes-Hut algorithm](../../docs/documentations/barnes_hut.md)
+
 In this example, we will simulate the collision of two galaxies with 60000 particles using the initial
 conditions from Gadget-2[@gadget2]. The initial conditions is preprocessed into a
 HDF5 file and is included in the repository.

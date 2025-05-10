@@ -436,14 +436,14 @@ By the way, since `acceleration_4` is the fastest, we put it into `common.py`.
 
 !!! Tip "Performance in C"
     By the way, if you are interested in the performance in C,
-    below is a benchmark using our `grav_sim` package written in C:
+    below is a benchmark using our `grav_sim` package:
     ```
     Test 0:    Method: Pairwise
         Number of times: 10000000
         Avg time: 2.06e-07 (+- 1.30e-10) s
     ```
     This is about 58 times faster than the vectorized NumPy implementation. But beware that
-    this may not be totally accurate as the run time for each run is too small.
+    this may not be totally accurate as the run time for each run is too short.
 
 ## Full scripts
 The full scripts are available at `5_steps_to_n_body_simulation/python/`,

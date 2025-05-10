@@ -1,3 +1,5 @@
+# Cosmic Structure Formation
+
 ??? Note "Source code in C (Click to expand)"
     ```python linenums="1" title="examples/cosmic_structure/c/cosmic_structure.c"
     --8<-- "examples/cosmic_structure/c/cosmic_structure.c"
@@ -7,6 +9,12 @@
     ```python linenums="1" title="examples/cosmic_structure/python/cosmic_structure.py"
     --8<-- "examples/cosmic_structure/python/cosmic_structure.py"
     ```
+
+Related topics: 
+
+* [Comoving coordinates](../../docs/documentations/comoving_coordinates.md)
+* [Particle mesh algorithm](../../docs/documentations/particle_mesh.md)
+
 
 In this example, we will simulate the formation of cosmological structures in a universe with $\Lambda$CDM model.
 
