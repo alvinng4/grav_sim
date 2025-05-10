@@ -1,0 +1,160 @@
+@inbook{CompensatedSummation,
+  author  = {(Ernst Hairer) and {Gerhard Wanner} and {Christian Lubich}},
+  title   = {Geometric Numerical Integration},
+  chapter = {VIII},
+  pages   = {272-274},
+  year    = {2002},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+}
+
+@book{MovingPlanetsAround,
+  author    = {{Javier Roa} and {Adrian S. Hamers} and {Maxwell X. Cai} and {Nathan W. C. Leigh}},
+  title     = {Moving Planets Around: An Introduction to N-Body Simulations Applied to Exoplanetary Systems},
+  year      = {2020},
+  publisher = {MIT Press},
+}
+
+@article{CFDPython,
+  doi = {10.21105/jose.00021},
+  year = {2019},
+  publisher = {The Open Journal},
+  volume = {2},
+  number = {16},
+  pages = {21},
+  author = {Lorena Barba and Gilbert Forsyth},
+  title = {{CFD Python: the 12 steps to Navier-Stokes equations}},
+  journal = {Journal of Open Source Education}
+}
+
+@misc{Horizons,
+  title = {Horizons System},
+  author = {{Jet Propulsion Laboratory}},
+  url = {https://ssd.jpl.nasa.gov/horizons/},
+  year = {2024},
+  note = {Accessed: April 2024}
+}
+
+@article{Park2021,
+  doi = {10.3847/1538-3881/abd414},
+  year = {2021},
+  month = {feb},
+  publisher = {The American Astronomical Society},
+  volume = {161},
+  number = {3},
+  pages = {105},
+  author = {Park, Ryan S. and Folkner, William M. and Williams, James G. and Boggs, Dale H.},
+  title = {The JPL Planetary and Lunar Ephemerides DE440 and DE441},
+  journal = {The Astronomical Journal},
+}
+
+@book{NumericalAnalysis,
+  author = {Burden, Richard L. and Faires, J. Douglas},
+  edition = {Nineth},
+  publisher = {Cengage Learning},
+  title = {Numerical Analysis},
+  year = 2011
+}
+
+@BOOK{LSSU,
+  author = {{Peebles}, P.~J.~E.},
+  title = "{The large-scale structure of the universe}",
+  year = 1980,
+  publisher = {Princeton University Press},
+  adsurl = {https://ui.adsabs.harvard.edu/abs/1980lssu.book.....P},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{gadget2,
+    author = {Springel, Volker},
+    title = {The cosmological simulation code gadget-2},
+    journal = {Monthly Notices of the Royal Astronomical Society},
+    volume = {364},
+    number = {4},
+    pages = {1105-1134},
+    year = {2005},
+    month = {12},
+    abstract = {We discuss the cosmological simulation code gadget-2, a new massively parallel TreeSPH code, capable of following a collisionless fluid with the N-body method, and an ideal gas by means of smoothed particle hydrodynamics (SPH). Our implementation of SPH manifestly conserves energy and entropy in regions free of dissipation, while allowing for fully adaptive smoothing lengths. Gravitational forces are computed with a hierarchical multipole expansion, which can optionally be applied in the form of a TreePM algorithm, where only short-range forces are computed with the ‘tree’ method while long-range forces are determined with Fourier techniques. Time integration is based on a quasi-symplectic scheme where long-range and short-range forces can be integrated with different time-steps. Individual and adaptive short-range time-steps may also be employed. The domain decomposition used in the parallelization algorithm is based on a space-filling curve, resulting in high flexibility and tree force errors that do not depend on the way the domains are cut. The code is efficient in terms of memory consumption and required communication bandwidth. It has been used to compute the first cosmological N-body simulation with more than 1010 dark matter particles, reaching a homogeneous spatial dynamic range of 105 per dimension in a three-dimensional box. It has also been used to carry out very large cosmological SPH simulations that account for radiative cooling and star formation, reaching total particle numbers of more than 250 million. We present the algorithms used by the code and discuss their accuracy and performance using a number of test problems. gadget-2 is publicly released to the research community.},
+    issn = {0035-8711},
+    doi = {10.1111/j.1365-2966.2005.09655.x},
+}
+
+@article{gadget4,
+    author = {Springel, Volker and Pakmor, Rüdiger and Zier, Oliver and Reinecke, Martin},
+    title = {Simulating cosmic structure formation with the gadget-4 code},
+    journal = {Monthly Notices of the Royal Astronomical Society},
+    volume = {506},
+    number = {2},
+    pages = {2871-2949},
+    year = {2021},
+    month = {07},
+    abstract = {Numerical methods have become a powerful tool for research in astrophysics, but their utility depends critically on the availability of suitable simulation codes. This calls for continuous efforts in code development, which is necessitated also by the rapidly evolving technology underlying today’s computing hardware. Here, we discuss recent methodological progress in the gadget code, which has been widely applied in cosmic structure formation over the past two decades. The new version offers improvements in force accuracy, in time-stepping, in adaptivity to a large dynamic range in time-scales, in computational efficiency, and in parallel scalability through a special MPI/shared-memory parallelization and communication strategy, and a more-sophisticated domain decomposition algorithm. A manifestly momentum conserving fast multipole method (FMM) can be employed as an alternative to the one-sided TreePM gravity solver introduced in earlier versions. Two different flavours of smoothed particle hydrodynamics, a classic entropy-conserving formulation and a pressure-based approach, are supported for dealing with gaseous flows. The code is able to cope with very large problem sizes, thus allowing accurate predictions for cosmic structure formation in support of future precision tests of cosmology, and at the same time is well adapted to high dynamic range zoom-calculations with extreme variability of the particle number density in the simulated volume. The gadget-4 code is publicly released to the community and contains infrastructure for on-the-fly group and substructure finding and tracking, as well as merger tree building, a simple model for radiative cooling and star formation, a high dynamic range power spectrum estimator, and an initial condition generator based on second-order Lagrangian perturbation theory.},
+    issn = {0035-8711},
+    doi = {10.1093/mnras/stab1855},
+}
+
+@misc{how_to_write_pm,
+  author={Andrey Kravtsov},
+  title = {Writing a PM code},
+  howpublished = {\url{https://astro.uchicago.edu/~andrey/Talks/PM/pm.pdf}},
+  year = {2002},
+  month = {March},
+  day = {1},
+  note = {Accessed: {2025-04-13}}
+}
+
+@article{dehnen_n-body_2011,
+	title = {N-body simulations of gravitational dynamics},
+	volume = {126},
+	copyright = {http://www.springer.com/tdm},
+	issn = {2190-5444},
+	url = {http://link.springer.com/10.1140/epjp/i2011-11055-3},
+	doi = {10.1140/epjp/i2011-11055-3},
+	number = {5},
+	urldate = {2025-03-31},
+	journal = {The European Physical Journal Plus},
+	author = {Dehnen, W. and Read, J. I.},
+	month = may,
+	year = {2011},
+	pages = {55},
+	file = {N-body simulations of gravitational dynamics:/Users/alvinng/Zotero/storage/I82JZU3L/dehnen2011.pdf.pdf:application/pdf},
+}
+
+@article{barnes_hierarchical_1986,
+	title = {A hierarchical {$O$}({$N$} $\log$ {$N$}) force-calculation algorithm},
+	volume = {324},
+	copyright = {http://www.springer.com/tdm},
+	issn = {0028-0836, 1476-4687},
+	url = {https://www.nature.com/articles/324446a0},
+	doi = {10.1038/324446a0},
+	number = {6096},
+	urldate = {2025-01-19},
+	journal = {Nature},
+	author = {Barnes, Josh and Hut, Piet},
+	month = dec,
+	year = {1986},
+	pages = {446--449},
+}
+
+@misc{morton_index_stackoverflow,
+    title       = {How to compute a 3D Morton number (interleave the bits of 3 ints)},
+    author      = {{Gabriel (https://stackoverflow.com/users/293195/gabriel)}},
+    howpublished= {Stack Overflow},
+    note        = {version: 2021-09-18},
+    eprint      = {https://stackoverflow.com/a/18528775},
+    url         = {https://stackoverflow.com/a/18528775}
+}
+
+@article{MUSIC,
+    author = "Hahn, Oliver and Abel, Tom",
+    title = "{Multi-scale initial conditions for cosmological simulations}",
+    eprint = "1103.6031",
+    archivePrefix = "arXiv",
+    primaryClass = "astro-ph.CO",
+    reportNumber = "SLAC-PUB-14463",
+    doi = "10.1111/j.1365-2966.2011.18820.x",
+    journal = "Mon. Not. Roy. Astron. Soc.",
+    volume = "415",
+    pages = "2101--2121",
+    year = "2011"
+}
