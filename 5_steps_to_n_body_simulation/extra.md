@@ -1,9 +1,9 @@
-This is an extra component to the 5 steps to n-body simulation tutorial. I figured some of you may be interested in the visuals,
+This is an extra component to 5 steps to n-body simulation. I figured some of you may be interested in the visuals,
 so in this section, I will show you how to make 3D plots and produce animations using the `matplotlib` library.
 
 ## Plotting in 3D
 It would be nice to plot the trajectory in 3D. To do this, we will need two functions,
-one to set the 3D axes in equal aspect ratio, and one to plot the trajectory in 3D.
+one to set the 3D axes limits in equal aspect ratio, and one to plot the trajectory in 3D.
 
 ??? Note "Code (Click to expand)"
     ```python title="common.py"
@@ -76,7 +76,7 @@ one to set the 3D axes in equal aspect ratio, and one to plot the trajectory in 
                 color=colors[i],
             )
             # Plot the last position with marker
-            ax.plot(
+            ax.scatter(
                 sol_x[-1, i, 0],
                 sol_x[-1, i, 1],
                 sol_x[-1, i, 2],
@@ -94,8 +94,8 @@ one to set the 3D axes in equal aspect ratio, and one to plot the trajectory in 
         plt.show()
     ```
 
-To make the plot look better, I added a few dwarf planets like Pluto. Again, the initial condition is already available in the
-`get_initial_conditions` function (input `solar_plus_3d`).
+To make the plot look better, I added a few dwarf planets like Pluto. The initial condition
+is already available in the `get_initial_conditions` function (input `solar_system_plus`).
 In step 4 or step 5, change `plot_2d_trajectory` to `plot_3d_trajectory`, and you should see a 3D plot:
 
 <img src="../../examples/media/solar_plus_3d.png" alt="3D Trajectory" width="400"/>
@@ -107,9 +107,8 @@ Animations generally consists of two steps:
 1. Generating the frames
 2. Combining the frames into a video
 
-Since you already know how to generate the frames, we
-have already solved the first step. First, let us
-copy `step5.py` to `extra.py` and modify it slightly to include
+If you know how to make a plot, you already know how to generate frames.
+First, let us copy `step5.py` to `extra.py` and modify it slightly to include
 `solar_system_plus`.
 
 ??? Note "Code (Click to expand)"
@@ -161,7 +160,7 @@ FRAMES_DIR = Path(__file__).parent.parent / "figures" / "frames"
 FRAMES_DIR.mkdir(parents=True, exist_ok=True)
 ```
 
-For simplicity, let us draw the frames in the main function.
+For simplicity, let us draw the frames in the `main` function.
 Note that we need to set the min and max values for the axes.
 ```python title="extra.py"
     print("Drawing frames...")
