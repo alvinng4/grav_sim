@@ -1,4 +1,14 @@
-# grav_sim
+# Index
+
+* [Home](index.md)
+* [Getting Started](getting_started/)
+* [Documentations](documentations/)
+* [Examples](../examples/)
+* [5 Steps to N-body simulation](../5_steps_to_n_body_simulation/)
+
+---
+
+## grav_sim
 
 N-body gravity simulation library with C and Python API
 
@@ -33,15 +43,15 @@ Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 - [Extra: Plotting and animation](5_steps_to_n_body_simulation/extra.md)
 - [Conclusion and Final Project](5_steps_to_n_body_simulation/conclusion.md)
 
-<img src="./examples/media/solar_plus_3d.png" alt="Image" width="300">
-<img src="./examples/media/rel_energy.png" alt="Image" width="300">
+<img src="../examples/media/solar_plus_3d.png" alt="Image" width="300">
+<img src="../examples/media/rel_energy.png" alt="Image" width="300">
 
 ## Sample projects
 
 ### Evolving the solar system for 1 million years
 
-<img src="./examples/media/eccentricity.png" alt="Image" width="300">
-<img src="./examples/media/inclination.png" alt="Image" width="300">
+<img src="../examples/media/eccentricity.png" alt="Image" width="300">
+<img src="../examples/media/inclination.png" alt="Image" width="300">
 
 ### Asteroid belt animation
 

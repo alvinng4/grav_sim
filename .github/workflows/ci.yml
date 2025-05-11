@@ -27,5 +27,5 @@ jobs:
           path: .cache 
           restore-keys: |
             mkdocs-material-
-      - run: pip install mkdocs-material mkdocs-bibtex mkdocs-jupyter mkdocs-same-dir "mkdocstrings[python]" "mkdocstrings[c]"
+      - run: pip install mkdocs-material mkdocs-bibtex mkdocs-jupyter mkdocs-same-dir "mkdocstrings[python]"
       - run: mkdocs gh-deploy --force

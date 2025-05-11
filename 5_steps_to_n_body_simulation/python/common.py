@@ -645,9 +645,9 @@ def plot_rel_energy_error(rel_energy_error: np.ndarray, sol_t: np.ndarray) -> No
     plt.figure()
     plt.plot(sol_t, rel_energy_error)
     plt.yscale("log")
-    plt.xlabel("Time step")
+    plt.xlabel("Time")
     plt.ylabel("Relative Energy Error")
-    plt.title("Relative Energy Error vs Time Step")
+    plt.title("Relative Energy Error vs Time")
     plt.show()
 
 

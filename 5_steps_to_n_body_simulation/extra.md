@@ -222,8 +222,13 @@ You can install `PIL` using
 pip install pillow
 ```
 
-The code is given below. The logic is simple: we open the first frame and append the rest of the frames to it. It is done by using a generator function. After the
-animation is done, we delete all frames by using `Path.unlink()`.
+The code is given below. The logic is simple: we open the first frame and append the rest of 
+the frames to it. After the animation is done, we delete all frames by using `Path.unlink()`.
+
+!!! Tip "Generator function"
+    We used a generator function `frames_generator`. If you use a list instead,
+    you may run out of memory very quickly.
+
 ```python title="extra.py"
     print("Combining frames to gif...")
 
@@ -250,7 +255,7 @@ animation is done, we delete all frames by using `Path.unlink()`.
 
 You should see the animation:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/8y9CubaVGLk?si=G1XDDJ8SgQ9qK4OS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Jqjbyi8ZXvk?si=OolUY32zeqB80Tu3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Conclusion
 

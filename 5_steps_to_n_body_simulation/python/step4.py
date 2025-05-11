@@ -4,6 +4,7 @@ import numpy as np
 
 import common
 
+INTEGRATOR = common.leapfrog
 INITIAL_CONDITION = "solar_system"
 
 # Default units is AU, days, and M_sun
@@ -37,7 +38,7 @@ def main() -> None:
     next_output_time = output_count * OUTPUT_INTERVAL
     start = timeit.default_timer()
     for i in range(NUM_STEPS):
-        common.leapfrog(a, system, DT)
+        INTEGRATOR(a, system, DT)
 
         current_time = i * DT
         if current_time >= next_output_time:
