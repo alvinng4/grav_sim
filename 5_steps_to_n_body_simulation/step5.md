@@ -131,14 +131,13 @@ $$
     \text{error} = \sqrt{\overline{\left( \frac{\Delta x'}{\mathbf{s}} \right)^2}}.
 $$
 
-The bar over the sum means that we take the average over all elements we summed over (In case I am not clear, just look at the code below).
-The denominator in the final line of code is `system.num_particles * 3.0 * 2.0` because we have $N$ particles, each with 3 dimensions, and we have two arrays $\mathbf{r}$ and $\mathbf{v}$.
+The bar over means that we take the average over all elements (In case I am not clear, just look at the code below).
 
 ```python
-total = np.sum(np.square(error_estimation_delta_x / tolerance_scale_x)) + np.sum(
-    np.square(error_estimation_delta_v / tolerance_scale_v)
-)
-error = math.sqrt(total / (system.num_particles * 3.0 * 2.0))
+total = np.average(
+    np.square(error_estimation_delta_x / tolerance_scale_x)
+) + np.average(np.square(error_estimation_delta_v / tolerance_scale_v))
+error = math.sqrt(total / 2.0)
 ```
 
 The new step is accepted if the error is less than or equal to 1.0.

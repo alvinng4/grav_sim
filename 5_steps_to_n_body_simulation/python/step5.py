@@ -148,10 +148,10 @@ def main() -> None:
             TOLERANCE + np.maximum(np.abs(system.v), np.abs(v_1)) * TOLERANCE
         )
 
-        total = np.sum(
+        total = np.average(
             np.square(error_estimation_delta_x / tolerance_scale_x)
-        ) + np.sum(np.square(error_estimation_delta_v / tolerance_scale_v))
-        error = math.sqrt(total / (system.num_particles * 3.0 * 2.0))
+        ) + np.average(np.square(error_estimation_delta_v / tolerance_scale_v))
+        error = math.sqrt(total / 2.0)
 
         # Advance step
         if error <= 1.0 or dt <= TF * 1e-12:

@@ -247,9 +247,9 @@ def main() -> None:
                 label=labels[i],
             )
 
-        ax.set_xlim3d(xyz_min, xyz_max) # type: ignore
-        ax.set_ylim3d(xyz_min, xyz_max) # type: ignore
-        ax.set_zlim3d(xyz_min, xyz_max) # type: ignore
+        ax.set_xlim3d(xyz_min, xyz_max)  # type: ignore
+        ax.set_ylim3d(xyz_min, xyz_max)  # type: ignore
+        ax.set_zlim3d(xyz_min, xyz_max)  # type: ignore
 
         # Set equal aspect ratio to prevent distortion
         ax.set_aspect("equal")
