@@ -1,7 +1,7 @@
 /**
  * \file output.h
  * \brief Functions for outputting the simulation results
- * 
+ *
  * \author Ching-Yin Ng
  * \date March 2025
  */
@@ -25,37 +25,35 @@
 #include "settings.h"
 #include "system.h"
 
-
 /**
  * \brief Get a new output parameter structure
- * 
+ *
  * \return OutputParam
  */
 OutputParam get_new_output_param(void);
 
 /**
  * \brief Finalize and check the output parameters.
- * 
+ *
  * \param output_param Pointer to the output parameters.
  * \param[in] settings Pointer to the settings.
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus finalize_output_param(
-    OutputParam *restrict output_param,
-    const Settings *restrict settings
+    OutputParam *restrict output_param, const Settings *restrict settings
 );
 
 /**
  * \brief Output a snapshot of the simulation.
- * 
+ *
  * \param system Pointer to the gravitational system.
  * \param integrator_param Pointer to the integrator parameters.
  * \param acceleration_param Pointer to the acceleration parameters.
  * \param output_param Pointer to the output parameters.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus output_snapshot(
@@ -69,12 +67,12 @@ ErrorStatus output_snapshot(
 
 /**
  * \brief Output a snapshot of the cosmological simulation in CSV format.
- * 
+ *
  * \param output_param Pointer to the output parameters.
  * \param system Pointer to the gravitational system.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus output_snapshot_cosmology(

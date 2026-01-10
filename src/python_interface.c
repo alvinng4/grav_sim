@@ -28,11 +28,7 @@ WIN32DLL_API int32 load_built_in_system_python(
     ErrorStatus error_status;
 
     System system = get_new_system();
-    error_status = initialize_built_in_system(
-        &system,
-        system_name,
-        false
-    );
+    error_status = initialize_built_in_system(&system, system_name, false);
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto err;
@@ -243,7 +239,7 @@ WIN32DLL_API int launch_cosmological_simulation_python(
     system.unit_mass = unit_mass_in_cgs;
     system.unit_length = unit_length_in_cgs;
     system.unit_time = unit_time_in_cgs;
-    
+
     /* Output parameters */
     OutputParam output_param = get_new_output_param();
     output_param.method = output_method;
@@ -327,9 +323,7 @@ WIN32DLL_API void compute_energy_python(
                     sol_state[n * size_snapshot + j * 7 + 3]
                 };
                 const double r_ij[3] = {
-                    x_i[0] - x_j[0],
-                    x_i[1] - x_j[1],
-                    x_i[2] - x_j[2]
+                    x_i[0] - x_j[0], x_i[1] - x_j[1], x_i[2] - x_j[2]
                 };
                 energy[n] -= (G * m_i * m_j / vec_norm_3d(r_ij));
             }
@@ -356,7 +350,7 @@ WIN32DLL_API void compute_linear_momentum_python(
                 sol_state[n * size_snapshot + i * 7 + 5],
                 sol_state[n * size_snapshot + i * 7 + 6]
             };
-            
+
             linear_momentum[n] += m_i * vec_sum_3d(v_i);
         }
     }

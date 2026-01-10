@@ -1,7 +1,7 @@
 /**
  * \file linear_octree.h
  * \brief Linear octree for Barnes-Hut algorithm
- * 
+ *
  * \author Ching-Yin Ng
  */
 
@@ -13,9 +13,8 @@
 /* Maximum level for 64-bit Morton index, do not change */
 #define MORTON_MAX_LEVEL 21
 
-
 /**
- * \brief Linear octree structure 
+ * \brief Linear octree structure
  */
 typedef struct LinearOctree
 {
@@ -58,18 +57,18 @@ typedef struct LinearOctree
 
 /**
  * \brief Get a new linear octree struct
- * 
+ *
  * \return LinearOctree
  */
 LinearOctree get_new_linear_octree(void);
 
 /**
  * \brief Construct the linear octree
- * 
+ *
  * \param octree Pointer to the linear octree
  * \param system Pointer to the system
  * \param acceleration_param Pointer to the acceleration parameters
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus construct_octree(
@@ -82,22 +81,20 @@ ErrorStatus construct_octree(
 
 /**
  * \brief Free the memory allocated for the linear octree
- * 
+ *
  * \param octree Pointer to the linear octree
  */
 void free_linear_octree(LinearOctree *restrict octree);
 
 /**
  * \brief Check if two Morton indices are included in the same octant
- * 
+ *
  * \param morton_index_i Morton index of the first object at the deepest level
  * \param morton_index_j Morton index of the second object at the deepest level
  * \param level Level of the Morton indices
  */
 bool linear_octree_check_if_included(
-    const int64 morton_index_i,
-    const int64 morton_index_j,
-    const int level
+    const int64 morton_index_i, const int64 morton_index_j, const int level
 );
 
 #endif

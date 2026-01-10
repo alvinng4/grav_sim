@@ -1,9 +1,9 @@
 /**
  * \file integrator_rk_embedded.c
  * \brief Function definitions for Embedded Runge-Kutta integrators
- * 
+ *
  * \author Ching-Yin Ng
- * 
+ *
  * \ref J. Roa, et al. Moving Planets Around: An Introduction to
  *   N-Body Simulations Applied to Exoplanetary Systems*, MIT
  *   Press, 2020
@@ -25,18 +25,15 @@
 
 /**
  * \brief Get the order of the Embedded RK integrator
- * 
+ *
  * \param[out] order Pointer to the order of the integrator
  * \param[in] method Integrator method
- * 
+ *
  * \return ErrorStatus
- * 
+ *
  * \exception GRAV_VALUE_ERROR if the given method is invalid
  */
-IN_FILE ErrorStatus get_rk_embedded_order(
-    int *restrict order,
-    const int method
-)
+IN_FILE ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
 {
     *order = 0;
     switch (method)
@@ -62,7 +59,7 @@ IN_FILE ErrorStatus get_rk_embedded_order(
 
 /**
  * \brief Butcher tableaus for Embedded RK integrator
- * 
+ *
  * \param[in] order Order of the integrator, must be one of 45 / 54 / 78 / 65
  * \param[out] power Power of the integrator
  * \param[out] power_test Power for error calculation
@@ -70,11 +67,12 @@ IN_FILE ErrorStatus get_rk_embedded_order(
  * \param[out] len_weights Length of the weights array
  * \param[out] weights Pointer to the array of weights for RK integrator
  * \param[out] weights_test Pointer to the array of weights for error calculation
- * 
+ *
  * \return ErrorStatus
- * 
+ *
  * \exception GRAV_VALUE_ERROR if the given order is invalid
- * \exception GRAV_MEMORY_ERROR if failed to allocate memory for coeff, weights and weights_test
+ * \exception GRAV_MEMORY_ERROR if failed to allocate memory for coeff, weights and
+ * weights_test
  */
 IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
     const int order,
@@ -86,13 +84,13 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
     double **weights_test
 )
 {
-    /*  
-    *   Select integrator
-    *   45) Runge-Kutta-Fehleberg 4(5)
-    *   54) Dormand-Prince 5(4)
-    *   78) Runge-Kutta-Fehlberg 7(8)
-    *   65) Verner's method 6(5), DVERK
-    */
+    /*
+     *   Select integrator
+     *   45) Runge-Kutta-Fehleberg 4(5)
+     *   54) Dormand-Prince 5(4)
+     *   78) Runge-Kutta-Fehlberg 7(8)
+     *   65) Verner's method 6(5), DVERK
+     */
 
     *power = -1;
     *power_test = -1;
@@ -119,31 +117,57 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau");
+                return WRAP_RAISE_ERROR(
+                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                );
             }
             memcpy(
                 *coeff,
-                (double [25]) {
-                    1.0L / 4.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    3.0L / 32.0L, 9.0L / 32.0L, 0.0L, 0.0L, 0.0L,
-                    1932.0L / 2197.0L, -7200.0L / 2197.0L, 7296.0L / 2197.0L, 0.0L, 0.0L,
-                    439.0L / 216.0L, -8.0L, 3680.0L / 513.0L, -845.0L / 4104.0L, 0.0L,
-                    -8.0L / 27.0L, 2.0L, -3544.0L / 2565.0L, 1859.0L / 4104.0L, -11.0L / 40.0L
-                },
+                (double[25]){1.0L / 4.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             3.0L / 32.0L,
+                             9.0L / 32.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             1932.0L / 2197.0L,
+                             -7200.0L / 2197.0L,
+                             7296.0L / 2197.0L,
+                             0.0L,
+                             0.0L,
+                             439.0L / 216.0L,
+                             -8.0L,
+                             3680.0L / 513.0L,
+                             -845.0L / 4104.0L,
+                             0.0L,
+                             -8.0L / 27.0L,
+                             2.0L,
+                             -3544.0L / 2565.0L,
+                             1859.0L / 4104.0L,
+                             -11.0L / 40.0L},
                 25 * sizeof(double)
             );
             memcpy(
                 *weights,
-                (double [6]) {
-                    25.0L / 216.0L, 0.0L, 1408.0L / 2565.0L, 2197.0L / 4104.0L, -0.2L, 0.0L
-                },
+                (double[6]){25.0L / 216.0L,
+                            0.0L,
+                            1408.0L / 2565.0L,
+                            2197.0L / 4104.0L,
+                            -0.2L,
+                            0.0L},
                 6 * sizeof(double)
             );
             memcpy(
                 *weights_test,
-                (double [6]) {
-                    16.0L / 135.0L, 0.0L, 6656.0L / 12825.0L, 28561.0L / 56430.0L, -9.0L / 50.0L, 2.0L / 55.0L
-                },
+                (double[6]){16.0L / 135.0L,
+                            0.0L,
+                            6656.0L / 12825.0L,
+                            28561.0L / 56430.0L,
+                            -9.0L / 50.0L,
+                            2.0L / 55.0L},
                 6 * sizeof(double)
             );
 
@@ -166,33 +190,71 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau");
+                return WRAP_RAISE_ERROR(
+                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                );
             }
 
             memcpy(
                 *coeff,
-                (double [36]) {
-                    1.0L / 5.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    3.0L / 40.0L, 9.0L / 40.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    44.0L / 45.0L, -56.0L / 15.0L, 32.0L / 9.0L, 0.0L, 0.0L, 0.0L,
-                    19372.0L / 6561.0L, -25360.0L / 2187.0L, 64448.0L / 6561.0L, -212.0L / 729.0L, 0.0L, 0.0L,
-                    9017.0L / 3168.0L, -355.0L / 33.0L, 46732.0L / 5247.0L, 49.0L / 176.0L, -5103.0L / 18656.0L, 0.0L,
-                    35.0L / 384.0L, 0.0L, 500.0L / 1113.0L, 125.0L / 192.0L, -2187.0L / 6784.0L, 11.0L / 84.0L
-                },
+                (double[36]){1.0L / 5.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             3.0L / 40.0L,
+                             9.0L / 40.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             44.0L / 45.0L,
+                             -56.0L / 15.0L,
+                             32.0L / 9.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             19372.0L / 6561.0L,
+                             -25360.0L / 2187.0L,
+                             64448.0L / 6561.0L,
+                             -212.0L / 729.0L,
+                             0.0L,
+                             0.0L,
+                             9017.0L / 3168.0L,
+                             -355.0L / 33.0L,
+                             46732.0L / 5247.0L,
+                             49.0L / 176.0L,
+                             -5103.0L / 18656.0L,
+                             0.0L,
+                             35.0L / 384.0L,
+                             0.0L,
+                             500.0L / 1113.0L,
+                             125.0L / 192.0L,
+                             -2187.0L / 6784.0L,
+                             11.0L / 84.0L},
                 36 * sizeof(double)
             );
             memcpy(
                 *weights,
-                (double [7]) {
-                    35.0L / 384.0L, 0.0L, 500.0L / 1113.0L, 125.0L / 192.0L, -2187.0L / 6784.0L, 11.0L / 84.0L, 0.0L
-                },
+                (double[7]){35.0L / 384.0L,
+                            0.0L,
+                            500.0L / 1113.0L,
+                            125.0L / 192.0L,
+                            -2187.0L / 6784.0L,
+                            11.0L / 84.0L,
+                            0.0L},
                 7 * sizeof(double)
             );
             memcpy(
                 *weights_test,
-                (double [7]) {
-                    5179.0L / 57600.0L, 0.0L, 7571.0L / 16695.0L, 393.0L / 640.0L, -92097.0L / 339200.0L, 187.0L / 2100.0L, 1.0L / 40.0L
-                },
+                (double[7]){5179.0L / 57600.0L,
+                            0.0L,
+                            7571.0L / 16695.0L,
+                            393.0L / 640.0L,
+                            -92097.0L / 339200.0L,
+                            187.0L / 2100.0L,
+                            1.0L / 40.0L},
                 7 * sizeof(double)
             );
 
@@ -219,7 +281,7 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
             //         1.0,
             //     ]
             // )
-            
+
             *coeff = malloc(144 * sizeof(double));
             *len_weights = 13;
             *weights = malloc(*len_weights * sizeof(double));
@@ -230,39 +292,191 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau");
+                return WRAP_RAISE_ERROR(
+                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                );
             }
 
             memcpy(
                 *coeff,
-                (double [144]) {
-                    2.0L / 27.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    1.0L / 36.0L, 1.0L / 12.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    1.0L / 24.0L, 0.0L, 1.0L / 8.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    5.0L / 12.0L, 0.0L, -25.0L / 16.0L, 25.0L / 16.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    1.0L / 20.0L, 0.0L, 0.0L, 1.0L / 4.0L, 1.0L / 5.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    -25.0L / 108.0L, 0.0L, 0.0L, 125.0L / 108.0L, -65.0L / 27.0L, 125.0L / 54.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    31.0L / 300.0L, 0.0L, 0.0L, 0.0L, 61.0L / 225.0L, -2.0L / 9.0L, 13.0L / 900.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    2.0L, 0.0L, 0.0L, -53.0L / 6.0L, 704.0L / 45.0L, -107.0L / 9.0L, 67.0L / 90.0L, 3.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    -91.0L / 108.0L, 0.0L, 0.0L, 23.0L / 108.0L, -976.0L / 135.0L, 311.0L / 54.0L, -19.0L / 60.0L, 17.0L / 6.0L, -1.0L / 12.0L, 0.0L, 0.0L, 0.0L,
-                    2383.0L / 4100.0L, 0.0L, 0.0L, -341.0L / 164.0L, 4496.0L / 1025.0L, -301.0L / 82.0L, 2133.0L / 4100.0L, 45.0L / 82.0L, 45.0L / 164.0L, 18.0L / 41.0L, 0.0L, 0.0L,
-                    3.0L / 205.0L, 0.0L, 0.0L, 0.0L, 0.0L, -6.0L / 41.0L, -3.0L / 205.0L, -3.0L / 41.0L, 3.0L / 41.0L, 6.0L / 41.0L, 0.0L, 0.0L,
-                    -1777.0L / 4100.0L, 0.0L, 0.0L, -341.0L / 164.0L, 4496.0L / 1025.0L, -289.0L / 82.0L, 2193.0L / 4100.0L, 51.0L / 82.0L, 33.0L / 164.0L, 19.0L / 41.0L, 0.0L, 1.0L
-                },
+                (double[144]){2.0L / 27.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              1.0L / 36.0L,
+                              1.0L / 12.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              1.0L / 24.0L,
+                              0.0L,
+                              1.0L / 8.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              5.0L / 12.0L,
+                              0.0L,
+                              -25.0L / 16.0L,
+                              25.0L / 16.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              1.0L / 20.0L,
+                              0.0L,
+                              0.0L,
+                              1.0L / 4.0L,
+                              1.0L / 5.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              -25.0L / 108.0L,
+                              0.0L,
+                              0.0L,
+                              125.0L / 108.0L,
+                              -65.0L / 27.0L,
+                              125.0L / 54.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              31.0L / 300.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              61.0L / 225.0L,
+                              -2.0L / 9.0L,
+                              13.0L / 900.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              2.0L,
+                              0.0L,
+                              0.0L,
+                              -53.0L / 6.0L,
+                              704.0L / 45.0L,
+                              -107.0L / 9.0L,
+                              67.0L / 90.0L,
+                              3.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              -91.0L / 108.0L,
+                              0.0L,
+                              0.0L,
+                              23.0L / 108.0L,
+                              -976.0L / 135.0L,
+                              311.0L / 54.0L,
+                              -19.0L / 60.0L,
+                              17.0L / 6.0L,
+                              -1.0L / 12.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              2383.0L / 4100.0L,
+                              0.0L,
+                              0.0L,
+                              -341.0L / 164.0L,
+                              4496.0L / 1025.0L,
+                              -301.0L / 82.0L,
+                              2133.0L / 4100.0L,
+                              45.0L / 82.0L,
+                              45.0L / 164.0L,
+                              18.0L / 41.0L,
+                              0.0L,
+                              0.0L,
+                              3.0L / 205.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              0.0L,
+                              -6.0L / 41.0L,
+                              -3.0L / 205.0L,
+                              -3.0L / 41.0L,
+                              3.0L / 41.0L,
+                              6.0L / 41.0L,
+                              0.0L,
+                              0.0L,
+                              -1777.0L / 4100.0L,
+                              0.0L,
+                              0.0L,
+                              -341.0L / 164.0L,
+                              4496.0L / 1025.0L,
+                              -289.0L / 82.0L,
+                              2193.0L / 4100.0L,
+                              51.0L / 82.0L,
+                              33.0L / 164.0L,
+                              19.0L / 41.0L,
+                              0.0L,
+                              1.0L},
                 144 * sizeof(double)
             );
             memcpy(
                 *weights,
-                (double [13]) {
-                    41.0L / 840.0L, 0.0L, 0.0L, 0.0L, 0.0L, 34.0L / 105.0L, 9.0L / 35.0L, 9.0L / 35.0L, 9.0L / 280.0L, 9.0L / 280.0L, 41.0L / 840.0L, 0.0L, 0.0L
-                },
+                (double[13]){41.0L / 840.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             34.0L / 105.0L,
+                             9.0L / 35.0L,
+                             9.0L / 35.0L,
+                             9.0L / 280.0L,
+                             9.0L / 280.0L,
+                             41.0L / 840.0L,
+                             0.0L,
+                             0.0L},
                 13 * sizeof(double)
             );
             memcpy(
                 *weights_test,
-                (double [13]) {
-                    0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 34.0L / 105.0L, 9.0L / 35.0L, 9.0L / 35.0L, 9.0L / 280.0L, 9.0L / 280.0L, 0.0L, 41.0L / 840.0L, 41.0L / 840.0L
-                },
+                (double[13]){0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             34.0L / 105.0L,
+                             9.0L / 35.0L,
+                             9.0L / 35.0L,
+                             9.0L / 280.0L,
+                             9.0L / 280.0L,
+                             0.0L,
+                             41.0L / 840.0L,
+                             41.0L / 840.0L},
                 13 * sizeof(double)
             );
 
@@ -274,9 +488,9 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
             *power = 6;
             *power_test = 7;
             /* nodes = np.array(
-            *     [1.0 / 6.0, 4.0 / 15.0, 2.0 / 3.0, 5.0 / 6.0, 1.0, 1.0 / 15.0, 1.0]
-            * )
-            */
+             *     [1.0 / 6.0, 4.0 / 15.0, 2.0 / 3.0, 5.0 / 6.0, 1.0, 1.0 / 15.0, 1.0]
+             * )
+             */
             *coeff = malloc(49 * sizeof(double));
             *len_weights = 8;
             *weights = malloc(*len_weights * sizeof(double));
@@ -287,40 +501,94 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau");
+                return WRAP_RAISE_ERROR(
+                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                );
             }
             memcpy(
                 *coeff,
-                (double [49]) {
-                    1.0L / 6.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    4.0L / 75.0L, 16.0L / 75.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    5.0L / 6.0L, -8.0L / 3.0L, 5.0L / 2.0L, 0.0L, 0.0L, 0.0L, 0.0L,
-                    -165.0L / 64.0L, 55.0L / 6.0L, -425.0L / 64.0L, 85.0L / 96.0L, 0.0L, 0.0L, 0.0L,
-                    12.0L / 5.0L, -8.0L, 4015.0L / 612.0L, -11.0L / 36.0L, 88.0L / 255.0L, 0.0L, 0.0L,
-                    -8263.0L / 15000.0L, 124.0L / 75.0L, -643.0L / 680.0L, -81.0L / 250.0L, 2484.0L / 10625.0L, 0.0L, 0.0L,
-                    3501.0L / 1720.0L, -300.0L / 43.0L, 297275.0L / 52632.0L, -319.0L / 2322.0L, 24068.0L / 84065.0L, 0.0L, 3850.0L / 26703.0L
-                },
+                (double[49]){1.0L / 6.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             4.0L / 75.0L,
+                             16.0L / 75.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             5.0L / 6.0L,
+                             -8.0L / 3.0L,
+                             5.0L / 2.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             -165.0L / 64.0L,
+                             55.0L / 6.0L,
+                             -425.0L / 64.0L,
+                             85.0L / 96.0L,
+                             0.0L,
+                             0.0L,
+                             0.0L,
+                             12.0L / 5.0L,
+                             -8.0L,
+                             4015.0L / 612.0L,
+                             -11.0L / 36.0L,
+                             88.0L / 255.0L,
+                             0.0L,
+                             0.0L,
+                             -8263.0L / 15000.0L,
+                             124.0L / 75.0L,
+                             -643.0L / 680.0L,
+                             -81.0L / 250.0L,
+                             2484.0L / 10625.0L,
+                             0.0L,
+                             0.0L,
+                             3501.0L / 1720.0L,
+                             -300.0L / 43.0L,
+                             297275.0L / 52632.0L,
+                             -319.0L / 2322.0L,
+                             24068.0L / 84065.0L,
+                             0.0L,
+                             3850.0L / 26703.0L},
                 49 * sizeof(double)
             );
             memcpy(
                 *weights,
-                (double [8]) {
-                    3.0L / 40.0L, 0.0L, 875.0L / 2244.0L, 23.0L / 72.0L, 264.0L / 1955.0L, 0.0L, 125.0L / 11592.0L, 43.0L / 616.0L
-                },
+                (double[8]){3.0L / 40.0L,
+                            0.0L,
+                            875.0L / 2244.0L,
+                            23.0L / 72.0L,
+                            264.0L / 1955.0L,
+                            0.0L,
+                            125.0L / 11592.0L,
+                            43.0L / 616.0L},
                 8 * sizeof(double)
             );
             memcpy(
                 *weights_test,
-                (double [8]) {
-                    13.0L / 160.0L, 0.0L, 2375.0L / 5984.0L, 5.0L / 16.0L, 12.0L / 85.0L, 3.0L / 44.0L, 0.0L, 0.0L
-                },
+                (double[8]){13.0L / 160.0L,
+                            0.0L,
+                            2375.0L / 5984.0L,
+                            5.0L / 16.0L,
+                            12.0L / 85.0L,
+                            3.0L / 44.0L,
+                            0.0L,
+                            0.0L},
                 8 * sizeof(double)
             );
 
             break;
 
         default:
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Invalid order for Embedded RK integrator");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR, "Invalid order for Embedded RK integrator"
+            );
     }
 
     return make_success_error_status();
@@ -328,18 +596,19 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
 
 /**
  * \brief Calculate initial time step for Embedded Runge-Kutta integrator
- * 
+ *
  * \param[out] initial_dt Pointer to the initial time step
  * \param[in] rel_tolerance Relative tolerance
  * \param[in] abs_tolerance Absolute tolerance
  * \param[in] power Power of the integrator
  * \param[in] system Pointer to the system
  * \param[in] acceleration_param Pointer to the acceleration parameters
- * 
- * \note Modified to return dt * 1e-2 since this function gives initial dt thats too large
- * 
+ *
+ * \note Modified to return dt * 1e-2 since this function gives initial dt thats too
+ * large
+ *
  * \return ErrorStatus
- * 
+ *
  * \exception GRAV_MEMORY_ERROR if failed to allocate memory for arrays
  * \exception GRAV_VALUE_ERROR if initial_dt is negative
  */
@@ -366,16 +635,10 @@ IN_FILE ErrorStatus rk_embedded_initial_dt(
     double *restrict v_1 = malloc(num_particles * 3 * sizeof(double));
     double *restrict a_1 = malloc(num_particles * 3 * sizeof(double));
     double *restrict a = malloc(num_particles * 3 * sizeof(double));
-    if (
-        !tolerance_scale_x ||
-        !tolerance_scale_v ||
-        !x_1 ||
-        !v_1 ||
-        !a_1 ||
-        !a
-    )
+    if (!tolerance_scale_x || !tolerance_scale_v || !x_1 || !v_1 || !a_1 || !a)
     {
-        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        error_status =
+            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto error_memory;
     }
 
@@ -397,11 +660,7 @@ IN_FILE ErrorStatus rk_embedded_initial_dt(
     };
 
     /* Compute acceleration */
-    error_status = WRAP_TRACEBACK(acceleration(
-        a,
-        system,
-        acceleration_param
-    ));
+    error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto error_acc;
@@ -415,8 +674,10 @@ IN_FILE ErrorStatus rk_embedded_initial_dt(
     {
         for (int j = 0; j < 3; j++)
         {
-            tolerance_scale_x[i * 3 + j] = abs_tolerance + rel_tolerance * fabs(x[i * 3 + j]);
-            tolerance_scale_v[i * 3 + j] = abs_tolerance + rel_tolerance * fabs(v[i * 3 + j]);
+            tolerance_scale_x[i * 3 + j] =
+                abs_tolerance + rel_tolerance * fabs(x[i * 3 + j]);
+            tolerance_scale_v[i * 3 + j] =
+                abs_tolerance + rel_tolerance * fabs(v[i * 3 + j]);
         }
     }
 
@@ -428,10 +689,14 @@ IN_FILE ErrorStatus rk_embedded_initial_dt(
     {
         for (int j = 0; j < 3; j++)
         {
-            sum_0 += (x[i * 3 + j] / tolerance_scale_x[i * 3 + j]) * (x[i * 3 + j] / tolerance_scale_x[i * 3 + j]);
-            sum_0 += (v[i * 3 + j] / tolerance_scale_v[i * 3 + j]) * (v[i * 3 + j] / tolerance_scale_v[i * 3 + j]);
-            sum_1 += (v[i * 3 + j] / tolerance_scale_x[i * 3 + j]) * (v[i * 3 + j] / tolerance_scale_x[i * 3 + j]);
-            sum_1 += (a[i * 3 + j] / tolerance_scale_v[i * 3 + j]) * (a[i * 3 + j] / tolerance_scale_v[i * 3 + j]);
+            sum_0 += (x[i * 3 + j] / tolerance_scale_x[i * 3 + j]) *
+                     (x[i * 3 + j] / tolerance_scale_x[i * 3 + j]);
+            sum_0 += (v[i * 3 + j] / tolerance_scale_v[i * 3 + j]) *
+                     (v[i * 3 + j] / tolerance_scale_v[i * 3 + j]);
+            sum_1 += (v[i * 3 + j] / tolerance_scale_x[i * 3 + j]) *
+                     (v[i * 3 + j] / tolerance_scale_x[i * 3 + j]);
+            sum_1 += (a[i * 3 + j] / tolerance_scale_v[i * 3 + j]) *
+                     (a[i * 3 + j] / tolerance_scale_v[i * 3 + j]);
         }
     }
 
@@ -456,11 +721,7 @@ IN_FILE ErrorStatus rk_embedded_initial_dt(
         }
     }
 
-    error_status = WRAP_TRACEBACK(acceleration(
-        a_1,
-        &system_1,
-        acceleration_param
-    ));
+    error_status = WRAP_TRACEBACK(acceleration(a_1, &system_1, acceleration_param));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto error_acc;
@@ -469,14 +730,17 @@ IN_FILE ErrorStatus rk_embedded_initial_dt(
     /* Calculate d_2 to measure how much the derivatives have changed */
 
     /**
-     * sum_2 = sum(square((v_1 - v) / tolerance_scale_x)) + sum(square((a_1 - a) / tolerance_scale_v))
+     * sum_2 = sum(square((v_1 - v) / tolerance_scale_x)) + sum(square((a_1 - a) /
+     * tolerance_scale_v))
      */
     for (int i = 0; i < num_particles; i++)
     {
         for (int j = 0; j < 3; j++)
         {
-            sum_2 += ((v_1[i * 3 + j] - v[i * 3 + j]) / tolerance_scale_x[i * 3 + j]) * ((v_1[i * 3 + j] - v[i * 3 + j]) / tolerance_scale_x[i * 3 + j]);
-            sum_2 += ((a_1[i * 3 + j] - a[i * 3 + j]) / tolerance_scale_v[i * 3 + j]) * ((a_1[i * 3 + j] - a[i * 3 + j]) / tolerance_scale_v[i * 3 + j]);
+            sum_2 += ((v_1[i * 3 + j] - v[i * 3 + j]) / tolerance_scale_x[i * 3 + j]) *
+                     ((v_1[i * 3 + j] - v[i * 3 + j]) / tolerance_scale_x[i * 3 + j]);
+            sum_2 += ((a_1[i * 3 + j] - a[i * 3 + j]) / tolerance_scale_v[i * 3 + j]) *
+                     ((a_1[i * 3 + j] - a[i * 3 + j]) / tolerance_scale_v[i * 3 + j]);
         }
     }
     d_2 = sqrt(sum_2 / (num_particles * 6)) / dt_0;
@@ -533,10 +797,8 @@ WIN32DLL_API ErrorStatus rk_embedded(
 
     /* Initialization */
     int order;
-    error_status = WRAP_TRACEBACK(get_rk_embedded_order(
-        &order,
-        integrator_param->integrator
-    ));
+    error_status =
+        WRAP_TRACEBACK(get_rk_embedded_order(&order, integrator_param->integrator));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         return error_status;
@@ -550,13 +812,7 @@ WIN32DLL_API ErrorStatus rk_embedded(
     double *weights_test = NULL;
 
     error_status = WRAP_TRACEBACK(rk_embedded_butcher_tableaus(
-        order,
-        &power,
-        &power_test,
-        &coeff,
-        &len_weights,
-        &weights,
-        &weights_test
+        order, &power, &power_test, &coeff, &len_weights, &weights, &weights_test
     ));
     if (error_status.return_code != GRAV_SUCCESS)
     {
@@ -566,7 +822,8 @@ WIN32DLL_API ErrorStatus rk_embedded(
     const int stages = len_weights;
     const int min_power = power < power_test ? power : power_test;
 
-    double *restrict error_estimation_delta_weights = malloc(len_weights * sizeof(double));
+    double *restrict error_estimation_delta_weights =
+        malloc(len_weights * sizeof(double));
     if (!error_estimation_delta_weights)
     {
         error_status = WRAP_RAISE_ERROR(
@@ -588,7 +845,7 @@ WIN32DLL_API ErrorStatus rk_embedded(
     /* Safety factors for step-size control */
     const double safety_fac_max = 6.0;
     const double safety_fac_min = 0.33;
-    const double safety_fac = pow(0.38, (1.0 / (1.0 + (double) min_power)));
+    const double safety_fac = pow(0.38, (1.0 / (1.0 + (double)min_power)));
 
     /* Declare variables */
     const int num_particles = system->num_particles;
@@ -621,11 +878,13 @@ WIN32DLL_API ErrorStatus rk_embedded(
     double *restrict v_1 = malloc(num_particles * 3 * sizeof(double));
     double *restrict x_1 = malloc(num_particles * 3 * sizeof(double));
     double *restrict vk = malloc(stages * num_particles * 3 * sizeof(double));
-    double *restrict xk = malloc(stages * num_particles * 3 * sizeof(double));    
+    double *restrict xk = malloc(stages * num_particles * 3 * sizeof(double));
     double *restrict temp_v = malloc(num_particles * 3 * sizeof(double));
     double *restrict temp_x = malloc(num_particles * 3 * sizeof(double));
-    double *restrict error_estimation_delta_v = malloc(num_particles * 3 * sizeof(double));
-    double *restrict error_estimation_delta_x = malloc(num_particles * 3 * sizeof(double));
+    double *restrict error_estimation_delta_v =
+        malloc(num_particles * 3 * sizeof(double));
+    double *restrict error_estimation_delta_x =
+        malloc(num_particles * 3 * sizeof(double));
     double *restrict tolerance_scale_v = malloc(num_particles * 3 * sizeof(double));
     double *restrict tolerance_scale_x = malloc(num_particles * 3 * sizeof(double));
 
@@ -635,27 +894,13 @@ WIN32DLL_API ErrorStatus rk_embedded(
     double *restrict temp_x_err_comp_sum = calloc(num_particles * 3, sizeof(double));
     double *restrict temp_v_err_comp_sum = calloc(num_particles * 3, sizeof(double));
 
-    if (
-        !v_1 ||
-        !x_1 ||
-        !vk ||
-        !xk ||
-        !temp_v ||
-        !temp_x ||
-        !error_estimation_delta_v ||
-        !error_estimation_delta_x ||
-        !tolerance_scale_v ||
-        !tolerance_scale_x ||
-        !x_err_comp_sum ||
-        !v_err_comp_sum ||
-        !temp_x_err_comp_sum ||
-        !temp_v_err_comp_sum
-    ) 
+    if (!v_1 || !x_1 || !vk || !xk || !temp_v || !temp_x || !error_estimation_delta_v ||
+        !error_estimation_delta_x || !tolerance_scale_v || !tolerance_scale_x ||
+        !x_err_comp_sum || !v_err_comp_sum || !temp_x_err_comp_sum ||
+        !temp_v_err_comp_sum)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for arrays"
-        );
+        error_status =
+            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto error_memory;
     }
 
@@ -668,12 +913,7 @@ WIN32DLL_API ErrorStatus rk_embedded(
     else
     {
         error_status = WRAP_TRACEBACK(rk_embedded_initial_dt(
-            &dt,
-            rel_tolerance,
-            abs_tolerance,
-            power,
-            system,
-            acceleration_param
+            &dt, rel_tolerance, abs_tolerance, power, system, acceleration_param
         ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
@@ -713,18 +953,14 @@ WIN32DLL_API ErrorStatus rk_embedded(
             goto err_start_progress_bar;
         }
     }
-    
+
     *t_ptr = 0.0;
     simulation_status->dt = dt;
     *num_steps_ptr = 0;
     while (*t_ptr < tf)
     {
         /* Compute xk and vk */
-        error_status = WRAP_TRACEBACK(acceleration(
-            vk,
-            system,
-            acceleration_param
-        ));
+        error_status = WRAP_TRACEBACK(acceleration(vk, system, acceleration_param));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto acc_error;
@@ -750,8 +986,10 @@ WIN32DLL_API ErrorStatus rk_embedded(
                 {
                     for (int k = 0; k < 3; k++)
                     {
-                        temp_v[j * 3 + k] += coeff[(stage - 1) * (stages - 1) + i] * vk[i * num_particles * 3 + j * 3 + k];
-                        temp_x[j * 3 + k] += coeff[(stage - 1) * (stages - 1) + i] * xk[i * num_particles * 3 + j * 3 + k];
+                        temp_v[j * 3 + k] += coeff[(stage - 1) * (stages - 1) + i] *
+                                             vk[i * num_particles * 3 + j * 3 + k];
+                        temp_x[j * 3 + k] += coeff[(stage - 1) * (stages - 1) + i] *
+                                             xk[i * num_particles * 3 + j * 3 + k];
                     }
                 }
             }
@@ -760,23 +998,27 @@ WIN32DLL_API ErrorStatus rk_embedded(
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    temp_v[i * 3 + j] = v[i * 3 + j] + dt * temp_v[i * 3 + j] + v_err_comp_sum[i * 3 + j];
-                    temp_x[i * 3 + j] = x[i * 3 + j] + dt * temp_x[i * 3 + j] + x_err_comp_sum[i * 3 + j];
+                    temp_v[i * 3 + j] = v[i * 3 + j] + dt * temp_v[i * 3 + j] +
+                                        v_err_comp_sum[i * 3 + j];
+                    temp_x[i * 3 + j] = x[i * 3 + j] + dt * temp_x[i * 3 + j] +
+                                        x_err_comp_sum[i * 3 + j];
                 }
             }
 
             temp_system.x = temp_x;
             temp_system.v = temp_v;
             error_status = WRAP_TRACEBACK(acceleration(
-                &vk[stage * num_particles * 3],
-                &temp_system,
-                acceleration_param
+                &vk[stage * num_particles * 3], &temp_system, acceleration_param
             ));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 goto acc_error;
             }
-            memcpy(&xk[stage * num_particles * 3], temp_v, num_particles * 3 * sizeof(double));
+            memcpy(
+                &xk[stage * num_particles * 3],
+                temp_v,
+                num_particles * 3 * sizeof(double)
+            );
         }
 
         // Empty temp_v, temp_x, error_estimation_delta_v, error_estimation_delta_x
@@ -797,17 +1039,23 @@ WIN32DLL_API ErrorStatus rk_embedded(
         }
 
         // Calculate x_1, v_1 and also delta x, delta v for error estimation
-        for(int stage = 0; stage < stages; stage++)
+        for (int stage = 0; stage < stages; stage++)
         {
             for (int i = 0; i < num_particles; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    temp_v[i * 3 + j] += weights[stage] * vk[stage * num_particles * 3 + i * 3 + j];
-                    temp_x[i * 3 + j] += weights[stage] * xk[stage * num_particles * 3 + i * 3 + j];
+                    temp_v[i * 3 + j] +=
+                        weights[stage] * vk[stage * num_particles * 3 + i * 3 + j];
+                    temp_x[i * 3 + j] +=
+                        weights[stage] * xk[stage * num_particles * 3 + i * 3 + j];
 
-                    error_estimation_delta_v[i * 3 + j] += dt * error_estimation_delta_weights[stage] * vk[stage * num_particles * 3 + i * 3 + j];
-                    error_estimation_delta_x[i * 3 + j] += dt * error_estimation_delta_weights[stage] * xk[stage * num_particles * 3 + i * 3 + j];
+                    error_estimation_delta_v[i * 3 + j] +=
+                        dt * error_estimation_delta_weights[stage] *
+                        vk[stage * num_particles * 3 + i * 3 + j];
+                    error_estimation_delta_x[i * 3 + j] +=
+                        dt * error_estimation_delta_weights[stage] *
+                        xk[stage * num_particles * 3 + i * 3 + j];
                 }
             }
         }
@@ -834,12 +1082,16 @@ WIN32DLL_API ErrorStatus rk_embedded(
         {
             for (int j = 0; j < 3; j++)
             {
-                tolerance_scale_v[i * 3 + j] = abs_tolerance + fmax(fabs(v[i * 3 + j]), fabs(v_1[i * 3 + j])) * rel_tolerance;
-                tolerance_scale_x[i * 3 + j] = abs_tolerance + fmax(fabs(x[i * 3 + j]), fabs(x_1[i * 3 + j])) * rel_tolerance;
+                tolerance_scale_v[i * 3 + j] =
+                    abs_tolerance +
+                    fmax(fabs(v[i * 3 + j]), fabs(v_1[i * 3 + j])) * rel_tolerance;
+                tolerance_scale_x[i * 3 + j] =
+                    abs_tolerance +
+                    fmax(fabs(x[i * 3 + j]), fabs(x_1[i * 3 + j])) * rel_tolerance;
             }
         }
 
-        // Sum up all the elements of x/tol and v/tol, 
+        // Sum up all the elements of x/tol and v/tol,
         // square and divide by the total number of elements
         sum = 0.0;
         for (int i = 0; i < num_particles; i++)
@@ -847,9 +1099,11 @@ WIN32DLL_API ErrorStatus rk_embedded(
             double temp;
             for (int j = 0; j < 3; j++)
             {
-                temp = error_estimation_delta_v[i * 3 + j] / tolerance_scale_v[i * 3 + j];
+                temp =
+                    error_estimation_delta_v[i * 3 + j] / tolerance_scale_v[i * 3 + j];
                 sum += temp * temp;
-                temp = error_estimation_delta_x[i * 3 + j] / tolerance_scale_x[i * 3 + j];
+                temp =
+                    error_estimation_delta_x[i * 3 + j] / tolerance_scale_x[i * 3 + j];
                 sum += temp * temp;
             }
         }
@@ -864,8 +1118,12 @@ WIN32DLL_API ErrorStatus rk_embedded(
             memcpy(x, x_1, num_particles * 3 * sizeof(double));
             memcpy(v, v_1, num_particles * 3 * sizeof(double));
 
-            memcpy(x_err_comp_sum, temp_x_err_comp_sum, num_particles * 3 * sizeof(double));
-            memcpy(v_err_comp_sum, temp_v_err_comp_sum, num_particles * 3 * sizeof(double));
+            memcpy(
+                x_err_comp_sum, temp_x_err_comp_sum, num_particles * 3 * sizeof(double)
+            );
+            memcpy(
+                v_err_comp_sum, temp_v_err_comp_sum, num_particles * 3 * sizeof(double)
+            );
 
             /* Output */
             if (is_output && *t_ptr >= next_output_time)
@@ -895,10 +1153,10 @@ WIN32DLL_API ErrorStatus rk_embedded(
         /* Calculate dt for next step */
         if (error < 1e-10)
         {
-            error = 1e-10;  // Prevent error from being too small
+            error = 1e-10; // Prevent error from being too small
         }
-        dt_new = dt * safety_fac / pow(error, (1.0 / (1.0 + (double) min_power)));
-        if (dt_new > safety_fac_max * dt) 
+        dt_new = dt * safety_fac / pow(error, (1.0 / (1.0 + (double)min_power)));
+        if (dt_new > safety_fac_max * dt)
         {
             dt *= safety_fac_max;
         }
@@ -953,7 +1211,7 @@ WIN32DLL_API ErrorStatus rk_embedded(
     free(error_estimation_delta_weights);
     free(coeff);
     free(weights);
-    free(weights_test); 
+    free(weights_test);
 
     return make_success_error_status();
 
@@ -981,7 +1239,7 @@ error_error_estimation_delta_weights_memory_alloc:
     free(error_estimation_delta_weights);
     free(coeff);
     free(weights);
-    free(weights_test); 
+    free(weights_test);
 
     return error_status;
 }

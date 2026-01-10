@@ -1,7 +1,7 @@
 /**
  * \file integrator.h
  * \brief Functions for the integrators
- * 
+ *
  * \author Ching-Yin NG
  */
 
@@ -27,30 +27,32 @@
 
 /**
  * \brief Get a new integrator parameter struct
- * 
+ *
  * \return IntegratorParam
  */
 IntegratorParam get_new_integrator_param(void);
 
 /**
  * \brief Finalize the integrator parameters
- * 
+ *
  * \return ErrorStatus
- * 
+ *
  * \exception GRAV_POINTER_ERROR If integrator_param is NULL
  * \exception GRAV_VALUE_ERROR If integrator value is invalid
- * \exception GRAV_VALUE_ERROR If integrator is fixed step size integrators and dt is not positive
- * \exception GRAV_VALUE_ERROR If integrator is adaptive step size integrators and tolerance is not positive
+ * \exception GRAV_VALUE_ERROR If integrator is fixed step size integrators and dt is
+ * not positive
+ * \exception GRAV_VALUE_ERROR If integrator is adaptive step size integrators and
+ * tolerance is not positive
  */
 ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_param);
 
 /**
  * \brief Launch the simulation with the specified integrator
- * 
+ *
  * \details This function launches the simulation with the specified integrator.
  * This function will be called by the main function. User should not
  * call this function directly as it will bypass the parameter checking.
- * 
+ *
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -71,7 +73,7 @@ ErrorStatus integrator_launch_simulation(
 
 /**
  * \brief RK Embedded integrator
- * 
+ *
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -79,7 +81,7 @@ ErrorStatus integrator_launch_simulation(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus rk_embedded(
@@ -94,7 +96,7 @@ ErrorStatus rk_embedded(
 
 /**
  * \brief IAS15 integrator
- * 
+ *
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -102,7 +104,7 @@ ErrorStatus rk_embedded(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus ias15(
@@ -117,7 +119,7 @@ ErrorStatus ias15(
 
 /**
  * \brief WHFast integrator
- * 
+ *
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -125,7 +127,7 @@ ErrorStatus ias15(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus whfast(
@@ -140,7 +142,7 @@ ErrorStatus whfast(
 
 /**
  * \brief Leapfrog integrator for cosmological simulations.
- * 
+ *
  * \param system Pointer to the cosmological system
  * \param output_param Pointer to the output parameters
  * \param simulation_status Pointer to the simulation status
@@ -148,7 +150,7 @@ ErrorStatus whfast(
  * \param a_final Final scale factor
  * \param num_steps Number of steps
  * \param pm_grid_size Size of the PM grid
- * 
+ *
  * \return ErrorStatus
  */
 ErrorStatus leapfrog_cosmology(

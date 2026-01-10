@@ -12,16 +12,14 @@
 #include "cosmology.h"
 #include "error.h"
 #include "math_functions.h"
-#include "system.h"
 #include "settings.h"
-
+#include "system.h"
 
 typedef struct
 {
     int index;
     double distance;
 } HelperSystemSortByDistanceStruct;
-
 
 WIN32DLL_API System get_new_system(void)
 {
@@ -35,10 +33,8 @@ WIN32DLL_API System get_new_system(void)
     return system;
 }
 
-WIN32DLL_API ErrorStatus get_initialized_system(
-    System *restrict system,
-    const int num_particles
-)
+WIN32DLL_API ErrorStatus
+get_initialized_system(System *restrict system, const int num_particles)
 {
     if (!system)
     {
@@ -56,7 +52,9 @@ WIN32DLL_API ErrorStatus get_initialized_system(
     if (!system->particle_ids || !system->x || !system->v || !system->m)
     {
         free_system(system);
-        return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for system");
+        return WRAP_RAISE_ERROR(
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for system"
+        );
     }
 
     for (int i = 0; i < num_particles; i++)
@@ -87,7 +85,9 @@ WIN32DLL_API ErrorStatus finalize_system(System *restrict system)
     }
     if (!system->particle_ids)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array particle_ids is NULL");
+        return WRAP_RAISE_ERROR(
+            GRAV_POINTER_ERROR, "System array particle_ids is NULL"
+        );
     }
     if (!system->x)
     {
@@ -148,8 +148,7 @@ WIN32DLL_API CosmologicalSystem get_new_cosmological_system(void)
 }
 
 WIN32DLL_API ErrorStatus get_initialized_cosmological_system(
-    CosmologicalSystem *restrict system,
-    const int num_particles
+    CosmologicalSystem *restrict system, const int num_particles
 )
 {
     if (!system)
@@ -167,7 +166,9 @@ WIN32DLL_API ErrorStatus get_initialized_cosmological_system(
     if (!system->particle_ids || !system->x || !system->v || !system->m)
     {
         free_cosmological_system(system);
-        return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for system");
+        return WRAP_RAISE_ERROR(
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for system"
+        );
     }
 
     for (int i = 0; i < num_particles; i++)
@@ -178,7 +179,8 @@ WIN32DLL_API ErrorStatus get_initialized_cosmological_system(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
+WIN32DLL_API ErrorStatus
+finalize_cosmological_system(CosmologicalSystem *restrict system)
 {
     if (!system)
     {
@@ -198,7 +200,9 @@ WIN32DLL_API ErrorStatus finalize_cosmological_system(CosmologicalSystem *restri
     }
     if (!system->particle_ids)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array particle_ids is NULL");
+        return WRAP_RAISE_ERROR(
+            GRAV_POINTER_ERROR, "System array particle_ids is NULL"
+        );
     }
     if (!system->x)
     {
@@ -304,7 +308,9 @@ WIN32DLL_API ErrorStatus check_invalid_idx_double(
     int *restrict invalid_particle_idx = malloc(buffer_size * sizeof(int));
     if (!invalid_particle_idx)
     {
-        return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for invalid particle index");
+        return WRAP_RAISE_ERROR(
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for invalid particle index"
+        );
     }
 
     for (int i = 0; i < arr_size; i++)
@@ -318,11 +324,15 @@ WIN32DLL_API ErrorStatus check_invalid_idx_double(
         if (invalid_count >= buffer_size)
         {
             buffer_size *= 2;
-            int *restrict new_invalid_particle_idx = realloc(invalid_particle_idx, buffer_size * sizeof(int));
+            int *restrict new_invalid_particle_idx =
+                realloc(invalid_particle_idx, buffer_size * sizeof(int));
             if (!new_invalid_particle_idx)
             {
                 free(invalid_particle_idx);
-                return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for invalid particle index");
+                return WRAP_RAISE_ERROR(
+                    GRAV_MEMORY_ERROR,
+                    "Failed to reallocate memory for invalid particle index"
+                );
             }
             invalid_particle_idx = new_invalid_particle_idx;
         }
@@ -344,8 +354,7 @@ WIN32DLL_API ErrorStatus check_invalid_idx_double(
 }
 
 WIN32DLL_API ErrorStatus check_and_remove_invalid_particles(
-    System *restrict system,
-    const Settings *restrict settings
+    System *restrict system, const Settings *restrict settings
 )
 {
     ErrorStatus error_status;
@@ -371,21 +380,17 @@ WIN32DLL_API ErrorStatus check_and_remove_invalid_particles(
     int *restrict invalid_particle_idx = malloc(buffer_size * sizeof(int));
     if (!invalid_particle_idx)
     {
-        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for invalid particle index");
+        error_status = WRAP_RAISE_ERROR(
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for invalid particle index"
+        );
         goto err_memory;
     }
 
     for (int i = 0; i < num_particles; i++)
     {
-        if (
-            !isfinite(x[i * 3 + 0]) ||
-            !isfinite(x[i * 3 + 1]) ||
-            !isfinite(x[i * 3 + 2]) ||
-            !isfinite(v[i * 3 + 0]) ||
-            !isfinite(v[i * 3 + 1]) ||
-            !isfinite(v[i * 3 + 2]) ||
-            !isfinite(m[i])            
-        )
+        if (!isfinite(x[i * 3 + 0]) || !isfinite(x[i * 3 + 1]) ||
+            !isfinite(x[i * 3 + 2]) || !isfinite(v[i * 3 + 0]) ||
+            !isfinite(v[i * 3 + 1]) || !isfinite(v[i * 3 + 2]) || !isfinite(m[i]))
         {
             invalid_particle_idx[invalid_count] = i;
             invalid_count++;
@@ -394,10 +399,14 @@ WIN32DLL_API ErrorStatus check_and_remove_invalid_particles(
         if (invalid_count >= buffer_size)
         {
             buffer_size *= 2;
-            int *restrict new_invalid_particle_idx = realloc(invalid_particle_idx, buffer_size * sizeof(int));
+            int *restrict new_invalid_particle_idx =
+                realloc(invalid_particle_idx, buffer_size * sizeof(int));
             if (!new_invalid_particle_idx)
             {
-                error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for invalid particle index");
+                error_status = WRAP_RAISE_ERROR(
+                    GRAV_MEMORY_ERROR,
+                    "Failed to reallocate memory for invalid particle index"
+                );
                 goto err_memory;
             }
             invalid_particle_idx = new_invalid_particle_idx;
@@ -407,10 +416,7 @@ WIN32DLL_API ErrorStatus check_and_remove_invalid_particles(
     if (invalid_count != 0)
     {
         error_status = WRAP_TRACEBACK(remove_invalid_particles(
-            system,
-            invalid_particle_idx,
-            invalid_count,
-            settings
+            system, invalid_particle_idx, invalid_count, settings
         ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
@@ -455,12 +461,20 @@ WIN32DLL_API ErrorStatus remove_invalid_particles(
 
     if (num_to_remove < 0)
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Number of particles to remove must be positive");
+        return WRAP_RAISE_ERROR(
+            GRAV_VALUE_ERROR, "Number of particles to remove must be positive"
+        );
     }
 
     if (settings->verbose >= GRAV_VERBOSITY_VERBOSE)
     {
-        fprintf(stderr, "remove_invalid_particles: Removing %d invalid particles. Particle IDs: [%d", num_to_remove, remove_idx_list[0]);
+        fprintf(
+            stderr,
+            "remove_invalid_particles: Removing %d invalid particles. Particle IDs: "
+            "[%d",
+            num_to_remove,
+            remove_idx_list[0]
+        );
         for (int i = 0; i < num_to_remove; i++)
         {
             fprintf(stderr, ", %d", remove_idx_list[i]);
@@ -468,11 +482,7 @@ WIN32DLL_API ErrorStatus remove_invalid_particles(
         fputs("]\n", stderr);
     }
 
-    return WRAP_TRACEBACK(remove_particles(
-        system,
-        remove_idx_list,
-        num_to_remove
-    ));
+    return WRAP_TRACEBACK(remove_particles(system, remove_idx_list, num_to_remove));
 }
 
 WIN32DLL_API ErrorStatus remove_particles(
@@ -510,8 +520,8 @@ WIN32DLL_API ErrorStatus remove_particles(
             idx_next = remove_idx_list[i + 1];
         }
 
-        for (int j = 0; j < idx_next - idx - 1; j++)    
-        { 
+        for (int j = 0; j < idx_next - idx - 1; j++)
+        {
             const int from_idx = last_shifted_idx + i + 1;
             particle_ids[last_shifted_idx] = particle_ids[from_idx];
             x[last_shifted_idx * 3 + 0] = x[from_idx * 3 + 0];
@@ -533,28 +543,32 @@ WIN32DLL_API ErrorStatus remove_particles(
     // int *new_particle_ids = realloc(system->particle_ids, new_size * sizeof(int));
     // if (!new_particle_ids)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for particle ids");
+    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     particle ids");
     // }
     // system->particle_ids = new_particle_ids;
 
     // double *new_x = realloc(system->x, new_size * 3 * sizeof(double));
     // if (!new_x)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for x");
+    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     x");
     // }
     // system->x = new_x;
 
     // double *new_v = realloc(system->v, new_size * 3 * sizeof(double));
     // if (!new_v)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for v");
+    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     v");
     // }
     // system->v = new_v;
 
     // double *new_m = realloc(system->m, new_size * sizeof(double));
     // if (!new_m)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for m");
+    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     m");
     // }
     // system->m = new_m;
 
@@ -579,7 +593,9 @@ WIN32DLL_API ErrorStatus remove_particle_from_double_arr(
     }
     if (num_to_remove <= 0)
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Number of particles to remove must be positive");
+        return WRAP_RAISE_ERROR(
+            GRAV_VALUE_ERROR, "Number of particles to remove must be positive"
+        );
     }
 
     for (int i = 0, last_shifted_idx = remove_idx_list[i]; i < num_to_remove; i++)
@@ -595,8 +611,8 @@ WIN32DLL_API ErrorStatus remove_particle_from_double_arr(
             idx_next = remove_idx_list[i + 1];
         }
 
-        for (int j = 0; j < idx_next - idx - 1; j++)    
-        { 
+        for (int j = 0; j < idx_next - idx - 1; j++)
+        {
             const int from_idx = last_shifted_idx + i + 1;
             for (int d = 0; d < dim; d++)
             {
@@ -628,7 +644,8 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
     /* Pre-defined constants */
 
     // Conversion factor from km^3 s^-2 to AU^3 d^-2
-    // double CONVERSION_FACTOR = ((double) 86400.0L * 86400.0L) / (149597870.7L * 149597870.7L * 149597870.7L);
+    // double CONVERSION_FACTOR = ((double) 86400.0L * 86400.0L) / (149597870.7L *
+    // 149597870.7L * 149597870.7L);
 
     // GM values (km^3 s^-2)
     // ref: https://ssd.jpl.nasa.gov/doc/Park.2021.AJ.DE440.pdf
@@ -682,47 +699,101 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
     // const double G_default = GM_SUN;
 
     /*
-    * Solar system position and velocities data
-    * Units: AU-D
-    * Coordinate center: Solar System Barycenter
-    * Data dated on A.D. 2024-Jan-01 00:00:00.0000 TDB
-    * Computational data generated by NASA JPL Horizons System https://ssd.jpl.nasa.gov/horizons/
-    */
-    const double POS_SUN[3] = {-7.967955691533730e-03L, -2.906227441573178e-03L, 2.103054301547123e-04L};
-    const double POS_MERCURY[3] = {-2.825983269538632e-01L, 1.974559795958082e-01L, 4.177433558063677e-02L};
-    const double POS_VENUS[3] = {-7.232103701666379e-01L, -7.948302026312400e-02L, 4.042871428174315e-02L};
-    const double POS_EARTH[3] = {-1.738192017257054e-01L, 9.663245550235138e-01L, 1.553901854897183e-04L};
-    const double POS_MARS[3] = {-3.013262392582653e-01L, -1.454029331393295e00L, -2.300531433991428e-02L};
-    const double POS_JUPITER[3] = {3.485202469657674e00L, 3.552136904413157e00L, -9.271035442798399e-02L};
-    const double POS_SATURN[3] = {8.988104223143450e00L, -3.719064854634689e00L, -2.931937777323593e-01L};
-    const double POS_URANUS[3] = {1.226302417897505e01L, 1.529738792480545e01L, -1.020549026883563e-01L};
-    const double POS_NEPTUNE[3] = {2.983501460984741e01L, -1.793812957956852e00L, -6.506401132254588e-01L};
-    const double POS_MOON[3] = {-1.762788124769829e-01L, 9.674377513177153e-01L, 3.236901585768862e-04L};
-    const double POS_PLUTO[3] = {1.720200478843485e01L, -3.034155683573043e01L, -1.729127607100611e00L};
-    const double POS_CERES[3] = {-1.103880510367569e00L, -2.533340440444230e00L, 1.220283937721780e-01L};
-    const double POS_VESTA[3] = {-8.092549658731499e-02L, 2.558381434460076e00L, -6.695836142398572e-02L};
+     * Solar system position and velocities data
+     * Units: AU-D
+     * Coordinate center: Solar System Barycenter
+     * Data dated on A.D. 2024-Jan-01 00:00:00.0000 TDB
+     * Computational data generated by NASA JPL Horizons System
+     * https://ssd.jpl.nasa.gov/horizons/
+     */
+    const double POS_SUN[3] = {
+        -7.967955691533730e-03L, -2.906227441573178e-03L, 2.103054301547123e-04L
+    };
+    const double POS_MERCURY[3] = {
+        -2.825983269538632e-01L, 1.974559795958082e-01L, 4.177433558063677e-02L
+    };
+    const double POS_VENUS[3] = {
+        -7.232103701666379e-01L, -7.948302026312400e-02L, 4.042871428174315e-02L
+    };
+    const double POS_EARTH[3] = {
+        -1.738192017257054e-01L, 9.663245550235138e-01L, 1.553901854897183e-04L
+    };
+    const double POS_MARS[3] = {
+        -3.013262392582653e-01L, -1.454029331393295e00L, -2.300531433991428e-02L
+    };
+    const double POS_JUPITER[3] = {
+        3.485202469657674e00L, 3.552136904413157e00L, -9.271035442798399e-02L
+    };
+    const double POS_SATURN[3] = {
+        8.988104223143450e00L, -3.719064854634689e00L, -2.931937777323593e-01L
+    };
+    const double POS_URANUS[3] = {
+        1.226302417897505e01L, 1.529738792480545e01L, -1.020549026883563e-01L
+    };
+    const double POS_NEPTUNE[3] = {
+        2.983501460984741e01L, -1.793812957956852e00L, -6.506401132254588e-01L
+    };
+    const double POS_MOON[3] = {
+        -1.762788124769829e-01L, 9.674377513177153e-01L, 3.236901585768862e-04L
+    };
+    const double POS_PLUTO[3] = {
+        1.720200478843485e01L, -3.034155683573043e01L, -1.729127607100611e00L
+    };
+    const double POS_CERES[3] = {
+        -1.103880510367569e00L, -2.533340440444230e00L, 1.220283937721780e-01L
+    };
+    const double POS_VESTA[3] = {
+        -8.092549658731499e-02L, 2.558381434460076e00L, -6.695836142398572e-02L
+    };
 
-    const double VEL_SUN[3] = {4.875094764261564e-06L, -7.057133213976680e-06L, -4.573453713094512e-08L};
-    const double VEL_MERCURY[3] = {-2.232165900189702e-02L, -2.157207103176252e-02L, 2.855193410495743e-04L};
-    const double VEL_VENUS[3] = {2.034068201002341e-03L, -2.020828626592994e-02L, -3.945639843855159e-04L};
-    const double VEL_EARTH[3] = {-1.723001232538228e-02L, -2.967721342618870e-03L, 6.382125383116755e-07L};
-    const double VEL_MARS[3] = {1.424832259345280e-02L, -1.579236181580905e-03L, -3.823722796161561e-04L};
-    const double VEL_JUPITER[3] = {-5.470970658852281e-03L, 5.642487338479145e-03L, 9.896190602066252e-05L};
-    const double VEL_SATURN[3] = {1.822013845554067e-03L, 5.143470425888054e-03L, -1.617235904887937e-04L};
-    const double VEL_URANUS[3] = {-3.097615358317413e-03L, 2.276781932345769e-03L, 4.860433222241686e-05L};
-    const double VEL_NEPTUNE[3] = {1.676536611817232e-04L, 3.152098732861913e-03L, -6.877501095688201e-05L};
-    const double VEL_MOON[3] = {-1.746667306153906e-02L, -3.473438277358121e-03L, -3.359028758606074e-05L};
-    const double VEL_PLUTO[3] = {2.802810313667557e-03L, 8.492056438614633e-04L, -9.060790113327894e-04L};
-    const double VEL_CERES[3] = {8.978653480111301e-03L, -4.873256528198994e-03L, -1.807162046049230e-03L};
-    const double VEL_VESTA[3] = {-1.017876585480054e-02L, -5.452367109338154e-04L, 1.255870551153315e-03L};
+    const double VEL_SUN[3] = {
+        4.875094764261564e-06L, -7.057133213976680e-06L, -4.573453713094512e-08L
+    };
+    const double VEL_MERCURY[3] = {
+        -2.232165900189702e-02L, -2.157207103176252e-02L, 2.855193410495743e-04L
+    };
+    const double VEL_VENUS[3] = {
+        2.034068201002341e-03L, -2.020828626592994e-02L, -3.945639843855159e-04L
+    };
+    const double VEL_EARTH[3] = {
+        -1.723001232538228e-02L, -2.967721342618870e-03L, 6.382125383116755e-07L
+    };
+    const double VEL_MARS[3] = {
+        1.424832259345280e-02L, -1.579236181580905e-03L, -3.823722796161561e-04L
+    };
+    const double VEL_JUPITER[3] = {
+        -5.470970658852281e-03L, 5.642487338479145e-03L, 9.896190602066252e-05L
+    };
+    const double VEL_SATURN[3] = {
+        1.822013845554067e-03L, 5.143470425888054e-03L, -1.617235904887937e-04L
+    };
+    const double VEL_URANUS[3] = {
+        -3.097615358317413e-03L, 2.276781932345769e-03L, 4.860433222241686e-05L
+    };
+    const double VEL_NEPTUNE[3] = {
+        1.676536611817232e-04L, 3.152098732861913e-03L, -6.877501095688201e-05L
+    };
+    const double VEL_MOON[3] = {
+        -1.746667306153906e-02L, -3.473438277358121e-03L, -3.359028758606074e-05L
+    };
+    const double VEL_PLUTO[3] = {
+        2.802810313667557e-03L, 8.492056438614633e-04L, -9.060790113327894e-04L
+    };
+    const double VEL_CERES[3] = {
+        8.978653480111301e-03L, -4.873256528198994e-03L, -1.807162046049230e-03L
+    };
+    const double VEL_VESTA[3] = {
+        -1.017876585480054e-02L, -5.452367109338154e-04L, 1.255870551153315e-03L
+    };
 
     // Pre-defined systems
-    if (strcmp(system_name, "circular_binary_orbit") == 0) 
+    if (strcmp(system_name, "circular_binary_orbit") == 0)
     {
         const int system_num_particles = 2;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -730,7 +801,10 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
 
         (system->x)[0] = 1.0;
@@ -739,7 +813,7 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
 
         (system->x)[3] = -1.0;
         (system->x)[4] = 0.0;
-        (system->x)[5] = 0.0; 
+        (system->x)[5] = 0.0;
 
         (system->v)[0] = 0.0;
         (system->v)[1] = 0.5;
@@ -748,16 +822,17 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         (system->v)[3] = 0.0;
         (system->v)[4] = -0.5;
         (system->v)[5] = 0.0;
-        
+
         (system->m)[0] = 1.0 / system->G;
         (system->m)[1] = 1.0 / system->G;
     }
-    else if (strcmp(system_name, "eccentric_binary_orbit") == 0) 
+    else if (strcmp(system_name, "eccentric_binary_orbit") == 0)
     {
         const int system_num_particles = 2;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -765,9 +840,11 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
-
 
         (system->x)[0] = 1.0;
         (system->x)[1] = 0.0;
@@ -775,7 +852,7 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
 
         (system->x)[3] = -1.25;
         (system->x)[4] = 0.0;
-        (system->x)[5] = 0.0; 
+        (system->x)[5] = 0.0;
 
         (system->v)[0] = 0.0;
         (system->v)[1] = 0.5;
@@ -784,16 +861,17 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         (system->v)[3] = 0.0;
         (system->v)[4] = -0.625;
         (system->v)[5] = 0.0;
-        
+
         (system->m)[0] = 1.0 / system->G;
         (system->m)[1] = 0.8 / system->G;
     }
-    else if (strcmp(system_name, "3d_helix") == 0) 
+    else if (strcmp(system_name, "3d_helix") == 0)
     {
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -801,7 +879,10 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
 
         (system->x)[0] = 0.0;
@@ -829,17 +910,18 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         (system->v)[6] = 0.5 * v0;
         (system->v)[7] = 0.5;
         (system->v)[8] = -(sqrt(3.0) / 2.0) * v0;
-        
+
         (system->m)[0] = 1.0 / system->G;
         (system->m)[1] = 1.0 / system->G;
         (system->m)[2] = 1.0 / system->G;
     }
-    else if (strcmp(system_name, "sun_earth_moon") == 0) 
+    else if (strcmp(system_name, "sun_earth_moon") == 0)
     {
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -847,20 +929,27 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
 
         (system->m)[0] = MASS_SUN;
         (system->m)[1] = MASS_EARTH;
         (system->m)[2] = MASS_MOON;
-        
+
         double R_CM[3];
         double V_CM[3];
         const double M = (system->m)[0] + (system->m)[1] + (system->m)[2];
         for (int i = 0; i < 3; i++)
         {
-            R_CM[i] = 1 / M * ((system->m)[0] * POS_SUN[i] + (system->m)[1] * POS_EARTH[i] + (system->m)[2] * POS_MOON[i]);
-            V_CM[i] = 1 / M * ((system->m)[0] * VEL_SUN[i] + (system->m)[1] * VEL_EARTH[i] + (system->m)[2] * VEL_MOON[i]);
+            R_CM[i] = 1 / M *
+                      ((system->m)[0] * POS_SUN[i] + (system->m)[1] * POS_EARTH[i] +
+                       (system->m)[2] * POS_MOON[i]);
+            V_CM[i] = 1 / M *
+                      ((system->m)[0] * VEL_SUN[i] + (system->m)[1] * VEL_EARTH[i] +
+                       (system->m)[2] * VEL_MOON[i]);
         }
 
         for (int i = 0; i < 3; i++)
@@ -874,12 +963,13 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
             (system->v)[2 * 3 + i] = VEL_MOON[i] - V_CM[i];
         }
     }
-    else if (strcmp(system_name, "figure-8") == 0) 
+    else if (strcmp(system_name, "figure-8") == 0)
     {
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -887,9 +977,11 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
-
 
         (system->x)[0] = 0.970043;
         (system->x)[1] = -0.24308753;
@@ -919,12 +1011,13 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         (system->m)[1] = 1.0 / system->G;
         (system->m)[2] = 1.0 / system->G;
     }
-    else if (strcmp(system_name, "pyth-3-body") == 0) 
+    else if (strcmp(system_name, "pyth-3-body") == 0)
     {
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -932,7 +1025,10 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
 
         (system->x)[0] = 1.0;
@@ -963,12 +1059,13 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         (system->m)[1] = 4.0 / system->G;
         (system->m)[2] = 5.0 / system->G;
     }
-    else if (strcmp(system_name, "solar_system") == 0) 
+    else if (strcmp(system_name, "solar_system") == 0)
     {
         const int system_num_particles = 9;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -976,7 +1073,10 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
 
         (system->m)[0] = MASS_SUN;
@@ -991,24 +1091,26 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
 
         double R_CM[3];
         double V_CM[3];
-        const double M = (
-            (system->m)[0] + (system->m)[1] + (system->m)[2] + (system->m)[3] + (system->m)[4] 
-            + (system->m)[5] + (system->m)[6] + (system->m)[7] + (system->m)[8]
-        );
+        const double M =
+            ((system->m)[0] + (system->m)[1] + (system->m)[2] + (system->m)[3] +
+             (system->m)[4] + (system->m)[5] + (system->m)[6] + (system->m)[7] +
+             (system->m)[8]);
 
         for (int i = 0; i < 3; i++)
         {
-            R_CM[i] = 1 / M * (
-                (system->m)[0] * POS_SUN[i] + (system->m)[1] * POS_MERCURY[i] + (system->m)[2] * POS_VENUS[i]
-                + (system->m)[3] * POS_EARTH[i] + (system->m)[4] * POS_MARS[i] + (system->m)[5] * POS_JUPITER[i]
-                + (system->m)[6] * POS_SATURN[i] + (system->m)[7] * POS_URANUS[i] + (system->m)[8] * POS_NEPTUNE[i]
-            );
+            R_CM[i] = 1 / M *
+                      ((system->m)[0] * POS_SUN[i] + (system->m)[1] * POS_MERCURY[i] +
+                       (system->m)[2] * POS_VENUS[i] + (system->m)[3] * POS_EARTH[i] +
+                       (system->m)[4] * POS_MARS[i] + (system->m)[5] * POS_JUPITER[i] +
+                       (system->m)[6] * POS_SATURN[i] + (system->m)[7] * POS_URANUS[i] +
+                       (system->m)[8] * POS_NEPTUNE[i]);
 
-            V_CM[i] = 1 / M * (
-                (system->m)[0] * VEL_SUN[i] + (system->m)[1] * VEL_MERCURY[i] + (system->m)[2] * VEL_VENUS[i]
-                + (system->m)[3] * VEL_EARTH[i] + (system->m)[4] * VEL_MARS[i] + (system->m)[5] * VEL_JUPITER[i]
-                + (system->m)[6] * VEL_SATURN[i] + (system->m)[7] * VEL_URANUS[i] + (system->m)[8] * VEL_NEPTUNE[i]
-            );
+            V_CM[i] = 1 / M *
+                      ((system->m)[0] * VEL_SUN[i] + (system->m)[1] * VEL_MERCURY[i] +
+                       (system->m)[2] * VEL_VENUS[i] + (system->m)[3] * VEL_EARTH[i] +
+                       (system->m)[4] * VEL_MARS[i] + (system->m)[5] * VEL_JUPITER[i] +
+                       (system->m)[6] * VEL_SATURN[i] + (system->m)[7] * VEL_URANUS[i] +
+                       (system->m)[8] * VEL_NEPTUNE[i]);
         }
 
         for (int i = 0; i < 3; i++)
@@ -1034,12 +1136,13 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
             (system->v)[8 * 3 + i] = VEL_NEPTUNE[i] - V_CM[i];
         }
     }
-    else if (strcmp(system_name, "solar_system_plus") == 0) 
+    else if (strcmp(system_name, "solar_system_plus") == 0)
     {
         const int system_num_particles = 12;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status = WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
+            ErrorStatus error_status =
+                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
             if (error_status.return_code != GRAV_SUCCESS)
             {
                 return error_status;
@@ -1047,9 +1150,12 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initialized system is not big enough for the built-in system");
+            return WRAP_RAISE_ERROR(
+                GRAV_VALUE_ERROR,
+                "Initialized system is not big enough for the built-in system"
+            );
         }
-        
+
         (system->m)[0] = MASS_SUN;
         (system->m)[1] = MASS_MERCURY;
         (system->m)[2] = MASS_VENUS;
@@ -1065,26 +1171,28 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
 
         double R_CM[3];
         double V_CM[3];
-        const double M = (
-            (system->m)[0] + (system->m)[1] + (system->m)[2] + (system->m)[3] + (system->m)[4] + (system->m)[5] 
-            + (system->m)[6] + (system->m)[7] + (system->m)[8] + (system->m)[9] + (system->m)[10] + (system->m)[11]
-        );
+        const double M =
+            ((system->m)[0] + (system->m)[1] + (system->m)[2] + (system->m)[3] +
+             (system->m)[4] + (system->m)[5] + (system->m)[6] + (system->m)[7] +
+             (system->m)[8] + (system->m)[9] + (system->m)[10] + (system->m)[11]);
 
         for (int i = 0; i < 3; i++)
         {
-            R_CM[i] = 1 / M * (
-                (system->m)[0] * POS_SUN[i] + (system->m)[1] * POS_MERCURY[i] + (system->m)[2] * POS_VENUS[i]
-                + (system->m)[3] * POS_EARTH[i] + (system->m)[4] * POS_MARS[i] + (system->m)[5] * POS_JUPITER[i]
-                + (system->m)[6] * POS_SATURN[i] + (system->m)[7] * POS_URANUS[i] + (system->m)[8] * POS_NEPTUNE[i]
-                + (system->m)[9] * POS_PLUTO[i] + (system->m)[10] * POS_CERES[i] + (system->m)[11] * POS_VESTA[i]
-            );
+            R_CM[i] = 1 / M *
+                      ((system->m)[0] * POS_SUN[i] + (system->m)[1] * POS_MERCURY[i] +
+                       (system->m)[2] * POS_VENUS[i] + (system->m)[3] * POS_EARTH[i] +
+                       (system->m)[4] * POS_MARS[i] + (system->m)[5] * POS_JUPITER[i] +
+                       (system->m)[6] * POS_SATURN[i] + (system->m)[7] * POS_URANUS[i] +
+                       (system->m)[8] * POS_NEPTUNE[i] + (system->m)[9] * POS_PLUTO[i] +
+                       (system->m)[10] * POS_CERES[i] + (system->m)[11] * POS_VESTA[i]);
 
-            V_CM[i] = 1 / M * (
-                (system->m)[0] * VEL_SUN[i] + (system->m)[1] * VEL_MERCURY[i] + (system->m)[2] * VEL_VENUS[i]
-                + (system->m)[3] * VEL_EARTH[i] + (system->m)[4] * VEL_MARS[i] + (system->m)[5] * VEL_JUPITER[i]
-                + (system->m)[6] * VEL_SATURN[i] + (system->m)[7] * VEL_URANUS[i] + (system->m)[8] * VEL_NEPTUNE[i]
-                + (system->m)[9] * VEL_PLUTO[i] + (system->m)[10] * VEL_CERES[i] + (system->m)[11] * VEL_VESTA [i]
-            );
+            V_CM[i] = 1 / M *
+                      ((system->m)[0] * VEL_SUN[i] + (system->m)[1] * VEL_MERCURY[i] +
+                       (system->m)[2] * VEL_VENUS[i] + (system->m)[3] * VEL_EARTH[i] +
+                       (system->m)[4] * VEL_MARS[i] + (system->m)[5] * VEL_JUPITER[i] +
+                       (system->m)[6] * VEL_SATURN[i] + (system->m)[7] * VEL_URANUS[i] +
+                       (system->m)[8] * VEL_NEPTUNE[i] + (system->m)[9] * VEL_PLUTO[i] +
+                       (system->m)[10] * VEL_CERES[i] + (system->m)[11] * VEL_VESTA[i]);
         }
 
         for (int i = 0; i < 3; i++)
@@ -1146,7 +1254,7 @@ WIN32DLL_API ErrorStatus system_set_center_of_mass_zero(System *restrict system)
     {
         return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System member is NULL");
     }
-    
+
     double R_CM[3] = {0.0, 0.0, 0.0};
     double total_mass = 0.0;
 
@@ -1244,10 +1352,8 @@ IN_FILE int compare_distance(const void *a, const void *b)
     return (d1->distance > d2->distance) - (d1->distance < d2->distance);
 }
 
-WIN32DLL_API ErrorStatus system_sort_by_distance(
-    System *restrict system,
-    const int primary_particle_id
-)
+WIN32DLL_API ErrorStatus
+system_sort_by_distance(System *restrict system, const int primary_particle_id)
 {
     ErrorStatus error_status;
 
@@ -1268,10 +1374,8 @@ WIN32DLL_API ErrorStatus system_sort_by_distance(
 
     /* Find the primary particle index */
     int primary_particle_index = -1;
-    if (
-        primary_particle_id < system->num_particles
-        && system->particle_ids[primary_particle_id] == primary_particle_id
-    )
+    if (primary_particle_id < system->num_particles &&
+        system->particle_ids[primary_particle_id] == primary_particle_id)
     {
         primary_particle_index = primary_particle_id;
     }
@@ -1288,15 +1392,17 @@ WIN32DLL_API ErrorStatus system_sort_by_distance(
     }
     if (primary_particle_index == -1)
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Primary particle ID not found in system");
+        return WRAP_RAISE_ERROR(
+            GRAV_VALUE_ERROR, "Primary particle ID not found in system"
+        );
     }
 
-    HelperSystemSortByDistanceStruct *helper_arr = malloc(num_particles * sizeof(HelperSystemSortByDistanceStruct));
+    HelperSystemSortByDistanceStruct *helper_arr =
+        malloc(num_particles * sizeof(HelperSystemSortByDistanceStruct));
     if (!helper_arr)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for helper arrays"
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for helper arrays"
         );
         goto err_helper_arr_malloc;
     }
@@ -1314,7 +1420,12 @@ WIN32DLL_API ErrorStatus system_sort_by_distance(
     helper_arr[primary_particle_index].distance = 0.0;
 
     /* Sort the helper array by distance using quick sort */
-    qsort(helper_arr, num_particles, sizeof(HelperSystemSortByDistanceStruct), compare_distance);
+    qsort(
+        helper_arr,
+        num_particles,
+        sizeof(HelperSystemSortByDistanceStruct),
+        compare_distance
+    );
 
     /* Allocate temporary arrays */
     int *restrict new_particle_ids = malloc(num_particles * sizeof(int));
@@ -1325,8 +1436,7 @@ WIN32DLL_API ErrorStatus system_sort_by_distance(
     if (!new_particle_ids || !new_x || !new_v || !new_m)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for new arrays"
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for new arrays"
         );
         goto err_temp_arr_malloc;
     }
@@ -1350,7 +1460,7 @@ WIN32DLL_API ErrorStatus system_sort_by_distance(
     memcpy(system->x, new_x, num_particles * 3 * sizeof(double));
     memcpy(system->v, new_v, num_particles * 3 * sizeof(double));
     memcpy(system->m, new_m, num_particles * sizeof(double));
-    
+
     /* Free the temporary arrays */
     free(helper_arr);
 
@@ -1385,7 +1495,7 @@ WIN32DLL_API void set_periodic_boundary_conditions(CosmologicalSystem *restrict 
             const double normalized_position = x[i * 3 + j] - box_center[j];
             if (normalized_position < -box_width)
             {
-                if ((int) (normalized_position / box_width) % 2 != 0)
+                if ((int)(normalized_position / box_width) % 2 != 0)
                 {
                     x[i * 3 + j] = fmod(normalized_position, box_width) + box_width;
                 }
@@ -1397,7 +1507,7 @@ WIN32DLL_API void set_periodic_boundary_conditions(CosmologicalSystem *restrict 
             }
             else if (normalized_position > box_width)
             {
-                if ((int) (normalized_position / box_width) % 2 != 0)
+                if ((int)(normalized_position / box_width) % 2 != 0)
                 {
                     x[i * 3 + j] = fmod(normalized_position, box_width) - box_width;
                 }

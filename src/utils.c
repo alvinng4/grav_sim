@@ -4,10 +4,10 @@
  */
 
 #include <math.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include <time.h>
+#include <stdlib.h>
 #include <sys/time.h>
+#include <time.h>
 
 #include "common.h"
 #include "error.h"
@@ -16,12 +16,11 @@
 #include "system.h"
 #include "utils.h"
 
-
 WIN32DLL_API double grav_get_current_time(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (double) ts.tv_sec + (double) ts.tv_nsec / 1.0e9;
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1.0e9;
 }
 
 WIN32DLL_API double compute_energy(const System *restrict system)
@@ -38,10 +37,7 @@ WIN32DLL_API double compute_energy(const System *restrict system)
     {
         // KE
         double v_norm = vec_norm_3d(&v[i * 3]);
-        energy += (
-            0.5 * m[i] 
-            * v_norm * v_norm
-        );
+        energy += (0.5 * m[i] * v_norm * v_norm);
 
         // PE
         for (int j = i + 1; j < num_particles; j++)
@@ -66,11 +62,8 @@ WIN32DLL_API pcg32_random_t init_pcg_rng(void)
     return rng;
 }
 
-WIN32DLL_API double grav_randrange(
-    const double min,
-    const double max,
-    pcg32_random_t *rng
-)
+WIN32DLL_API double
+grav_randrange(const double min, const double max, pcg32_random_t *rng)
 {
     // Generate a random number in the range [0, 1)
     const double random_number = ldexp(pcg32_random_r(rng), -32);
@@ -105,37 +98,37 @@ WIN32DLL_API void keplerian_to_cartesian(
     const double sin_true_anomaly = sin(true_anomaly);
 
     const double ecc_unit_vec[3] = {
-        cos_long_asc_node * cos_arg_periapsis
-        - sin_long_asc_node * sin_arg_periapsis * cos_inc,
-        sin_long_asc_node * cos_arg_periapsis
-        + cos_long_asc_node * sin_arg_periapsis * cos_inc,
+        cos_long_asc_node * cos_arg_periapsis -
+            sin_long_asc_node * sin_arg_periapsis * cos_inc,
+        sin_long_asc_node * cos_arg_periapsis +
+            cos_long_asc_node * sin_arg_periapsis * cos_inc,
         sin_arg_periapsis * sin_inc
     };
 
     const double q_unit_vec[3] = {
-        -cos_long_asc_node * sin_arg_periapsis
-        - sin_long_asc_node * cos_arg_periapsis * cos_inc,
-        -sin_long_asc_node * sin_arg_periapsis
-        + cos_long_asc_node * cos_arg_periapsis * cos_inc,
+        -cos_long_asc_node * sin_arg_periapsis -
+            sin_long_asc_node * cos_arg_periapsis * cos_inc,
+        -sin_long_asc_node * sin_arg_periapsis +
+            cos_long_asc_node * cos_arg_periapsis * cos_inc,
         cos_arg_periapsis * sin_inc
     };
 
     for (int i = 0; i < 3; i++)
     {
-        x[i] = semi_major_axis * (
-            (1.0 - eccentricity * eccentricity)
-            * (cos_true_anomaly * ecc_unit_vec[i]+ sin_true_anomaly * q_unit_vec[i])
-            / (1.0 + eccentricity * cos_true_anomaly)
-        );
+        x[i] =
+            semi_major_axis *
+            ((1.0 - eccentricity * eccentricity) *
+             (cos_true_anomaly * ecc_unit_vec[i] + sin_true_anomaly * q_unit_vec[i]) /
+             (1.0 + eccentricity * cos_true_anomaly));
     }
     for (int i = 0; i < 3; i++)
     {
-        v[i] = (
-            sqrt(G * total_mass / (semi_major_axis * (1.0 - eccentricity * eccentricity)))
-            * (
-                -sin_true_anomaly * ecc_unit_vec[i]
-                + (eccentricity + cos_true_anomaly) * q_unit_vec[i]
-            )
-        );
+        v[i] =
+            (sqrt(
+                 G * total_mass /
+                 (semi_major_axis * (1.0 - eccentricity * eccentricity))
+             ) *
+             (-sin_true_anomaly * ecc_unit_vec[i] +
+              (eccentricity + cos_true_anomaly) * q_unit_vec[i]));
     }
 }

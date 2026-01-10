@@ -3,24 +3,23 @@
 
 #include "common.h"
 
-
 /**
  * \brief Free memory allocated for a int32 array
- * 
+ *
  * \param ptr Pointer to the int32 array
  */
 void free_memory_int32(int32 *restrict ptr);
 
 /**
  * \brief Free memory allocated for a double array
- * 
+ *
  * \param ptr Pointer to the double array
  */
 void free_memory_double(double *restrict ptr);
 
 /**
  * \brief Load a built-in system
- * 
+ *
  * \param system_name Name of the system
  * \param num_particles_ptr Pointer to the number of particles
  * \param particle_ids_ptr Pointer to the particle ID array
@@ -28,7 +27,7 @@ void free_memory_double(double *restrict ptr);
  * \param v_ptr Pointer to the velocity array
  * \param m_ptr Pointer to the mass array
  * \param G_ptr Pointer to the gravitational constant
- * 
+ *
  * \retval 0 Success
  * \retval 1 Failure
  */
@@ -44,7 +43,7 @@ int32 load_built_in_system_python(
 
 /**
  * \brief Convert Keplerian elements to Cartesian coordinates
- * 
+ *
  * \param[out] x Output position x-coordinate
  * \param[out] y Output position y-coordinate
  * \param[out] z Output position z-coordinate
@@ -79,7 +78,7 @@ void keplerian_to_cartesian_python(
 
 /**
  * \brief Launch simulation from Python
- * 
+ *
  * \retval 0 Success
  * \retval 1 Failure
  */
@@ -152,7 +151,7 @@ WIN32DLL_API int launch_cosmological_simulation_python(
 
 /**
  * \brief Compute the energy from solution state
- * 
+ *
  * \param[out] energy Pointer to the energy array to be updated
  * \param[in] G Gravitational constant
  * \param[in] sol_state Pointer to the solution state array
@@ -169,7 +168,7 @@ void compute_energy_python(
 
 /**
  * \brief Compute the linear momentum from solution state
- * 
+ *
  * \param[out] linear_momentum Pointer to the linear momentum array to be updated
  * \param[in] sol_state Pointer to the solution state array
  * \param[in] num_snapshots Number of time steps
@@ -184,7 +183,7 @@ void compute_linear_momentum_python(
 
 /**
  * \brief Compute the angular momentum from solution state
- * 
+ *
  * \param[out] angular_momentum Pointer to the angular momentum array to be updated
  * \param[in] sol_state Pointer to the solution state array
  * \param[in] num_snapshots Number of time steps

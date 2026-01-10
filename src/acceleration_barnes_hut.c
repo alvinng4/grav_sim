@@ -1,7 +1,7 @@
 /**
  * \file acceleration_barnes_hut.c
  * \brief Implementation of Barnes-Hut algorithm
- * 
+ *
  * \author Ching-Yin Ng
  */
 
@@ -17,7 +17,7 @@
 
 /**
  * \brief Helper function to compute acceleration
- * 
+ *
  * \param[out] a Array of acceleration vectors to be modified
  * \param[in] system Pointer to the gravitational system
  * \param[in] acceleration_param Pointer to the acceleration parameters
@@ -49,25 +49,16 @@ WIN32DLL_API ErrorStatus acceleration_barnes_hut(
 
     /* Construct octree */
     LinearOctree octree = get_new_linear_octree();
-    error_status = WRAP_TRACEBACK(construct_octree(
-        &octree,
-        system,
-        acceleration_param,
-        NULL,
-        -1.0
-    ));
+    error_status = WRAP_TRACEBACK(
+        construct_octree(&octree, system, acceleration_param, NULL, -1.0)
+    );
     if (error_status.return_code != GRAV_SUCCESS)
     {
         return error_status;
     }
 
     /* Compute acceleration */
-    helper_compute_acceleration(
-        a,
-        system,
-        acceleration_param,
-        &octree
-    );
+    helper_compute_acceleration(a, system, acceleration_param, &octree);
 
     /* Free memory */
     free_linear_octree(&octree);
@@ -100,26 +91,29 @@ IN_FILE void helper_compute_acceleration(
     const double opening_angle_squared = opening_angle * opening_angle;
 
     const double box_length = octree->box_width * 2.0;
-    const int64 *restrict particle_morton_indices_deepest_level = octree->particle_morton_indices_deepest_level;
+    const int64 *restrict particle_morton_indices_deepest_level =
+        octree->particle_morton_indices_deepest_level;
     const int *restrict sorted_indices = octree->sorted_indices;
     const int *restrict tree_num_particles = octree->tree_num_particles;
     const int *restrict tree_num_internal_children = octree->tree_num_internal_children;
-    const int *restrict tree_first_particle_sorted_idx = octree->tree_first_particle_sorted_idx;
-    const int *restrict tree_first_internal_children_idx = octree->tree_first_internal_children_idx;
+    const int *restrict tree_first_particle_sorted_idx =
+        octree->tree_first_particle_sorted_idx;
+    const int *restrict tree_first_internal_children_idx =
+        octree->tree_first_internal_children_idx;
     const double *restrict tree_mass = octree->tree_mass;
     const double *restrict tree_center_of_mass_x = octree->tree_center_of_mass_x;
     const double *restrict tree_center_of_mass_y = octree->tree_center_of_mass_y;
     const double *restrict tree_center_of_mass_z = octree->tree_center_of_mass_z;
 
 #ifdef USE_OPENMP
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif
     for (int i = 0; i < num_particles; i++)
     {
-        const int idx_i = sorted_indices[i];    // For coalesced memory access
+        const int idx_i = sorted_indices[i]; // For coalesced memory access
         const int64 morton_index_i = particle_morton_indices_deepest_level[idx_i];
         const double x_i[3] = {x[idx_i * 3 + 0], x[idx_i * 3 + 1], x[idx_i * 3 + 2]};
-    
+
         Stack stack[MORTON_MAX_LEVEL + 1];
         Stack *current_stack = &(stack[0]);
         current_stack->processed_children = -1;
@@ -133,7 +127,9 @@ IN_FILE void helper_compute_acceleration(
         while (true)
         {
             const int current_node = current_stack->node;
-            for (int j = (current_stack->processed_children) + 1; j < tree_num_internal_children[current_node]; j++)
+            for (int j = (current_stack->processed_children) + 1;
+                 j < tree_num_internal_children[current_node];
+                 j++)
             {
                 const int child_j = tree_first_internal_children_idx[current_node] + j;
                 const int num_children_j = tree_num_internal_children[child_j];
@@ -159,17 +155,18 @@ IN_FILE void helper_compute_acceleration(
 
                     // Check if box_length_j / norm < opening_angle
                     // Use squared values to avoid sqrt
-                    if ((box_length_j * box_length_j) < opening_angle_squared * norm_square)
+                    if ((box_length_j * box_length_j) <
+                        opening_angle_squared * norm_square)
                     {
-                        const double R_norm = sqrt(
-                            norm_square + softening_length_squared
-                        );
+                        const double R_norm =
+                            sqrt(norm_square + softening_length_squared);
 
-                        const double temp_value = G * tree_mass[child_j] / (R_norm * R_norm * R_norm);
+                        const double temp_value =
+                            G * tree_mass[child_j] / (R_norm * R_norm * R_norm);
                         acceleration[0] -= temp_value * R[0];
                         acceleration[1] -= temp_value * R[1];
                         acceleration[2] -= temp_value * R[2];
-    
+
                         current_stack->processed_children = j;
                         continue;
                     }
@@ -196,14 +193,13 @@ IN_FILE void helper_compute_acceleration(
                             x_i[2] - x[idx_j * 3 + 2]
                         };
                         const double R_norm = sqrt(
-                            R[0] * R[0] + 
-                            R[1] * R[1] + 
-                            R[2] * R[2] +
+                            R[0] * R[0] + R[1] * R[1] + R[2] * R[2] +
                             softening_length_squared
                         );
 
                         // Calculate the acceleration
-                        const double temp_value = G * m[idx_j] / (R_norm * R_norm * R_norm);
+                        const double temp_value =
+                            G * m[idx_j] / (R_norm * R_norm * R_norm);
                         acceleration[0] -= temp_value * R[0];
                         acceleration[1] -= temp_value * R[1];
                         acceleration[2] -= temp_value * R[2];
@@ -227,7 +223,8 @@ IN_FILE void helper_compute_acceleration(
                 }
             }
 
-            if ((current_stack->processed_children + 1) >= tree_num_internal_children[current_stack->node])
+            if ((current_stack->processed_children + 1) >=
+                tree_num_internal_children[current_stack->node])
             {
                 Stack *parent_stack = current_stack->parent;
                 if (!parent_stack)

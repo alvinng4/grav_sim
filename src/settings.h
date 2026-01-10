@@ -17,7 +17,7 @@ typedef struct Settings
 
 /**
  * \brief Get a new settings struct
- * 
+ *
  * \return Settings
  */
 Settings get_new_settings(void);

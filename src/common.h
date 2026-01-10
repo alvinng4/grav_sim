@@ -1,7 +1,7 @@
 /**
  * \file common.h
  * \brief Common definitions for the gravity simulation
- * 
+ *
  * \author Ching-Yin Ng
  */
 
@@ -13,9 +13,9 @@
 
 /* For exporting functions in Windows for dynamic-link library */
 #ifdef WIN32DLL_EXPORTS
-    #define WIN32DLL_API __declspec(dllexport)
+#define WIN32DLL_API __declspec(dllexport)
 #else
-    #define WIN32DLL_API 
+#define WIN32DLL_API
 #endif
 
 /* Functions that are only used in the same file */
@@ -54,7 +54,5 @@ typedef struct SimulationStatus
     double dt;
     int64 num_steps;
 } SimulationStatus;
-
-
 
 #endif

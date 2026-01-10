@@ -25,7 +25,6 @@
 /* Utils */
 #include "utils.h"
 
-
 /* Project version */
 #ifndef VERSION_INFO
 #define VERSION_INFO "unknown"
@@ -33,7 +32,7 @@
 
 /**
  * \brief Main function to launch a simulation.
- * 
+ *
  * \param system Pointer to the system.
  * \param integrator_param Pointer to the integrator parameters.
  * \param acceleration_param Pointer to the acceleration parameters.
@@ -41,7 +40,7 @@
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
  * \param tf Simulation time.
- * 
+ *
  * \return Error code.
  */
 int launch_simulation(
@@ -56,15 +55,15 @@ int launch_simulation(
 
 /**
  * \brief Main function to launch a cosmological simulation.
- * 
+ *
  * \param system Pointer to the system.
  * \param output_param Pointer to the output parameters.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- * \param a_final Final scale factor. 
+ * \param a_final Final scale factor.
  * \param num_steps Number of steps.
  * \param pm_grid_size Particle mesh grid size.
- * 
+ *
  * \return Error code.
  */
 int launch_cosmological_simulation(
@@ -79,10 +78,10 @@ int launch_cosmological_simulation(
 
 /**
  * \brief Get the logo string of grav_sim.
- * 
+ *
  * \return Pointer to the logo string.
  */
-const char* get_grav_sim_logo_string(void);
+const char *get_grav_sim_logo_string(void);
 
 /**
  * \brief Print project compilation information.

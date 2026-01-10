@@ -1,9 +1,9 @@
 /**
  * \file integrator_ias15.c
  * \brief Implementation for IAS15 integrator
- * 
+ *
  * \author Ching-Yin Ng
- * 
+ *
  * \ref J. Roa, et al. Moving Planets Around: An Introduction to
  *   N-Body Simulations Applied to Exoplanetary Systems*, MIT
  *   Press, 2020
@@ -28,36 +28,36 @@
 
 /**
  * \brief Initialize the radau spacing nodes for IAS15
- * 
+ *
  * \param[out] nodes 1D array of size 8 to be modified
  */
 IN_FILE void initialize_radau_spacing(double *restrict nodes);
 
 /**
  * \brief Initialize the auxiliary coefficients aux_c for IAS15
- * 
+ *
  * \param[out] aux_c 1D array of length 49 to be modified
- */ 
+ */
 IN_FILE void initialize_aux_c(double *restrict aux_c);
 
 /**
  * \brief Initialize auxiliary coefficients aux_r for IAS15
- * 
+ *
  * \param[out] aux_r 1D array of size 64 to be modified
  */
 IN_FILE void initialize_aux_r(double *restrict aux_r);
 
 /**
  * \brief Calculate the initial time step for IAS15 integrator
- * 
+ *
  * \param[out] initial_dt Pointer to the initial time step
  * \param[in] power Power of the integrator
  * \param[in] system Pointer to the system
  * \param[in] acceleration_param Pointer to the acceleration parameters
  * \param[in] a Pointer to the acceleration array with already computed values
- * 
+ *
  * \return ErrorStatus
- * 
+ *
  * \exception GRAV_MEMORY_ERROR if failed to allocate memory for arrays
  * \exception GRAV_VALUE_ERROR if initial_dt is negative
  */
@@ -71,7 +71,7 @@ IN_FILE ErrorStatus ias15_initial_dt(
 
 /**
  * \brief Calculate position for the predictor-corrector algorithm
- * 
+ *
  * \param[out] x Array of position vectors to be modified
  * \param[in] num_particles Number of particles in the system
  * \param[in] x0 Array of position vectors from the last time step
@@ -80,7 +80,7 @@ IN_FILE ErrorStatus ias15_initial_dt(
  * \param[in] node Current node of the predictor-corrector algorithm
  * \param[in] aux_b Auxiliary b array
  * \param[in] dt Current time step of the system
- * \param[in] x_err_comp_sum Array of round off errors of position vectors 
+ * \param[in] x_err_comp_sum Array of round off errors of position vectors
  *                       for compensated summation
  */
 IN_FILE void approx_pos_pc(
@@ -105,7 +105,7 @@ IN_FILE void approx_pos_pc(
  * \param[in] node Current node of the predictor-corrector algorithm
  * \param[in] aux_b Auxiliary b array
  * \param[in] dt Current time step of the system
- * \param[in] v_err_comp_sum Array of round off errors of velocity vectors 
+ * \param[in] v_err_comp_sum Array of round off errors of velocity vectors
  *                       for compensated summation
  */
 IN_FILE void approx_vel_pc(
@@ -121,7 +121,7 @@ IN_FILE void approx_vel_pc(
 
 /**
  * \brief Calculate position for the next time step
- * 
+ *
  * \param[out] x Array of position vectors to be modified
  * \param[out] temp_x_err_comp_sum Temporary array for compensated summation
  * \param[in] num_particles Number of particles in the system
@@ -144,7 +144,7 @@ IN_FILE void approx_pos_step(
 
 /**
  * \brief Calculate velocity for the next time step
- * 
+ *
  * \param[out] v Array of velocity vectors to be modified
  * \param[out] temp_v_err_comp_sum Temporary array for compensated summation
  * \param[in] num_particles Number of particles in the system
@@ -165,7 +165,7 @@ IN_FILE void approx_vel_step(
 
 /**
  * \brief Calculate the auxiliary coefficients b for IAS15 integrator
- * 
+ *
  * \param[out] aux_b Array of auxiliary coefficients b to be modified
  * \param[in] num_particles Number of particles in the system
  * \param[in] dim_nodes_minus_1 Dimension of nodes minus one
@@ -184,7 +184,7 @@ IN_FILE void compute_aux_b(
 
 /**
  * \brief Calculate the auxiliary coefficients g for IAS15 integrator
- * 
+ *
  * \param[out] aux_g Array of auxiliary coefficients g to be modified
  * \param[in] num_particles Number of particles in the system
  * \param[in] dim_nodes Dimension of nodes
@@ -205,7 +205,7 @@ IN_FILE void compute_aux_g(
 
 /**
  * \brief Refine the auxiliary coefficients b for IAS15 integrator
- * 
+ *
  * \param[out] aux_b Array of auxiliary coefficients b to be modified
  * \param[out] aux_e Array of auxiliary coefficients e
  * \param[out] delta_aux_b Helper array for this function
@@ -275,15 +275,18 @@ WIN32DLL_API ErrorStatus ias15(
     double *restrict nodes = malloc(dim_nodes * sizeof(double));
     double *restrict aux_c = calloc(7 * 7, sizeof(double));
     double *restrict aux_r = calloc(8 * 8, sizeof(double));
-    double *restrict aux_b0 = calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
-    double *restrict aux_b = calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
-    double *restrict aux_g = calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
-    double *restrict aux_e = calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
+    double *restrict aux_b0 =
+        calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
+    double *restrict aux_b =
+        calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
+    double *restrict aux_g =
+        calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
+    double *restrict aux_e =
+        calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
     if (!nodes || !aux_c || !aux_r || !aux_b0 || !aux_b || !aux_g || !aux_e)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for auxiliary arrays"
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for auxiliary arrays"
         );
         goto err_aux_memory;
     }
@@ -303,7 +306,8 @@ WIN32DLL_API ErrorStatus ias15(
     double *restrict F = calloc(8 * num_particles * 3, sizeof(double));
 
     // Array for refine aux_b
-    double *restrict delta_aux_b = calloc(dim_nodes_minus_1 * num_particles * 3, sizeof(double));
+    double *restrict delta_aux_b =
+        calloc(dim_nodes_minus_1 * num_particles * 3, sizeof(double));
 
     // Arrays for compensated summation
     double *restrict x_err_comp_sum = calloc(num_particles * 3, sizeof(double));
@@ -311,25 +315,12 @@ WIN32DLL_API ErrorStatus ias15(
     double *restrict temp_x_err_comp_sum = calloc(num_particles * 3, sizeof(double));
     double *restrict temp_v_err_comp_sum = calloc(num_particles * 3, sizeof(double));
 
-    if (
-        !a || 
-        !aux_a || 
-        !x_1 ||
-        !v_1 ||
-        !a_1 ||
-        !delta_b7 ||
-        !F ||
-        !delta_aux_b ||
-        !x_err_comp_sum ||
-        !v_err_comp_sum ||
-        !temp_x_err_comp_sum ||
-        !temp_v_err_comp_sum
-    )
+    if (!a || !aux_a || !x_1 || !v_1 || !a_1 || !delta_b7 || !F || !delta_aux_b ||
+        !x_err_comp_sum || !v_err_comp_sum || !temp_x_err_comp_sum ||
+        !temp_v_err_comp_sum)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for arrays"
-        );
+        error_status =
+            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -342,11 +333,7 @@ WIN32DLL_API ErrorStatus ias15(
     };
 
     /* Get initial dt */
-    error_status = WRAP_TRACEBACK(acceleration(
-        a,
-        system,
-        acceleration_param
-    ));
+    error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto err_acc_error;
@@ -360,13 +347,8 @@ WIN32DLL_API ErrorStatus ias15(
     }
     else
     {
-        error_status = WRAP_TRACEBACK(ias15_initial_dt(
-            &dt,
-            15,
-            system,
-            acceleration_param,
-            a
-        ));
+        error_status =
+            WRAP_TRACEBACK(ias15_initial_dt(&dt, 15, system, acceleration_param, a));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_initial_dt;
@@ -417,14 +399,16 @@ WIN32DLL_API ErrorStatus ias15(
             for (int i = 0; i < dim_nodes; i++)
             {
                 // Estimate position and velocity with current aux_b and nodes
-                approx_pos_pc(x_1, num_particles, x, v, a, nodes[i], aux_b, dt, x_err_comp_sum);
-                approx_vel_pc(v_1, num_particles, v, a, nodes[i], aux_b, dt, v_err_comp_sum);
+                approx_pos_pc(
+                    x_1, num_particles, x, v, a, nodes[i], aux_b, dt, x_err_comp_sum
+                );
+                approx_vel_pc(
+                    v_1, num_particles, v, a, nodes[i], aux_b, dt, v_err_comp_sum
+                );
 
                 // Evaluate force function and store result
                 error_status = WRAP_TRACEBACK(acceleration(
-                    &aux_a[i * num_particles * 3],
-                    &temp_system,
-                    acceleration_param
+                    &aux_a[i * num_particles * 3], &temp_system, acceleration_param
                 ));
                 if (error_status.return_code != GRAV_SUCCESS)
                 {
@@ -440,34 +424,41 @@ WIN32DLL_API ErrorStatus ias15(
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    delta_b7[i * 3 + j] = aux_b[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j] - aux_b0[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j];
+                    delta_b7[i * 3 + j] =
+                        aux_b[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j] -
+                        aux_b0[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j];
                 }
             }
-            memcpy(aux_b0, aux_b, dim_nodes_minus_1 * num_particles * 3 * sizeof(double));
-            if ((abs_max_vec(delta_b7, num_particles * 3) / abs_max_vec(&aux_a[dim_nodes_minus_1 * num_particles * 3], num_particles * 3)) < tolerance_pc)
+            memcpy(
+                aux_b0, aux_b, dim_nodes_minus_1 * num_particles * 3 * sizeof(double)
+            );
+            if ((abs_max_vec(delta_b7, num_particles * 3) /
+                 abs_max_vec(
+                     &aux_a[dim_nodes_minus_1 * num_particles * 3], num_particles * 3
+                 )) < tolerance_pc)
             {
                 break;
             }
         }
-        
+
         /* Advance step */
         memcpy(temp_x_err_comp_sum, x_err_comp_sum, num_particles * 3 * sizeof(double));
         memcpy(temp_v_err_comp_sum, v_err_comp_sum, num_particles * 3 * sizeof(double));
 
         approx_pos_step(x_1, temp_x_err_comp_sum, num_particles, x, v, a, aux_b, dt);
         approx_vel_step(v_1, temp_v_err_comp_sum, num_particles, v, a, aux_b, dt);
-        error_status = WRAP_TRACEBACK(acceleration(
-            a_1,
-            &temp_system,
-            acceleration_param
-        ));
+        error_status =
+            WRAP_TRACEBACK(acceleration(a_1, &temp_system, acceleration_param));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acc_error;
         }
 
         /* Estimate relative error */
-        error_b7 = abs_max_vec(&aux_b[dim_nodes_minus_2 * num_particles * 3], num_particles * 3) / abs_max_vec(a_1, num_particles * 3);
+        error_b7 = abs_max_vec(
+                       &aux_b[dim_nodes_minus_2 * num_particles * 3], num_particles * 3
+                   ) /
+                   abs_max_vec(a_1, num_particles * 3);
         error = pow((error_b7 / tolerance), exponent);
 
         // Prevent error from being too small
@@ -484,11 +475,24 @@ WIN32DLL_API ErrorStatus ias15(
             (*num_steps_ptr)++;
             *t_ptr += dt;
 
-            refine_aux_b(aux_b, aux_e, delta_aux_b, num_particles, dim_nodes_minus_1, dt, dt_new, refine_flag);
+            refine_aux_b(
+                aux_b,
+                aux_e,
+                delta_aux_b,
+                num_particles,
+                dim_nodes_minus_1,
+                dt,
+                dt_new,
+                refine_flag
+            );
             refine_flag = true;
 
-            memcpy(x_err_comp_sum, temp_x_err_comp_sum, num_particles * 3 * sizeof(double));
-            memcpy(v_err_comp_sum, temp_v_err_comp_sum, num_particles * 3 * sizeof(double));
+            memcpy(
+                x_err_comp_sum, temp_x_err_comp_sum, num_particles * 3 * sizeof(double)
+            );
+            memcpy(
+                v_err_comp_sum, temp_v_err_comp_sum, num_particles * 3 * sizeof(double)
+            );
         }
 
         if (accept_step_flag)
@@ -496,8 +500,8 @@ WIN32DLL_API ErrorStatus ias15(
             accept_step_flag = false;
             memcpy(x, x_1, num_particles * 3 * sizeof(double));
             memcpy(v, v_1, num_particles * 3 * sizeof(double));
-            memcpy(a, a_1, num_particles * 3 * sizeof(double));    
-        
+            memcpy(a, a_1, num_particles * 3 * sizeof(double));
+
             /* Output */
             if (is_output && *t_ptr >= next_output_time)
             {
@@ -720,8 +724,7 @@ IN_FILE ErrorStatus ias15_initial_dt(
     if (!x_1 || !a_1)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for initial_dt calculation"
+            GRAV_MEMORY_ERROR, "Failed to allocate memory for initial_dt calculation"
         );
         goto error_memory;
     }
@@ -747,19 +750,15 @@ IN_FILE ErrorStatus ias15_initial_dt(
     {
         dt_0 = 0.01 * (d_0 / d_1);
     }
-    
+
     for (int i = 0; i < num_particles; i++)
     {
         x_1[i * 3 + 0] = x[i * 3 + 0] + dt_0 * v[i * 3 + 0];
         x_1[i * 3 + 1] = x[i * 3 + 1] + dt_0 * v[i * 3 + 1];
         x_1[i * 3 + 2] = x[i * 3 + 2] + dt_0 * v[i * 3 + 2];
     }
-    
-    error_status = WRAP_TRACEBACK(acceleration(
-        a_1,
-        &system_1,
-        acceleration_param
-    ));
+
+    error_status = WRAP_TRACEBACK(acceleration(a_1, &system_1, acceleration_param));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto error_acc;
@@ -779,15 +778,14 @@ IN_FILE ErrorStatus ias15_initial_dt(
     }
     else
     {
-        dt_1 = pow((0.01 / fmax(d_1, d_2)), 1.0 / (1.0 + (double) power));
+        dt_1 = pow((0.01 / fmax(d_1, d_2)), 1.0 / (1.0 + (double)power));
     }
 
     *initial_dt = fmin(100.0 * dt_0, dt_1);
     if (*initial_dt <= 0.0)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR,
-            "Initial dt is less than or equal to zero"
+            GRAV_VALUE_ERROR, "Initial dt is less than or equal to zero"
         );
         goto error_dt;
     }
@@ -816,51 +814,50 @@ IN_FILE void approx_pos_pc(
     const double dt,
     const double *restrict x_err_comp_sum
 )
-{   
+{
     for (int j = 0; j < num_particles; j++)
     {
         for (int k = 0; k < 3; k++)
         {
             /*
-            *   Warning: Because x0 is much larger than dx, combining both statements 
-            *            would increase floating point error
-            *            e.g. x[j][k] = x0[j][k] + x_err_comp_sum[j][k] + ...   (WRONG)
-            */
+             *   Warning: Because x0 is much larger than dx, combining both statements
+             *            would increase floating point error
+             *            e.g. x[j][k] = x0[j][k] + x_err_comp_sum[j][k] + ...   (WRONG)
+             */
 
-            x[j * 3 + k] = x0[j * 3 + k];     
-            x[j * 3 + k] += x_err_comp_sum[j * 3 + k] + dt * node * (
-                v0[j * 3 + k]
-                + dt
-                * node
-                * (
-                    a0[j * 3 + k]
-                    + node 
-                    * (
-                        aux_b[0 * num_particles * 3 + j * 3 + k] / 3.0
-                        + node
-                        * (
-                            aux_b[1 * num_particles * 3 + j * 3 + k] / 6.0
-                            + node
-                            * (
-                                aux_b[2 * num_particles * 3 + j * 3 + k] / 10.0
-                                + node
-                                * (
-                                    aux_b[3 * num_particles * 3 + j * 3 + k] / 15.0
-                                    + node
-                                    * (
-                                        aux_b[4 * num_particles * 3 + j * 3 + k] / 21.0
-                                        + node * (
-                                            aux_b[5 * num_particles * 3 + j * 3 + k] / 28.0 
-                                            + node * aux_b[6 * num_particles * 3 + j * 3 + k] / 36.0
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-                / 2.0
-            );
+            x[j * 3 + k] = x0[j * 3 + k];
+            x[j * 3 + k] +=
+                x_err_comp_sum[j * 3 + k] +
+                dt * node *
+                    (v0[j * 3 + k] +
+                     dt * node *
+                         (a0[j * 3 + k] +
+                          node *
+                              (aux_b[0 * num_particles * 3 + j * 3 + k] / 3.0 +
+                               node *
+                                   (aux_b[1 * num_particles * 3 + j * 3 + k] / 6.0 +
+                                    node *
+                                        (aux_b[2 * num_particles * 3 + j * 3 + k] /
+                                             10.0 +
+                                         node *
+                                             (aux_b[3 * num_particles * 3 + j * 3 + k] /
+                                                  15.0 +
+                                              node *
+                                                  (aux_b
+                                                           [4 * num_particles * 3 +
+                                                            j * 3 + k] /
+                                                       21.0 +
+                                                   node *
+                                                       (aux_b
+                                                                [5 * num_particles * 3 +
+                                                                 j * 3 + k] /
+                                                            28.0 +
+                                                        node *
+                                                            aux_b
+                                                                [6 * num_particles * 3 +
+                                                                 j * 3 + k] /
+                                                            36.0))))))) /
+                         2.0);
         }
     }
 }
@@ -881,39 +878,37 @@ IN_FILE void approx_vel_pc(
         for (int k = 0; k < 3; k++)
         {
             /*
-            *   Warning: Because v0 is much larger than dv, combining both statements 
-            *            would increase floating point error
-            *            e.g. v[j][k] = v0[j][k] + v_err_comp_sum[j][k] + ...   (WRONG)
-            */
+             *   Warning: Because v0 is much larger than dv, combining both statements
+             *            would increase floating point error
+             *            e.g. v[j][k] = v0[j][k] + v_err_comp_sum[j][k] + ...   (WRONG)
+             */
 
             v[j * 3 + k] = v0[j * 3 + k];
-            v[j * 3 + k] += v_err_comp_sum[j * 3 + k] + dt * node * (
-                a0[j * 3 + k]
-                + node
-                * (
-                    aux_b[0 * num_particles * 3 + j * 3 + k] / 2.0
-                    + node
-                    * (
-                        aux_b[1 * num_particles * 3 + j * 3 + k] / 3.0
-                        + node
-                        * (
-                            aux_b[2 * num_particles * 3 + j * 3 + k] / 4.0
-                            + node
-                            * (
-                                aux_b[3 * num_particles * 3 + j * 3 + k] / 5.0
-                                + node
-                                * (
-                                    aux_b[4 * num_particles * 3 + j * 3 + k] / 6.0
-                                    + node * (
-                                        aux_b[5 * num_particles * 3 + j * 3 + k] / 7.0 
-                                        + node * aux_b[6 * num_particles * 3 + j * 3 + k] / 8.0
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            );
+            v[j * 3 + k] +=
+                v_err_comp_sum[j * 3 + k] +
+                dt * node *
+                    (a0[j * 3 + k] +
+                     node *
+                         (aux_b[0 * num_particles * 3 + j * 3 + k] / 2.0 +
+                          node *
+                              (aux_b[1 * num_particles * 3 + j * 3 + k] / 3.0 +
+                               node *
+                                   (aux_b[2 * num_particles * 3 + j * 3 + k] / 4.0 +
+                                    node *
+                                        (aux_b[3 * num_particles * 3 + j * 3 + k] /
+                                             5.0 +
+                                         node *
+                                             (aux_b[4 * num_particles * 3 + j * 3 + k] /
+                                                  6.0 +
+                                              node * (aux_b
+                                                              [5 * num_particles * 3 +
+                                                               j * 3 + k] /
+                                                          7.0 +
+                                                      node *
+                                                          aux_b
+                                                              [6 * num_particles * 3 +
+                                                               j * 3 + k] /
+                                                          8.0)))))));
         }
     }
 }
@@ -928,23 +923,23 @@ IN_FILE void approx_pos_step(
     const double *restrict aux_b,
     const double dt
 )
-{   
+{
     for (int j = 0; j < num_particles; j++)
     {
         for (int k = 0; k < 3; k++)
         {
-            temp_x_err_comp_sum[j * 3 + k] += dt * (
-                v0[j * 3 + k] + dt * (a0[j * 3 + k]
-                    + aux_b[0 * num_particles * 3 + j * 3 + k] / 3.0
-                    + aux_b[1 * num_particles * 3 + j * 3 + k] / 6.0
-                    + aux_b[2 * num_particles * 3 + j * 3 + k] / 10.0
-                    + aux_b[3 * num_particles * 3 + j * 3 + k] / 15.0
-                    + aux_b[4 * num_particles * 3 + j * 3 + k] / 21.0
-                    + aux_b[5 * num_particles * 3 + j * 3 + k] / 28.0 
-                    + aux_b[6 * num_particles * 3 + j * 3 + k] / 36.0
-                )
-                / 2.0
-            );
+            temp_x_err_comp_sum[j * 3 + k] +=
+                dt *
+                (v0[j * 3 + k] +
+                 dt *
+                     (a0[j * 3 + k] + aux_b[0 * num_particles * 3 + j * 3 + k] / 3.0 +
+                      aux_b[1 * num_particles * 3 + j * 3 + k] / 6.0 +
+                      aux_b[2 * num_particles * 3 + j * 3 + k] / 10.0 +
+                      aux_b[3 * num_particles * 3 + j * 3 + k] / 15.0 +
+                      aux_b[4 * num_particles * 3 + j * 3 + k] / 21.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k] / 28.0 +
+                      aux_b[6 * num_particles * 3 + j * 3 + k] / 36.0) /
+                     2.0);
 
             x[j * 3 + k] = x0[j * 3 + k] + temp_x_err_comp_sum[j * 3 + k];
             temp_x_err_comp_sum[j * 3 + k] += (x0[j * 3 + k] - x[j * 3 + k]);
@@ -966,16 +961,14 @@ IN_FILE void approx_vel_step(
     {
         for (int k = 0; k < 3; k++)
         {
-            temp_v_err_comp_sum[j * 3 + k] += dt * (
-                a0[j * 3 + k]
-                + aux_b[0 * num_particles * 3 + j * 3 + k] / 2.0
-                + aux_b[1 * num_particles * 3 + j * 3 + k] / 3.0
-                + aux_b[2 * num_particles * 3 + j * 3 + k] / 4.0
-                + aux_b[3 * num_particles * 3 + j * 3 + k] / 5.0
-                + aux_b[4 * num_particles * 3 + j * 3 + k] / 6.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k] / 7.0 
-                + aux_b[6 * num_particles * 3 + j * 3 + k] / 8.0
-            );
+            temp_v_err_comp_sum[j * 3 + k] +=
+                dt * (a0[j * 3 + k] + aux_b[0 * num_particles * 3 + j * 3 + k] / 2.0 +
+                      aux_b[1 * num_particles * 3 + j * 3 + k] / 3.0 +
+                      aux_b[2 * num_particles * 3 + j * 3 + k] / 4.0 +
+                      aux_b[3 * num_particles * 3 + j * 3 + k] / 5.0 +
+                      aux_b[4 * num_particles * 3 + j * 3 + k] / 6.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k] / 7.0 +
+                      aux_b[6 * num_particles * 3 + j * 3 + k] / 8.0);
             v[j * 3 + k] = v0[j * 3 + k] + temp_v_err_comp_sum[j * 3 + k];
             temp_v_err_comp_sum[j * 3 + k] += (v0[j * 3 + k] - v[j * 3 + k]);
         }
@@ -993,19 +986,25 @@ IN_FILE void compute_aux_b(
 {
     for (int j = 0; j < num_particles; j++)
     {
-        if (i >= 1) 
+        if (i >= 1)
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[0 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[0 * dim_nodes_minus_1 + 0] * aux_g[0 * num_particles * 3 + j * 3 + k]
-                    + aux_c[1 * dim_nodes_minus_1 + 0] * aux_g[1 * num_particles * 3 + j * 3 + k]
-                    + aux_c[2 * dim_nodes_minus_1 + 0] * aux_g[2 * num_particles * 3 + j * 3 + k]
-                    + aux_c[3 * dim_nodes_minus_1 + 0] * aux_g[3 * num_particles * 3 + j * 3 + k]
-                    + aux_c[4 * dim_nodes_minus_1 + 0] * aux_g[4 * num_particles * 3 + j * 3 + k]
-                    + aux_c[5 * dim_nodes_minus_1 + 0] * aux_g[5 * num_particles * 3 + j * 3 + k]
-                    + aux_c[6 * dim_nodes_minus_1 + 0] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[0 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[0 * dim_nodes_minus_1 + 0] *
+                         aux_g[0 * num_particles * 3 + j * 3 + k] +
+                     aux_c[1 * dim_nodes_minus_1 + 0] *
+                         aux_g[1 * num_particles * 3 + j * 3 + k] +
+                     aux_c[2 * dim_nodes_minus_1 + 0] *
+                         aux_g[2 * num_particles * 3 + j * 3 + k] +
+                     aux_c[3 * dim_nodes_minus_1 + 0] *
+                         aux_g[3 * num_particles * 3 + j * 3 + k] +
+                     aux_c[4 * dim_nodes_minus_1 + 0] *
+                         aux_g[4 * num_particles * 3 + j * 3 + k] +
+                     aux_c[5 * dim_nodes_minus_1 + 0] *
+                         aux_g[5 * num_particles * 3 + j * 3 + k] +
+                     aux_c[6 * dim_nodes_minus_1 + 0] *
+                         aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1013,18 +1012,23 @@ IN_FILE void compute_aux_b(
             continue;
         }
 
-        if (i >= 2) 
+        if (i >= 2)
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[1 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[1 * dim_nodes_minus_1 + 1] * aux_g[1 * num_particles * 3 + j * 3 + k]
-                    + aux_c[2 * dim_nodes_minus_1 + 1] * aux_g[2 * num_particles * 3 + j * 3 + k]
-                    + aux_c[3 * dim_nodes_minus_1 + 1] * aux_g[3 * num_particles * 3 + j * 3 + k]
-                    + aux_c[4 * dim_nodes_minus_1 + 1] * aux_g[4 * num_particles * 3 + j * 3 + k]
-                    + aux_c[5 * dim_nodes_minus_1 + 1] * aux_g[5 * num_particles * 3 + j * 3 + k]
-                    + aux_c[6 * dim_nodes_minus_1 + 1] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[1 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[1 * dim_nodes_minus_1 + 1] *
+                         aux_g[1 * num_particles * 3 + j * 3 + k] +
+                     aux_c[2 * dim_nodes_minus_1 + 1] *
+                         aux_g[2 * num_particles * 3 + j * 3 + k] +
+                     aux_c[3 * dim_nodes_minus_1 + 1] *
+                         aux_g[3 * num_particles * 3 + j * 3 + k] +
+                     aux_c[4 * dim_nodes_minus_1 + 1] *
+                         aux_g[4 * num_particles * 3 + j * 3 + k] +
+                     aux_c[5 * dim_nodes_minus_1 + 1] *
+                         aux_g[5 * num_particles * 3 + j * 3 + k] +
+                     aux_c[6 * dim_nodes_minus_1 + 1] *
+                         aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1036,13 +1040,17 @@ IN_FILE void compute_aux_b(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[2 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[2 * dim_nodes_minus_1 + 2] * aux_g[2 * num_particles * 3 + j * 3 + k]
-                    + aux_c[3 * dim_nodes_minus_1 + 2] * aux_g[3 * num_particles * 3 + j * 3 + k]
-                    + aux_c[4 * dim_nodes_minus_1 + 2] * aux_g[4 * num_particles * 3 + j * 3 + k]
-                    + aux_c[5 * dim_nodes_minus_1 + 2] * aux_g[5 * num_particles * 3 + j * 3 + k]
-                    + aux_c[6 * dim_nodes_minus_1 + 2] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[2 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[2 * dim_nodes_minus_1 + 2] *
+                         aux_g[2 * num_particles * 3 + j * 3 + k] +
+                     aux_c[3 * dim_nodes_minus_1 + 2] *
+                         aux_g[3 * num_particles * 3 + j * 3 + k] +
+                     aux_c[4 * dim_nodes_minus_1 + 2] *
+                         aux_g[4 * num_particles * 3 + j * 3 + k] +
+                     aux_c[5 * dim_nodes_minus_1 + 2] *
+                         aux_g[5 * num_particles * 3 + j * 3 + k] +
+                     aux_c[6 * dim_nodes_minus_1 + 2] *
+                         aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1054,12 +1062,15 @@ IN_FILE void compute_aux_b(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[3 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[3 * dim_nodes_minus_1 + 3] * aux_g[3 * num_particles * 3 + j * 3 + k]
-                    + aux_c[4 * dim_nodes_minus_1 + 3] * aux_g[4 * num_particles * 3 + j * 3 + k]
-                    + aux_c[5 * dim_nodes_minus_1 + 3] * aux_g[5 * num_particles * 3 + j * 3 + k]
-                    + aux_c[6 * dim_nodes_minus_1 + 3] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[3 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[3 * dim_nodes_minus_1 + 3] *
+                         aux_g[3 * num_particles * 3 + j * 3 + k] +
+                     aux_c[4 * dim_nodes_minus_1 + 3] *
+                         aux_g[4 * num_particles * 3 + j * 3 + k] +
+                     aux_c[5 * dim_nodes_minus_1 + 3] *
+                         aux_g[5 * num_particles * 3 + j * 3 + k] +
+                     aux_c[6 * dim_nodes_minus_1 + 3] *
+                         aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1071,11 +1082,13 @@ IN_FILE void compute_aux_b(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[4 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[4 * dim_nodes_minus_1 + 4] * aux_g[4 * num_particles * 3 + j * 3 + k]
-                    + aux_c[5 * dim_nodes_minus_1 + 4] * aux_g[5 * num_particles * 3 + j * 3 + k]
-                    + aux_c[6 * dim_nodes_minus_1 + 4] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[4 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[4 * dim_nodes_minus_1 + 4] *
+                         aux_g[4 * num_particles * 3 + j * 3 + k] +
+                     aux_c[5 * dim_nodes_minus_1 + 4] *
+                         aux_g[5 * num_particles * 3 + j * 3 + k] +
+                     aux_c[6 * dim_nodes_minus_1 + 4] *
+                         aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1087,10 +1100,11 @@ IN_FILE void compute_aux_b(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[5 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[5 * dim_nodes_minus_1 + 5] * aux_g[5 * num_particles * 3 + j * 3 + k]
-                    + aux_c[6 * dim_nodes_minus_1 + 5] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[5 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[5 * dim_nodes_minus_1 + 5] *
+                         aux_g[5 * num_particles * 3 + j * 3 + k] +
+                     aux_c[6 * dim_nodes_minus_1 + 5] *
+                         aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1102,9 +1116,9 @@ IN_FILE void compute_aux_b(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[6 * num_particles * 3 + j * 3 + k] = (
-                    aux_c[6 * dim_nodes_minus_1 + 6] * aux_g[6 * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[6 * num_particles * 3 + j * 3 + k] =
+                    (aux_c[6 * dim_nodes_minus_1 + 6] *
+                     aux_g[6 * num_particles * 3 + j * 3 + k]);
             }
         }
         else
@@ -1135,27 +1149,30 @@ IN_FILE void compute_aux_g(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[0 * num_particles * 3 + j * 3 + k] = (
-                    (F[1 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[1 * dim_nodes + 0]
-                );
+                aux_g[0 * num_particles * 3 + j * 3 + k] =
+                    ((F[1 * num_particles * 3 + j * 3 + k] -
+                      F[0 * num_particles * 3 + j * 3 + k]) *
+                     aux_r[1 * dim_nodes + 0]);
             }
         }
         else
         {
             continue;
         }
-                
+
         if (i >= 2)
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[1 * num_particles * 3 + j * 3 + k] = (
-                    ((F[2 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[2 * dim_nodes + 0] 
-                    - aux_g[0 * num_particles * 3 + j * 3 + k]) * aux_r[2 * dim_nodes + 1]
-                );
+                aux_g[1 * num_particles * 3 + j * 3 + k] =
+                    (((F[2 * num_particles * 3 + j * 3 + k] -
+                       F[0 * num_particles * 3 + j * 3 + k]) *
+                          aux_r[2 * dim_nodes + 0] -
+                      aux_g[0 * num_particles * 3 + j * 3 + k]) *
+                     aux_r[2 * dim_nodes + 1]);
             }
         }
-        else 
+        else
         {
             continue;
         }
@@ -1164,28 +1181,35 @@ IN_FILE void compute_aux_g(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[2 * num_particles * 3 + j * 3 + k] = (
-                    ((F[3 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[3 * dim_nodes + 0] 
-                    - aux_g[0 * num_particles * 3 + j * 3 + k]) * aux_r[3 * dim_nodes + 1] 
-                    - aux_g[1 * num_particles * 3 + j * 3 + k]
-                ) * aux_r[3 * dim_nodes + 2];
+                aux_g[2 * num_particles * 3 + j * 3 + k] =
+                    (((F[3 * num_particles * 3 + j * 3 + k] -
+                       F[0 * num_particles * 3 + j * 3 + k]) *
+                          aux_r[3 * dim_nodes + 0] -
+                      aux_g[0 * num_particles * 3 + j * 3 + k]) *
+                         aux_r[3 * dim_nodes + 1] -
+                     aux_g[1 * num_particles * 3 + j * 3 + k]) *
+                    aux_r[3 * dim_nodes + 2];
             }
         }
         else
         {
             continue;
         }
-                
+
         if (i >= 4)
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[3 * num_particles * 3 + j * 3 + k] = (
-                    (((F[4 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[4 * dim_nodes + 0] 
-                    - aux_g[0 * num_particles * 3 + j * 3 + k]) * aux_r[4 * dim_nodes + 1] - aux_g[1 * num_particles * 3 + j * 3 + k])
-                    * aux_r[4 * dim_nodes + 2]
-                    - aux_g[2 * num_particles * 3 + j * 3 + k]
-                ) * aux_r[4 * dim_nodes + 3];
+                aux_g[3 * num_particles * 3 + j * 3 + k] =
+                    ((((F[4 * num_particles * 3 + j * 3 + k] -
+                        F[0 * num_particles * 3 + j * 3 + k]) *
+                           aux_r[4 * dim_nodes + 0] -
+                       aux_g[0 * num_particles * 3 + j * 3 + k]) *
+                          aux_r[4 * dim_nodes + 1] -
+                      aux_g[1 * num_particles * 3 + j * 3 + k]) *
+                         aux_r[4 * dim_nodes + 2] -
+                     aux_g[2 * num_particles * 3 + j * 3 + k]) *
+                    aux_r[4 * dim_nodes + 3];
             }
         }
         else
@@ -1197,17 +1221,18 @@ IN_FILE void compute_aux_g(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[4 * num_particles * 3 + j * 3 + k] = (
-                    (
-                        (((F[5 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[5 * dim_nodes + 0] 
-                        - aux_g[0 * num_particles * 3 + j * 3 + k]) * aux_r[5 * dim_nodes + 1] 
-                        - aux_g[1 * num_particles * 3 + j * 3 + k])
-                        * aux_r[5 * dim_nodes + 2]
-                        - aux_g[2 * num_particles * 3 + j * 3 + k]
-                    )
-                    * aux_r[5 * dim_nodes + 3]
-                    - aux_g[3 * num_particles * 3 + j * 3 + k]
-                ) * aux_r[5 * dim_nodes + 4];
+                aux_g[4 * num_particles * 3 + j * 3 + k] =
+                    (((((F[5 * num_particles * 3 + j * 3 + k] -
+                         F[0 * num_particles * 3 + j * 3 + k]) *
+                            aux_r[5 * dim_nodes + 0] -
+                        aux_g[0 * num_particles * 3 + j * 3 + k]) *
+                           aux_r[5 * dim_nodes + 1] -
+                       aux_g[1 * num_particles * 3 + j * 3 + k]) *
+                          aux_r[5 * dim_nodes + 2] -
+                      aux_g[2 * num_particles * 3 + j * 3 + k]) *
+                         aux_r[5 * dim_nodes + 3] -
+                     aux_g[3 * num_particles * 3 + j * 3 + k]) *
+                    aux_r[5 * dim_nodes + 4];
             }
         }
         else
@@ -1219,21 +1244,20 @@ IN_FILE void compute_aux_g(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[5 * num_particles * 3 + j * 3 + k] = (
-                    (
-                        (
-                            (((F[6 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[6 * dim_nodes + 0] 
-                            - aux_g[0 * num_particles * 3 + j * 3 + k]) * aux_r[6 * dim_nodes + 1] 
-                            - aux_g[1 * num_particles * 3 + j * 3 + k])
-                            * aux_r[6 * dim_nodes + 2]
-                            - aux_g[2 * num_particles * 3 + j * 3 + k]
-                        )
-                        * aux_r[6 * dim_nodes + 3]
-                        - aux_g[3 * num_particles * 3 + j * 3 + k]
-                    )
-                    * aux_r[6 * dim_nodes + 4]
-                    - aux_g[4 * num_particles * 3 + j * 3 + k]
-                ) * aux_r[6 * dim_nodes + 5];
+                aux_g[5 * num_particles * 3 + j * 3 + k] =
+                    ((((((F[6 * num_particles * 3 + j * 3 + k] -
+                          F[0 * num_particles * 3 + j * 3 + k]) *
+                             aux_r[6 * dim_nodes + 0] -
+                         aux_g[0 * num_particles * 3 + j * 3 + k]) *
+                            aux_r[6 * dim_nodes + 1] -
+                        aux_g[1 * num_particles * 3 + j * 3 + k]) *
+                           aux_r[6 * dim_nodes + 2] -
+                       aux_g[2 * num_particles * 3 + j * 3 + k]) *
+                          aux_r[6 * dim_nodes + 3] -
+                      aux_g[3 * num_particles * 3 + j * 3 + k]) *
+                         aux_r[6 * dim_nodes + 4] -
+                     aux_g[4 * num_particles * 3 + j * 3 + k]) *
+                    aux_r[6 * dim_nodes + 5];
             }
         }
         else
@@ -1245,25 +1269,22 @@ IN_FILE void compute_aux_g(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_g[6 * num_particles * 3 + j * 3 + k] = (
-                    (
-                        (
-                            (
-                                (((F[7 * num_particles * 3 + j * 3 + k] - F[0 * num_particles * 3 + j * 3 + k]) * aux_r[7 * dim_nodes + 0] - aux_g[0 * num_particles * 3 + j * 3 + k]) 
-                                * aux_r[7 * dim_nodes + 1] 
-                                - aux_g[1 * num_particles * 3 + j * 3 + k])
-                                * aux_r[7 * dim_nodes + 2]
-                                - aux_g[2 * num_particles * 3 + j * 3 + k]
-                            )
-                            * aux_r[7 * dim_nodes + 3]
-                            - aux_g[3 * num_particles * 3 + j * 3 + k]
-                        )
-                        * aux_r[7 * dim_nodes + 4]
-                        - aux_g[4 * num_particles * 3 + j * 3 + k]
-                    )
-                    * aux_r[7 * dim_nodes + 5]
-                    - aux_g[5 * num_particles * 3 + j * 3 + k]
-                ) * aux_r[7 * dim_nodes + 6];                
+                aux_g[6 * num_particles * 3 + j * 3 + k] =
+                    (((((((F[7 * num_particles * 3 + j * 3 + k] -
+                           F[0 * num_particles * 3 + j * 3 + k]) *
+                              aux_r[7 * dim_nodes + 0] -
+                          aux_g[0 * num_particles * 3 + j * 3 + k]) *
+                             aux_r[7 * dim_nodes + 1] -
+                         aux_g[1 * num_particles * 3 + j * 3 + k]) *
+                            aux_r[7 * dim_nodes + 2] -
+                        aux_g[2 * num_particles * 3 + j * 3 + k]) *
+                           aux_r[7 * dim_nodes + 3] -
+                       aux_g[3 * num_particles * 3 + j * 3 + k]) *
+                          aux_r[7 * dim_nodes + 4] -
+                      aux_g[4 * num_particles * 3 + j * 3 + k]) *
+                         aux_r[7 * dim_nodes + 5] -
+                     aux_g[5 * num_particles * 3 + j * 3 + k]) *
+                    aux_r[7 * dim_nodes + 6];
             }
         }
         else
@@ -1292,9 +1313,9 @@ IN_FILE void refine_aux_b(
             {
                 for (int k = 0; k < 3; k++)
                 {
-                    delta_aux_b[i * num_particles * 3 + j * 3 + k] = (
-                        aux_b[i * num_particles * 3 + j * 3 + k] - aux_e[i * num_particles * 3 + j * 3 + k]
-                    );
+                    delta_aux_b[i * num_particles * 3 + j * 3 + k] =
+                        (aux_b[i * num_particles * 3 + j * 3 + k] -
+                         aux_e[i * num_particles * 3 + j * 3 + k]);
                 }
             }
         }
@@ -1313,57 +1334,52 @@ IN_FILE void refine_aux_b(
 
     double q = dt_new / dt;
     double q2 = q * q, q3 = q2 * q, q4 = q3 * q, q5 = q4 * q, q6 = q5 * q, q7 = q6 * q;
-    
-    for (int j = 0; j < num_particles; j++) 
+
+    for (int j = 0; j < num_particles; j++)
     {
-        for (int k = 0; k < 3; k++) 
+        for (int k = 0; k < 3; k++)
         {
-            aux_e[0 * num_particles * 3 + j * 3 + k] = q * (
-                aux_b[6 * num_particles * 3 + j * 3 + k] * 7.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k] * 6.0
-                + aux_b[4 * num_particles * 3 + j * 3 + k] * 5.0
-                + aux_b[3 * num_particles * 3 + j * 3 + k] * 4.0
-                + aux_b[2 * num_particles * 3 + j * 3 + k] * 3.0
-                + aux_b[1 * num_particles * 3 + j * 3 + k] * 2.0
-                + aux_b[0 * num_particles * 3 + j * 3 + k]
-            );
+            aux_e[0 * num_particles * 3 + j * 3 + k] =
+                q * (aux_b[6 * num_particles * 3 + j * 3 + k] * 7.0 +
+                     aux_b[5 * num_particles * 3 + j * 3 + k] * 6.0 +
+                     aux_b[4 * num_particles * 3 + j * 3 + k] * 5.0 +
+                     aux_b[3 * num_particles * 3 + j * 3 + k] * 4.0 +
+                     aux_b[2 * num_particles * 3 + j * 3 + k] * 3.0 +
+                     aux_b[1 * num_particles * 3 + j * 3 + k] * 2.0 +
+                     aux_b[0 * num_particles * 3 + j * 3 + k]);
 
-            aux_e[1 * num_particles * 3 + j * 3 + k] = q2 * (
-                aux_b[6 * num_particles * 3 + j * 3 + k] * 21.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k] * 15.0
-                + aux_b[4 * num_particles * 3 + j * 3 + k] * 10.0
-                + aux_b[3 * num_particles * 3 + j * 3 + k] * 6.0
-                + aux_b[2 * num_particles * 3 + j * 3 + k] * 3.0
-                + aux_b[1 * num_particles * 3 + j * 3 + k]
-            );
+            aux_e[1 * num_particles * 3 + j * 3 + k] =
+                q2 * (aux_b[6 * num_particles * 3 + j * 3 + k] * 21.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k] * 15.0 +
+                      aux_b[4 * num_particles * 3 + j * 3 + k] * 10.0 +
+                      aux_b[3 * num_particles * 3 + j * 3 + k] * 6.0 +
+                      aux_b[2 * num_particles * 3 + j * 3 + k] * 3.0 +
+                      aux_b[1 * num_particles * 3 + j * 3 + k]);
 
-            aux_e[2 * num_particles * 3 + j * 3 + k] = q3 * (
-                aux_b[6 * num_particles * 3 + j * 3 + k] * 35.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k] * 20.0
-                + aux_b[4 * num_particles * 3 + j * 3 + k] * 10.0
-                + aux_b[3 * num_particles * 3 + j * 3 + k] * 4.0
-                + aux_b[2 * num_particles * 3 + j * 3 + k]
-            );
+            aux_e[2 * num_particles * 3 + j * 3 + k] =
+                q3 * (aux_b[6 * num_particles * 3 + j * 3 + k] * 35.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k] * 20.0 +
+                      aux_b[4 * num_particles * 3 + j * 3 + k] * 10.0 +
+                      aux_b[3 * num_particles * 3 + j * 3 + k] * 4.0 +
+                      aux_b[2 * num_particles * 3 + j * 3 + k]);
 
-            aux_e[3 * num_particles * 3 + j * 3 + k] = q4 * (
-                aux_b[6 * num_particles * 3 + j * 3 + k] * 35.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k] * 15.0
-                + aux_b[4 * num_particles * 3 + j * 3 + k] * 5.0
-                + aux_b[3 * num_particles * 3 + j * 3 + k]
-            );
+            aux_e[3 * num_particles * 3 + j * 3 + k] =
+                q4 * (aux_b[6 * num_particles * 3 + j * 3 + k] * 35.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k] * 15.0 +
+                      aux_b[4 * num_particles * 3 + j * 3 + k] * 5.0 +
+                      aux_b[3 * num_particles * 3 + j * 3 + k]);
 
-            aux_e[4 * num_particles * 3 + j * 3 + k] = q5 * (
-                aux_b[6 * num_particles * 3 + j * 3 + k] * 21.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k] * 6.0
-                + aux_b[4 * num_particles * 3 + j * 3 + k]
-            );
+            aux_e[4 * num_particles * 3 + j * 3 + k] =
+                q5 * (aux_b[6 * num_particles * 3 + j * 3 + k] * 21.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k] * 6.0 +
+                      aux_b[4 * num_particles * 3 + j * 3 + k]);
 
-            aux_e[5 * num_particles * 3 + j * 3 + k] = q6 * (
-                aux_b[6 * num_particles * 3 + j * 3 + k] * 7.0
-                + aux_b[5 * num_particles * 3 + j * 3 + k]
-            );
+            aux_e[5 * num_particles * 3 + j * 3 + k] =
+                q6 * (aux_b[6 * num_particles * 3 + j * 3 + k] * 7.0 +
+                      aux_b[5 * num_particles * 3 + j * 3 + k]);
 
-            aux_e[6 * num_particles * 3 + j * 3 + k] = q7 * aux_b[6 * num_particles * 3 + j * 3 + k];
+            aux_e[6 * num_particles * 3 + j * 3 + k] =
+                q7 * aux_b[6 * num_particles * 3 + j * 3 + k];
         }
     }
 
@@ -1373,9 +1389,9 @@ IN_FILE void refine_aux_b(
         {
             for (int k = 0; k < 3; k++)
             {
-                aux_b[i * num_particles * 3 + j * 3 + k] = (
-                    aux_e[i * num_particles * 3 + j * 3 + k] + delta_aux_b[i * num_particles * 3 + j * 3 + k]
-                );
+                aux_b[i * num_particles * 3 + j * 3 + k] =
+                    (aux_e[i * num_particles * 3 + j * 3 + k] +
+                     delta_aux_b[i * num_particles * 3 + j * 3 + k]);
             }
         }
     }
