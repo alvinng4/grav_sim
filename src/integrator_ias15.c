@@ -31,21 +31,21 @@
  *
  * \param[out] nodes 1D array of size 8 to be modified
  */
-IN_FILE void initialize_radau_spacing(double *restrict nodes);
+static void initialize_radau_spacing(double *restrict nodes);
 
 /**
  * \brief Initialize the auxiliary coefficients aux_c for IAS15
  *
  * \param[out] aux_c 1D array of length 49 to be modified
  */
-IN_FILE void initialize_aux_c(double *restrict aux_c);
+static void initialize_aux_c(double *restrict aux_c);
 
 /**
  * \brief Initialize auxiliary coefficients aux_r for IAS15
  *
  * \param[out] aux_r 1D array of size 64 to be modified
  */
-IN_FILE void initialize_aux_r(double *restrict aux_r);
+static void initialize_aux_r(double *restrict aux_r);
 
 /**
  * \brief Calculate the initial time step for IAS15 integrator
@@ -61,7 +61,7 @@ IN_FILE void initialize_aux_r(double *restrict aux_r);
  * \exception GRAV_MEMORY_ERROR if failed to allocate memory for arrays
  * \exception GRAV_VALUE_ERROR if initial_dt is negative
  */
-IN_FILE ErrorStatus ias15_initial_dt(
+static ErrorStatus ias15_initial_dt(
     double *restrict initial_dt,
     const int power,
     const System *restrict system,
@@ -83,7 +83,7 @@ IN_FILE ErrorStatus ias15_initial_dt(
  * \param[in] x_err_comp_sum Array of round off errors of position vectors
  *                       for compensated summation
  */
-IN_FILE void approx_pos_pc(
+static void approx_pos_pc(
     double *restrict x,
     const int num_particles,
     const double *restrict x0,
@@ -108,7 +108,7 @@ IN_FILE void approx_pos_pc(
  * \param[in] v_err_comp_sum Array of round off errors of velocity vectors
  *                       for compensated summation
  */
-IN_FILE void approx_vel_pc(
+static void approx_vel_pc(
     double *restrict v,
     const int num_particles,
     const double *restrict v0,
@@ -131,7 +131,7 @@ IN_FILE void approx_vel_pc(
  * \param[in] aux_b Auxiliary coefficients b
  * \param[in] dt Current time step of the system
  */
-IN_FILE void approx_pos_step(
+static void approx_pos_step(
     double *restrict x,
     double *restrict temp_x_err_comp_sum,
     const int num_particles,
@@ -153,7 +153,7 @@ IN_FILE void approx_pos_step(
  * \param[in] aux_b Auxiliary coefficients b
  * \param[in] dt Current time step of the system
  */
-IN_FILE void approx_vel_step(
+static void approx_vel_step(
     double *restrict v,
     double *restrict temp_v_err_comp_sum,
     const int num_particles,
@@ -173,7 +173,7 @@ IN_FILE void approx_vel_step(
  * \param[in] aux_c Array of auxiliary coefficients c
  * \param[in] i Current iteration of nodes of the predictor-corrector algorithm
  */
-IN_FILE void compute_aux_b(
+static void compute_aux_b(
     double *restrict aux_b,
     const int num_particles,
     const int dim_nodes_minus_1,
@@ -193,7 +193,7 @@ IN_FILE void compute_aux_b(
  * \param[in] i Current iteration of nodes of the predictor-corrector algorithm
  * \param[in] F Helper array for this function
  */
-IN_FILE void compute_aux_g(
+static void compute_aux_g(
     double *restrict aux_g,
     const int num_particles,
     const int dim_nodes,
@@ -215,7 +215,7 @@ IN_FILE void compute_aux_g(
  * \param[in] dt_new Next Time Step of the system
  * \param[in] refine_flag Helper flag for this function
  */
-IN_FILE void refine_aux_b(
+static void refine_aux_b(
     double *restrict aux_b,
     double *restrict aux_e,
     double *restrict delta_aux_b,
@@ -618,7 +618,7 @@ err_aux_memory:
     return error_status;
 }
 
-IN_FILE void initialize_radau_spacing(double *restrict nodes)
+static void initialize_radau_spacing(double *restrict nodes)
 {
     nodes[0] = 0.0L;
     nodes[1] = 0.056262560536922146465652191032L;
@@ -630,7 +630,7 @@ IN_FILE void initialize_radau_spacing(double *restrict nodes)
     nodes[7] = 0.977520613561287501891174500429L;
 }
 
-IN_FILE void initialize_aux_c(double *restrict aux_c)
+static void initialize_aux_c(double *restrict aux_c)
 {
     for (int i = 0; i < 7; i++)
     {
@@ -703,7 +703,7 @@ void initialize_aux_r(double *restrict aux_r)
     aux_r[7 * 8 + 6] = 10.846026190236844684706431007823415424143683137181L;
 }
 
-IN_FILE ErrorStatus ias15_initial_dt(
+static ErrorStatus ias15_initial_dt(
     double *restrict initial_dt,
     const int power,
     const System *restrict system,
@@ -803,7 +803,7 @@ error_memory:
     return error_status;
 }
 
-IN_FILE void approx_pos_pc(
+static void approx_pos_pc(
     double *restrict x,
     const int num_particles,
     const double *restrict x0,
@@ -862,7 +862,7 @@ IN_FILE void approx_pos_pc(
     }
 }
 
-IN_FILE void approx_vel_pc(
+static void approx_vel_pc(
     double *restrict v,
     const int num_particles,
     const double *restrict v0,
@@ -913,7 +913,7 @@ IN_FILE void approx_vel_pc(
     }
 }
 
-IN_FILE void approx_pos_step(
+static void approx_pos_step(
     double *restrict x,
     double *restrict temp_x_err_comp_sum,
     const int num_particles,
@@ -947,7 +947,7 @@ IN_FILE void approx_pos_step(
     }
 }
 
-IN_FILE void approx_vel_step(
+static void approx_vel_step(
     double *restrict v,
     double *restrict temp_v_err_comp_sum,
     const int num_particles,
@@ -975,7 +975,7 @@ IN_FILE void approx_vel_step(
     }
 }
 
-IN_FILE void compute_aux_b(
+static void compute_aux_b(
     double *restrict aux_b,
     const int num_particles,
     const int dim_nodes_minus_1,
@@ -1128,7 +1128,7 @@ IN_FILE void compute_aux_b(
     }
 }
 
-IN_FILE void compute_aux_g(
+static void compute_aux_g(
     double *restrict aux_g,
     const int num_particles,
     const int dim_nodes,
@@ -1294,7 +1294,7 @@ IN_FILE void compute_aux_g(
     }
 }
 
-IN_FILE void refine_aux_b(
+static void refine_aux_b(
     double *restrict aux_b,
     double *restrict aux_e,
     double *restrict delta_aux_b,

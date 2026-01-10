@@ -37,7 +37,7 @@
  *
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus euler(
+static ErrorStatus euler(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -60,7 +60,7 @@ IN_FILE ErrorStatus euler(
  *
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus euler_cromer(
+static ErrorStatus euler_cromer(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -83,7 +83,7 @@ IN_FILE ErrorStatus euler_cromer(
  *
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus
+static ErrorStatus
 rk4(System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -105,7 +105,7 @@ rk4(System *restrict system,
  *
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus leapfrog(
+static ErrorStatus leapfrog(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -283,7 +283,7 @@ WIN32DLL_API ErrorStatus integrator_launch_simulation(
     }
 }
 
-IN_FILE ErrorStatus euler(
+static ErrorStatus euler(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -456,7 +456,7 @@ err_memory:
     return error_status;
 }
 
-IN_FILE ErrorStatus euler_cromer(
+static ErrorStatus euler_cromer(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -628,7 +628,7 @@ err_memory:
     return error_status;
 }
 
-IN_FILE ErrorStatus
+static ErrorStatus
 rk4(System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -869,7 +869,7 @@ err_memory:
     return error_status;
 }
 
-IN_FILE ErrorStatus leapfrog(
+static ErrorStatus leapfrog(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,

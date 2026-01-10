@@ -33,7 +33,7 @@
  *
  * \exception GRAV_VALUE_ERROR if the given method is invalid
  */
-IN_FILE ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
+static ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
 {
     *order = 0;
     switch (method)
@@ -74,7 +74,7 @@ IN_FILE ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
  * \exception GRAV_MEMORY_ERROR if failed to allocate memory for coeff, weights and
  * weights_test
  */
-IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
+static ErrorStatus rk_embedded_butcher_tableaus(
     const int order,
     int *restrict power,
     int *restrict power_test,
@@ -612,7 +612,7 @@ IN_FILE ErrorStatus rk_embedded_butcher_tableaus(
  * \exception GRAV_MEMORY_ERROR if failed to allocate memory for arrays
  * \exception GRAV_VALUE_ERROR if initial_dt is negative
  */
-IN_FILE ErrorStatus rk_embedded_initial_dt(
+static ErrorStatus rk_embedded_initial_dt(
     double *restrict initial_dt,
     const double rel_tolerance,
     const double abs_tolerance,

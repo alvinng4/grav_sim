@@ -43,7 +43,7 @@
  *
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus output_snapshot_csv(
+static ErrorStatus output_snapshot_csv(
     OutputParam *output_param,
     const System *system,
     const IntegratorParam *integrator_param,
@@ -65,7 +65,7 @@ IN_FILE ErrorStatus output_snapshot_csv(
  *
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus output_snapshot_hdf5(
+static ErrorStatus output_snapshot_hdf5(
     OutputParam *output_param,
     const System *system,
     const IntegratorParam *integrator_param,
@@ -74,7 +74,7 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     const Settings *settings
 );
 
-IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
+static ErrorStatus output_snapshot_cosmology_hdf5(
     OutputParam *output_param,
     const CosmologicalSystem *system,
     const SimulationStatus *simulation_status,
@@ -97,7 +97,7 @@ OutputParam get_new_output_param(void)
     return output_param;
 }
 
-IN_FILE ErrorStatus check_output_method(const int output_method)
+static ErrorStatus check_output_method(const int output_method)
 {
     switch (output_method)
     {
@@ -375,7 +375,7 @@ WIN32DLL_API ErrorStatus output_snapshot_cosmology(
     return make_success_error_status();
 }
 
-IN_FILE ErrorStatus output_snapshot_csv(
+static ErrorStatus output_snapshot_csv(
     OutputParam *restrict output_param,
     const System *restrict system,
     const IntegratorParam *restrict integrator_param,
@@ -523,7 +523,7 @@ err_output_dir_null:
 }
 
 #ifdef USE_HDF5
-IN_FILE ErrorStatus output_snapshot_hdf5(
+static ErrorStatus output_snapshot_hdf5(
     OutputParam *restrict output_param,
     const System *restrict system,
     const IntegratorParam *restrict integrator_param,
@@ -875,7 +875,7 @@ err_output_dir_null:
     return error_status;
 }
 
-IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
+static ErrorStatus output_snapshot_cosmology_hdf5(
     OutputParam *restrict output_param,
     const CosmologicalSystem *restrict system,
     const SimulationStatus *restrict simulation_status,

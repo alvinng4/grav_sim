@@ -43,7 +43,7 @@
  * \param estimated_time_remaining Estimated time remaining in seconds
  * \param is_end Whether the progress bar is at the end
  */
-IN_FILE void print_progress_bar(
+static void print_progress_bar(
     const ProgressBarParam *restrict progress_bar_param,
     double percent,
     const double estimated_time_remaining,
@@ -202,7 +202,7 @@ error:
     return error_status;
 }
 
-IN_FILE time_t least_squares_regression_remaining_time(
+static time_t least_squares_regression_remaining_time(
     const ProgressBarParam *restrict progress_bar_param, const double diff_now_start
 )
 {
