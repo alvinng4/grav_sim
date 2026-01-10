@@ -22,7 +22,7 @@
 #define PURPLE_BRIGHT "\033[0;95m"
 #define PURPLE_BRIGHT_BOLD "\033[1;95m"
 
-WIN32DLL_API ErrorStatus make_success_error_status(void)
+ErrorStatus make_success_error_status(void)
 {
     ErrorStatus error_status = {
         .return_code = GRAV_SUCCESS,
@@ -32,7 +32,7 @@ WIN32DLL_API ErrorStatus make_success_error_status(void)
     return error_status;
 }
 
-WIN32DLL_API void raise_warning(
+void raise_warning(
     const char *restrict warning_file,
     const int warning_line,
     const char *restrict warning_func,
@@ -59,7 +59,7 @@ WIN32DLL_API void raise_warning(
     );
 }
 
-WIN32DLL_API ErrorStatus raise_warning_fmt(
+ErrorStatus raise_warning_fmt(
     const char *restrict warning_file,
     const int warning_line,
     const char *restrict warning_func,
@@ -106,7 +106,7 @@ WIN32DLL_API ErrorStatus raise_warning_fmt(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus raise_error(
+ErrorStatus raise_error(
     const char *restrict error_file,
     const int error_line,
     const char *restrict error_func,
@@ -216,7 +216,7 @@ err_memory_alloc:
     return error_status;
 }
 
-WIN32DLL_API ErrorStatus raise_error_fmt(
+ErrorStatus raise_error_fmt(
     const char *restrict error_file,
     const int error_line,
     const char *restrict error_func,
@@ -360,7 +360,7 @@ err_malloc:
     return error_status;
 }
 
-WIN32DLL_API ErrorStatus traceback(
+ErrorStatus traceback(
     ErrorStatus error_status,
     const char *restrict function_call_source_code,
     const char *restrict error_file,
@@ -439,7 +439,7 @@ WIN32DLL_API ErrorStatus traceback(
     return error_status;
 }
 
-WIN32DLL_API void free_traceback(ErrorStatus *restrict error_status)
+void free_traceback(ErrorStatus *restrict error_status)
 {
     if (error_status->traceback)
     {
@@ -448,7 +448,7 @@ WIN32DLL_API void free_traceback(ErrorStatus *restrict error_status)
     }
 }
 
-WIN32DLL_API void print_and_free_traceback(ErrorStatus *restrict error_status)
+void print_and_free_traceback(ErrorStatus *restrict error_status)
 {
     fprintf(
         stderr,

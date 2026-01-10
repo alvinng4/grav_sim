@@ -115,7 +115,7 @@ static ErrorStatus leapfrog(
     const double tf
 );
 
-WIN32DLL_API IntegratorParam get_new_integrator_param(void)
+IntegratorParam get_new_integrator_param(void)
 {
     IntegratorParam integrator_param = {
         .integrator = -1,
@@ -127,8 +127,7 @@ WIN32DLL_API IntegratorParam get_new_integrator_param(void)
     return integrator_param;
 }
 
-WIN32DLL_API ErrorStatus
-finalize_integration_param(IntegratorParam *restrict integration_param)
+ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_param)
 {
     if (!integration_param)
     {
@@ -193,7 +192,7 @@ finalize_integration_param(IntegratorParam *restrict integration_param)
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus integrator_launch_simulation(
+ErrorStatus integrator_launch_simulation(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,

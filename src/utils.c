@@ -16,14 +16,14 @@
 #include "system.h"
 #include "utils.h"
 
-WIN32DLL_API double grav_get_current_time(void)
+double grav_get_current_time(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (double)ts.tv_sec + (double)ts.tv_nsec / 1.0e9;
 }
 
-WIN32DLL_API double compute_energy(const System *restrict system)
+double compute_energy(const System *restrict system)
 {
     const double *restrict x = system->x;
     const double *restrict v = system->v;
@@ -54,7 +54,7 @@ WIN32DLL_API double compute_energy(const System *restrict system)
     return energy;
 }
 
-WIN32DLL_API pcg32_random_t init_pcg_rng(void)
+pcg32_random_t init_pcg_rng(void)
 {
     pcg32_random_t rng;
     pcg32_srandom_r(&rng, time(NULL), (intptr_t)&rng);
@@ -62,8 +62,7 @@ WIN32DLL_API pcg32_random_t init_pcg_rng(void)
     return rng;
 }
 
-WIN32DLL_API double
-grav_randrange(const double min, const double max, pcg32_random_t *rng)
+double grav_randrange(const double min, const double max, pcg32_random_t *rng)
 {
     // Generate a random number in the range [0, 1)
     const double random_number = ldexp(pcg32_random_r(rng), -32);
@@ -72,7 +71,7 @@ grav_randrange(const double min, const double max, pcg32_random_t *rng)
     return min + (max - min) * random_number;
 }
 
-WIN32DLL_API void keplerian_to_cartesian(
+void keplerian_to_cartesian(
     double *restrict x,
     double *restrict v,
     const double semi_major_axis,

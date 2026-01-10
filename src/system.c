@@ -21,7 +21,7 @@ typedef struct
     double distance;
 } HelperSystemSortByDistanceStruct;
 
-WIN32DLL_API System get_new_system(void)
+System get_new_system(void)
 {
     System system;
     system.num_particles = 0;
@@ -33,8 +33,7 @@ WIN32DLL_API System get_new_system(void)
     return system;
 }
 
-WIN32DLL_API ErrorStatus
-get_initialized_system(System *restrict system, const int num_particles)
+ErrorStatus get_initialized_system(System *restrict system, const int num_particles)
 {
     if (!system)
     {
@@ -65,7 +64,7 @@ get_initialized_system(System *restrict system, const int num_particles)
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus finalize_system(System *restrict system)
+ErrorStatus finalize_system(System *restrict system)
 {
     if (!system)
     {
@@ -116,7 +115,7 @@ WIN32DLL_API ErrorStatus finalize_system(System *restrict system)
     return make_success_error_status();
 }
 
-WIN32DLL_API void free_system(System *restrict system)
+void free_system(System *restrict system)
 {
     free(system->particle_ids);
     free(system->x);
@@ -124,7 +123,7 @@ WIN32DLL_API void free_system(System *restrict system)
     free(system->m);
 }
 
-WIN32DLL_API CosmologicalSystem get_new_cosmological_system(void)
+CosmologicalSystem get_new_cosmological_system(void)
 {
     CosmologicalSystem system;
     system.num_particles = 0;
@@ -147,7 +146,7 @@ WIN32DLL_API CosmologicalSystem get_new_cosmological_system(void)
     return system;
 }
 
-WIN32DLL_API ErrorStatus get_initialized_cosmological_system(
+ErrorStatus get_initialized_cosmological_system(
     CosmologicalSystem *restrict system, const int num_particles
 )
 {
@@ -179,8 +178,7 @@ WIN32DLL_API ErrorStatus get_initialized_cosmological_system(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus
-finalize_cosmological_system(CosmologicalSystem *restrict system)
+ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
 {
     if (!system)
     {
@@ -279,7 +277,7 @@ finalize_cosmological_system(CosmologicalSystem *restrict system)
     return make_success_error_status();
 }
 
-WIN32DLL_API void free_cosmological_system(CosmologicalSystem *restrict system)
+void free_cosmological_system(CosmologicalSystem *restrict system)
 {
     free(system->particle_ids);
     free(system->x);
@@ -287,7 +285,7 @@ WIN32DLL_API void free_cosmological_system(CosmologicalSystem *restrict system)
     free(system->m);
 }
 
-WIN32DLL_API ErrorStatus check_invalid_idx_double(
+ErrorStatus check_invalid_idx_double(
     bool *restrict has_invalid_idx,
     int **invalid_idx_array,
     const double *restrict array,
@@ -353,7 +351,7 @@ WIN32DLL_API ErrorStatus check_invalid_idx_double(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus check_and_remove_invalid_particles(
+ErrorStatus check_and_remove_invalid_particles(
     System *restrict system, const Settings *restrict settings
 )
 {
@@ -434,7 +432,7 @@ err_memory:
     return error_status;
 }
 
-WIN32DLL_API ErrorStatus remove_invalid_particles(
+ErrorStatus remove_invalid_particles(
     System *restrict system,
     const int *restrict remove_idx_list,
     const int num_to_remove,
@@ -485,7 +483,7 @@ WIN32DLL_API ErrorStatus remove_invalid_particles(
     return WRAP_TRACEBACK(remove_particles(system, remove_idx_list, num_to_remove));
 }
 
-WIN32DLL_API ErrorStatus remove_particles(
+ErrorStatus remove_particles(
     System *restrict system,
     const int *restrict remove_idx_list,
     const int num_to_remove
@@ -575,7 +573,7 @@ WIN32DLL_API ErrorStatus remove_particles(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus remove_particle_from_double_arr(
+ErrorStatus remove_particle_from_double_arr(
     double *restrict arr,
     const int *restrict remove_idx_list,
     const int num_to_remove,
@@ -626,7 +624,7 @@ WIN32DLL_API ErrorStatus remove_particle_from_double_arr(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus initialize_built_in_system(
+ErrorStatus initialize_built_in_system(
     System *restrict system,
     const char *restrict system_name,
     const bool is_memory_initialized
@@ -1239,7 +1237,7 @@ WIN32DLL_API ErrorStatus initialize_built_in_system(
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus system_set_center_of_mass_zero(System *restrict system)
+ErrorStatus system_set_center_of_mass_zero(System *restrict system)
 {
     if (!system)
     {
@@ -1292,7 +1290,7 @@ WIN32DLL_API ErrorStatus system_set_center_of_mass_zero(System *restrict system)
     return make_success_error_status();
 }
 
-WIN32DLL_API ErrorStatus system_set_total_momentum_zero(System *restrict system)
+ErrorStatus system_set_total_momentum_zero(System *restrict system)
 {
     if (!system)
     {
@@ -1352,7 +1350,7 @@ static int compare_distance(const void *a, const void *b)
     return (d1->distance > d2->distance) - (d1->distance < d2->distance);
 }
 
-WIN32DLL_API ErrorStatus
+ErrorStatus
 system_sort_by_distance(System *restrict system, const int primary_particle_id)
 {
     ErrorStatus error_status;
@@ -1481,7 +1479,7 @@ err_helper_arr_malloc:
     return error_status;
 }
 
-WIN32DLL_API void set_periodic_boundary_conditions(CosmologicalSystem *restrict system)
+void set_periodic_boundary_conditions(CosmologicalSystem *restrict system)
 {
     const int num_particles = system->num_particles;
     double *restrict x = system->x;

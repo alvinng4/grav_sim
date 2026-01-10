@@ -56,7 +56,7 @@ static void print_cosmological_simulation_info(
 );
 #endif
 
-WIN32DLL_API int launch_simulation(
+int launch_simulation(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -150,7 +150,7 @@ error:
     return 1;
 }
 
-WIN32DLL_API int launch_cosmological_simulation(
+int launch_cosmological_simulation(
     CosmologicalSystem *restrict system,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,
@@ -297,7 +297,7 @@ error:
 #endif
 }
 
-WIN32DLL_API const char *get_grav_sim_logo_string(void)
+const char *get_grav_sim_logo_string(void)
 {
     const char *logo =
         ("                                              __                   \n"
@@ -690,7 +690,7 @@ static void print_cosmological_simulation_info(
 }
 #endif
 
-WIN32DLL_API void print_compilation_info(void)
+void print_compilation_info(void)
 {
     const char *new_line = "\n";
     const char *straight_line =

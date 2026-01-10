@@ -5,17 +5,17 @@
 #include "grav_sim.h"
 #include "math_functions.h"
 
-WIN32DLL_API void free_memory_int32(int32 *restrict ptr)
+void free_memory_int32(int32 *restrict ptr)
 {
     free(ptr);
 }
 
-WIN32DLL_API void free_memory_double(double *restrict ptr)
+void free_memory_double(double *restrict ptr)
 {
     free(ptr);
 }
 
-WIN32DLL_API int32 load_built_in_system_python(
+int32 load_built_in_system_python(
     const char *system_name,
     int *num_particles_ptr,
     int32 **particle_ids_ptr,
@@ -48,7 +48,7 @@ err:
     return error_status.return_code;
 }
 
-WIN32DLL_API void keplerian_to_cartesian_python(
+void keplerian_to_cartesian_python(
     double *restrict x,
     double *restrict y,
     double *restrict z,
@@ -87,7 +87,7 @@ WIN32DLL_API void keplerian_to_cartesian_python(
     *v_z = v_arr[2];
 }
 
-WIN32DLL_API int launch_simulation_python(
+int launch_simulation_python(
     int32 *restrict num_particles,
     int32 *particle_ids,
     double *x,
@@ -187,7 +187,7 @@ WIN32DLL_API int launch_simulation_python(
     return 0;
 }
 
-WIN32DLL_API int launch_cosmological_simulation_python(
+int launch_cosmological_simulation_python(
     int32 *restrict num_particles,
     int32 *particle_ids,
     double *x,
@@ -283,7 +283,7 @@ WIN32DLL_API int launch_cosmological_simulation_python(
     return 0;
 }
 
-WIN32DLL_API void compute_energy_python(
+void compute_energy_python(
     double *restrict energy,
     const double G,
     const double *restrict sol_state,
@@ -331,7 +331,7 @@ WIN32DLL_API void compute_energy_python(
     }
 }
 
-WIN32DLL_API void compute_linear_momentum_python(
+void compute_linear_momentum_python(
     double *restrict linear_momentum,
     const double *restrict sol_state,
     const int32 num_snapshots,
@@ -356,7 +356,7 @@ WIN32DLL_API void compute_linear_momentum_python(
     }
 }
 
-WIN32DLL_API void compute_angular_momentum_python(
+void compute_angular_momentum_python(
     double *restrict angular_momentum,
     const double *restrict sol_state,
     const int32 num_snapshots,
