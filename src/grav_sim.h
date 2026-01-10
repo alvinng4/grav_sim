@@ -8,7 +8,7 @@
 #include "common.h"
 
 /* Exception handling */
-#include "error.h"
+#include "c_traceback.h"
 
 /* Integrator */
 #include "integrator.h"

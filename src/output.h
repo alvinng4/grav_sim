@@ -20,8 +20,8 @@
 
 #include <stdbool.h>
 
+#include "c_traceback.h"
 #include "common.h"
-#include "error.h"
 #include "settings.h"
 #include "system.h"
 
@@ -37,10 +37,8 @@ OutputParam get_new_output_param(void);
  *
  * \param output_param Pointer to the output parameters.
  * \param[in] settings Pointer to the settings.
- *
- * \return ErrorStatus
  */
-ErrorStatus finalize_output_param(
+void finalize_output_param(
     OutputParam *restrict output_param, const Settings *restrict settings
 );
 
@@ -53,10 +51,8 @@ ErrorStatus finalize_output_param(
  * \param output_param Pointer to the output parameters.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- *
- * \return ErrorStatus
  */
-ErrorStatus output_snapshot(
+void output_snapshot(
     OutputParam *restrict output_param,
     const System *restrict system,
     const IntegratorParam *restrict integrator_param,
@@ -72,10 +68,8 @@ ErrorStatus output_snapshot(
  * \param system Pointer to the gravitational system.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- *
- * \return ErrorStatus
  */
-ErrorStatus output_snapshot_cosmology(
+void output_snapshot_cosmology(
     OutputParam *restrict output_param,
     const CosmologicalSystem *restrict system,
     const SimulationStatus *restrict simulation_status,

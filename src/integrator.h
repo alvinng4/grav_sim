@@ -10,7 +10,7 @@
 
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "settings.h"
 #include "system.h"
 
@@ -35,8 +35,6 @@ IntegratorParam get_new_integrator_param(void);
 /**
  * \brief Finalize the integrator parameters
  *
- * \return ErrorStatus
- *
  * \exception GRAV_POINTER_ERROR If integrator_param is NULL
  * \exception GRAV_VALUE_ERROR If integrator value is invalid
  * \exception GRAV_VALUE_ERROR If integrator is fixed step size integrators and dt is
@@ -44,7 +42,7 @@ IntegratorParam get_new_integrator_param(void);
  * \exception GRAV_VALUE_ERROR If integrator is adaptive step size integrators and
  * tolerance is not positive
  */
-ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_param);
+void finalize_integration_param(IntegratorParam *restrict integration_param);
 
 /**
  * \brief Launch the simulation with the specified integrator
@@ -61,7 +59,7 @@ ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_par
  * \param settings Pointer to the settings
  * \param tf Simulation time
  */
-ErrorStatus integrator_launch_simulation(
+void integrator_launch_simulation(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -81,10 +79,8 @@ ErrorStatus integrator_launch_simulation(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-ErrorStatus rk_embedded(
+void rk_embedded(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -104,10 +100,8 @@ ErrorStatus rk_embedded(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-ErrorStatus ias15(
+void ias15(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -127,10 +121,8 @@ ErrorStatus ias15(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-ErrorStatus whfast(
+void whfast(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -150,10 +142,8 @@ ErrorStatus whfast(
  * \param a_final Final scale factor
  * \param num_steps Number of steps
  * \param pm_grid_size Size of the PM grid
- *
- * \return ErrorStatus
  */
-ErrorStatus leapfrog_cosmology(
+void leapfrog_cosmology(
     CosmologicalSystem *restrict system,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,

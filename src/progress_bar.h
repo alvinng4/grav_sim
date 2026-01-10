@@ -9,8 +9,8 @@
 #ifndef PROGRESS_BAR_H
 #define PROGRESS_BAR_H
 
+#include "c_traceback.h"
 #include "common.h"
-#include "error.h"
 
 typedef struct ProgressBarParam
 {
@@ -29,7 +29,7 @@ typedef struct ProgressBarParam
  * \param progress_bar_param Pointer to progress bar parameters
  * \param total Total value
  */
-ErrorStatus
+void
 start_progress_bar(ProgressBarParam *restrict progress_bar_param, const double total);
 
 /**
