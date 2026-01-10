@@ -10,7 +10,7 @@
 #include "c_traceback.h"
 
 #include "acceleration.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "math_functions.h"
 #include "system.h"
 

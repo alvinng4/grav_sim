@@ -10,7 +10,7 @@
 #include <time.h>
 
 #include "common.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "math_functions.h"
 #include "pcg_basic.h"
 #include "system.h"

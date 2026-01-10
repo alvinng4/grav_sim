@@ -26,7 +26,7 @@
 
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "integrator.h"
 #include "output.h"
 #include "system.h"
@@ -108,51 +108,41 @@ static ErrorStatus check_output_method(const int output_method)
 #ifdef USE_HDF5
             break;
 #else
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "HDF5 output method is not available"
+            THROW(
+                CTB_MEMORY_ERROR, "HDF5 output method is not available"
             );
 #endif
         default:
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW_FMT(CTB_VALUE_ERROR,
                 "Unknown output method. Got: %d",
                 output_method
             );
         }
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus finalize_output_param(
+void finalize_output_param(
     OutputParam *restrict output_param, const Settings *restrict settings
 )
 {
-    ErrorStatus error_status;
-
-    error_status = WRAP_TRACEBACK(check_output_method(output_param->method));
-    if (error_status.return_code != GRAV_SUCCESS)
+    TRY_GOTO(check_output_method(output_param->method));
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
 
     if (output_param->method == OUTPUT_METHOD_DISABLED)
     {
-        return make_success_error_status();
+        return;
     }
 
     /* Check storing interval */
     if (output_param->output_interval <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Output interval must be positive. Got: %.17g",
             output_param->output_interval
         );
@@ -166,8 +156,8 @@ ErrorStatus finalize_output_param(
         char *output_dir = malloc(path_str_len * sizeof(char));
         if (!output_dir)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to allocate memory for directory path."
+            THROW(
+                CTB_MEMORY_ERROR, "Failed to allocate memory for directory path."
             );
         }
         const time_t raw_time = time(NULL);
@@ -179,11 +169,7 @@ ErrorStatus finalize_output_param(
     {
         if (output_param->output_dir[strlen(output_param->output_dir) - 1] != '/')
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW_FMT(CTB_VALUE_ERROR,
                 "Directory path for storing snapshots must end with a trailing slash "
                 "(\"/\"). Got: \"%s\".",
                 output_param->output_dir
@@ -197,11 +183,7 @@ ErrorStatus finalize_output_param(
     {
         if (GetFileAttributes(output_param->output_dir) == INVALID_FILE_ATTRIBUTES)
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_OS_ERROR,
+            THROW_FMT(CTB_OS_ERROR,
                 "Failed to access path for storing snapshots: \"%s\".",
                 output_param->output_dir
             );
@@ -218,9 +200,9 @@ ErrorStatus finalize_output_param(
                 "overwritten. Directory: \"%s\".",
                 output_param->output_dir
             );
-            if (error_status.return_code != GRAV_SUCCESS)
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
     }
@@ -230,11 +212,7 @@ ErrorStatus finalize_output_param(
     {
         if (stat(output_param->output_dir, &st) != 0)
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_OS_ERROR,
+            THROW_FMT(CTB_OS_ERROR,
                 "Failed to access path for storing snapshots: \"%s\".",
                 output_param->output_dir
             );
@@ -251,18 +229,18 @@ ErrorStatus finalize_output_param(
                 "overwritten. Directory: \"%s\".",
                 output_param->output_dir
             );
-            if (error_status.return_code != GRAV_SUCCESS)
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
     }
 #endif
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus output_snapshot(
+void output_snapshot(
     OutputParam *output_param,
     const System *system,
     const IntegratorParam *integrator_param,
@@ -271,14 +249,14 @@ ErrorStatus output_snapshot(
     const Settings *settings
 )
 {
-    ErrorStatus error_status = make_success_error_status();
+    
 
     switch (output_param->method)
     {
         case OUTPUT_METHOD_DISABLED:
             break;
         case OUTPUT_METHOD_CSV:
-            error_status = WRAP_TRACEBACK(output_snapshot_csv(
+            TRY_GOTO(output_snapshot_csv(
                 output_param,
                 system,
                 integrator_param,
@@ -289,7 +267,7 @@ ErrorStatus output_snapshot(
             break;
         case OUTPUT_METHOD_HDF5:
 #ifdef USE_HDF5
-            error_status = WRAP_TRACEBACK(output_snapshot_hdf5(
+            TRY_GOTO(output_snapshot_hdf5(
                 output_param,
                 system,
                 integrator_param,
@@ -300,32 +278,32 @@ ErrorStatus output_snapshot(
             break;
 #else
             error_status = WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR, "HDF5 output method is not available"
+                CTB_VALUE_ERROR, "HDF5 output method is not available"
             );
             break;
 #endif
         default:
-            error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Unknown output method");
+            THROW(CTB_VALUE_ERROR, "Unknown output method");
             break;
     }
-    if (error_status.return_code != GRAV_SUCCESS)
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
 
     (output_param->output_count_)++;
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus output_snapshot_cosmology(
+void output_snapshot_cosmology(
     OutputParam *output_param,
     const CosmologicalSystem *system,
     const SimulationStatus *simulation_status,
     const Settings *settings
 )
 {
-    ErrorStatus error_status = make_success_error_status();
+    
 
     switch (output_param->method)
     {
@@ -333,13 +311,13 @@ ErrorStatus output_snapshot_cosmology(
             break;
         case OUTPUT_METHOD_CSV:
             error_status = WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+                CTB_VALUE_ERROR,
                 "CSV output method is not supported for cosmological simulation."
             );
             break;
         case OUTPUT_METHOD_HDF5:
 #ifdef USE_HDF5
-            error_status = WRAP_TRACEBACK(output_snapshot_cosmology_hdf5(
+            TRY_GOTO(output_snapshot_cosmology_hdf5(
                 output_param, system, simulation_status, settings
             ));
             break;
@@ -348,7 +326,7 @@ ErrorStatus output_snapshot_cosmology(
             (void)simulation_status;
             (void)settings;
             error_status = WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+                CTB_VALUE_ERROR,
                 "HDF5 output method is not available. Please recompile with HDF5 "
                 "support."
             );
@@ -359,20 +337,20 @@ ErrorStatus output_snapshot_cosmology(
                 __FILE__,
                 __LINE__,
                 __func__,
-                GRAV_VALUE_ERROR,
+                CTB_VALUE_ERROR,
                 "Unknown output method. Got: %d",
                 output_param->method
             );
             break;
     }
-    if (error_status.return_code != GRAV_SUCCESS)
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
 
     (output_param->output_count_)++;
 
-    return make_success_error_status();
+    return;
 }
 
 static ErrorStatus output_snapshot_csv(
@@ -384,16 +362,13 @@ static ErrorStatus output_snapshot_csv(
     const Settings *restrict settings
 )
 {
-    ErrorStatus error_status;
-
     (void)integrator_param;
     (void)acceleration_param;
     (void)settings;
 
     if (!output_param->output_dir)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
+        THROW(CTB_POINTER_ERROR, "Output directory path is NULL.");
         goto err_output_dir_null;
     }
 
@@ -407,7 +382,7 @@ static ErrorStatus output_snapshot_csv(
     if (!file_path)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string."
+            CTB_MEMORY_ERROR, "Failed to allocate memory for file path string."
         );
         goto err_file_path_memory_alloc;
     }
@@ -422,14 +397,14 @@ static ErrorStatus output_snapshot_csv(
     if (actual_file_path_length < 0)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Failed to get storing file path string"
+            CTB_VALUE_ERROR, "Failed to get storing file path string"
         );
         goto err_write_file_path_string;
     }
     else if (actual_file_path_length >= file_path_length)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Storing file path string is truncated."
+            CTB_VALUE_ERROR, "Storing file path string is truncated."
         );
         goto err_write_file_path_string;
     }
@@ -442,7 +417,7 @@ static ErrorStatus output_snapshot_csv(
             __FILE__,
             __LINE__,
             __func__,
-            GRAV_OS_ERROR,
+            CTB_OS_ERROR,
             "Failed to open file for storing snapshots: \"%s\".",
             file_path
         );
@@ -512,14 +487,14 @@ static ErrorStatus output_snapshot_csv(
     fflush(file);
     fclose(file);
 
-    return make_success_error_status();
+    return;
 
 err_open_file:
 err_write_file_path_string:
 err_file_path_memory_alloc:
     free(file_path);
 err_output_dir_null:
-    return error_status;
+    return;
 }
 
 #ifdef USE_HDF5
@@ -532,16 +507,13 @@ static ErrorStatus output_snapshot_hdf5(
     const Settings *restrict settings
 )
 {
-    ErrorStatus error_status;
-
     (void)integrator_param;
     (void)acceleration_param;
     (void)settings;
 
     if (!output_param->output_dir)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
+        THROW(CTB_POINTER_ERROR, "Output directory path is NULL.");
         goto err_output_dir_null;
     }
 
@@ -562,7 +534,7 @@ static ErrorStatus output_snapshot_hdf5(
     if (!file_path)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string."
+            CTB_MEMORY_ERROR, "Failed to allocate memory for file path string."
         );
         goto err_file_path_memory_alloc;
     }
@@ -577,14 +549,14 @@ static ErrorStatus output_snapshot_hdf5(
     if (actual_file_path_length < 0)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Failed to get storing file path string"
+            CTB_VALUE_ERROR, "Failed to get storing file path string"
         );
         goto err_write_file_path_string;
     }
     else if (actual_file_path_length >= file_path_length)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Storing file path string is truncated."
+            CTB_VALUE_ERROR, "Storing file path string is truncated."
         );
         goto err_write_file_path_string;
     }
@@ -597,7 +569,7 @@ static ErrorStatus output_snapshot_hdf5(
             __FILE__,
             __LINE__,
             __func__,
-            GRAV_OS_ERROR,
+            CTB_OS_ERROR,
             "Failed to create HDF5 file for storing snapshots: \"%s\".",
             file_path
         );
@@ -613,7 +585,7 @@ static ErrorStatus output_snapshot_hdf5(
     {
         H5Gclose(header_group);
         H5Gclose(part_type_0_group);
-        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 groups.");
+        THROW(CTB_OS_ERROR, "Failed to create HDF5 groups.");
         goto err_create_hdf5_group;
     }
 
@@ -628,8 +600,7 @@ static ErrorStatus output_snapshot_hdf5(
         dataspace_1d_objects_count == H5I_INVALID_HID ||
         dataspace_3d_objects_count == H5I_INVALID_HID)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 dataspace.");
+        THROW(CTB_OS_ERROR, "Failed to create HDF5 dataspace.");
         goto err_create_hdf5_dataspace;
     }
 
@@ -679,7 +650,7 @@ static ErrorStatus output_snapshot_hdf5(
         header_attr_G == H5I_INVALID_HID)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_OS_ERROR, "Failed to create HDF5 attribute for header."
+            CTB_OS_ERROR, "Failed to create HDF5 attribute for header."
         );
         goto err_create_hdf5_header_attr;
     }
@@ -778,8 +749,7 @@ static ErrorStatus output_snapshot_hdf5(
         part_type_0_dataset_coordinates == H5I_INVALID_HID ||
         part_type_0_dataset_velocities == H5I_INVALID_HID)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 datasets.");
+        THROW(CTB_OS_ERROR, "Failed to create HDF5 datasets.");
         goto err_create_hdf5_datasets;
     }
 
@@ -845,7 +815,7 @@ static ErrorStatus output_snapshot_hdf5(
 
     H5Fclose(file);
 
-    return make_success_error_status();
+    return;
 
     H5Dclose(part_type_0_dataset_part_ids);
     H5Dclose(part_type_0_dataset_masses);
@@ -872,7 +842,7 @@ err_write_file_path_string:
 err_file_path_memory_alloc:
     free(file_path);
 err_output_dir_null:
-    return error_status;
+    return;
 }
 
 static ErrorStatus output_snapshot_cosmology_hdf5(
@@ -882,14 +852,11 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
     const Settings *restrict settings
 )
 {
-    ErrorStatus error_status;
-
     (void)settings;
 
     if (!output_param->output_dir)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
+        THROW(CTB_POINTER_ERROR, "Output directory path is NULL.");
         goto err_output_dir_null;
     }
 
@@ -910,7 +877,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
     if (!file_path)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string."
+            CTB_MEMORY_ERROR, "Failed to allocate memory for file path string."
         );
         goto err_file_path_memory_alloc;
     }
@@ -925,14 +892,14 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
     if (actual_file_path_length < 0)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Failed to get storing file path string"
+            CTB_VALUE_ERROR, "Failed to get storing file path string"
         );
         goto err_write_file_path_string;
     }
     else if (actual_file_path_length >= file_path_length)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Storing file path string is truncated."
+            CTB_VALUE_ERROR, "Storing file path string is truncated."
         );
         goto err_write_file_path_string;
     }
@@ -945,7 +912,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
             __FILE__,
             __LINE__,
             __func__,
-            GRAV_OS_ERROR,
+            CTB_OS_ERROR,
             "Failed to create HDF5 snapshot file: \"%s\".",
             file_path
         );
@@ -965,7 +932,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
         H5Gclose(header_group);
         H5Gclose(part_type_0_group);
         H5Gclose(units_group);
-        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 groups.");
+        THROW(CTB_OS_ERROR, "Failed to create HDF5 groups.");
         goto err_create_hdf5_group;
     }
 
@@ -981,8 +948,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
         dataspace_1d_objects_count == H5I_INVALID_HID ||
         dataspace_3d_objects_count == H5I_INVALID_HID)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 dataspace.");
+        THROW(CTB_OS_ERROR, "Failed to create HDF5 dataspace.");
         goto err_create_hdf5_dataspace;
     }
 
@@ -1052,7 +1018,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
         header_attr_omega_lambda == H5I_INVALID_HID)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_OS_ERROR, "Failed to create HDF5 attribute for header."
+            CTB_OS_ERROR, "Failed to create HDF5 attribute for header."
         );
         goto err_create_hdf5_header_attr;
     }
@@ -1151,8 +1117,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
         part_type_0_dataset_coordinates == H5I_INVALID_HID ||
         part_type_0_dataset_velocities == H5I_INVALID_HID)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 datasets.");
+        THROW(CTB_OS_ERROR, "Failed to create HDF5 datasets.");
         goto err_create_hdf5_datasets;
     }
 
@@ -1204,7 +1169,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
         units_attr_temperature_unit == H5I_INVALID_HID)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_OS_ERROR, "Failed to create HDF5 attribute for units."
+            CTB_OS_ERROR, "Failed to create HDF5 attribute for units."
         );
         goto err_create_hdf5_units_attr;
     }
@@ -1291,7 +1256,7 @@ static ErrorStatus output_snapshot_cosmology_hdf5(
 
     H5Fclose(file);
 
-    return make_success_error_status();
+    return;
 
     H5Aclose(units_attr_current_unit);
     H5Aclose(units_attr_length_unit);
@@ -1326,6 +1291,6 @@ err_write_file_path_string:
 err_file_path_memory_alloc:
     free(file_path);
 err_output_dir_null:
-    return error_status;
+    return;
 }
 #endif

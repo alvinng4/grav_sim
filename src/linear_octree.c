@@ -16,7 +16,7 @@
 
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "linear_octree.h"
 
 // // For debug only
@@ -211,7 +211,7 @@ static void compute_3d_particle_morton_indices_deepest_level(
  *
  * \return ErrorStatus
  *
- * \exception GRAV_MEMORY_ERROR if memory allocation for temporary arrays failed
+ * \exception CTB_MEMORY_ERROR if memory allocation for temporary arrays failed
  */
 static ErrorStatus radix_sort_particles_morton_index(
     int64 *restrict morton_indices,
@@ -238,8 +238,8 @@ static ErrorStatus radix_sort_particles_morton_index(
         free(temp_morton_indices);
         free(temp_indices);
 
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for temporary arrays"
+        THROW(
+            CTB_MEMORY_ERROR, "Failed to allocate memory for temporary arrays"
         );
     }
 
@@ -322,7 +322,7 @@ static ErrorStatus radix_sort_particles_morton_index(
     free(temp_morton_indices);
     free(temp_indices);
 
-    return make_success_error_status();
+    return;
 }
 
 /**
@@ -339,7 +339,7 @@ static ErrorStatus radix_sort_particles_morton_index(
  *
  * \return ErrorStatus
  *
- * \exception GRAV_VALUE_ERROR if the Morton index is out of range
+ * \exception CTB_VALUE_ERROR if the Morton index is out of range
  */
 static ErrorStatus binary_search_num_particles_per_octant(
     int *restrict num_particles_per_octant,
@@ -368,11 +368,7 @@ static ErrorStatus binary_search_num_particles_per_octant(
 
             if (mid_octant > 7 || mid_octant < 0)
             {
-                return raise_error_fmt(
-                    __FILE__,
-                    __LINE__,
-                    __func__,
-                    GRAV_VALUE_ERROR,
+                THROW_FMT(CTB_VALUE_ERROR,
                     "Morton index %d is out of range [0, 7]",
                     mid_octant
                 );
@@ -398,7 +394,7 @@ static ErrorStatus binary_search_num_particles_per_octant(
         }
     }
 
-    return make_success_error_status();
+    return;
 }
 
 /**
@@ -421,8 +417,6 @@ static ErrorStatus setup_node(
     const int64 node_morton_index_level
 )
 {
-    ErrorStatus error_status;
-
     /* Declare variables */
     int *restrict num_internal_nodes_ptr = &octree->num_internal_nodes;
     int *restrict tree_num_particles = octree->tree_num_particles;
@@ -443,7 +437,7 @@ static ErrorStatus setup_node(
     const int start_idx = tree_first_particle_sorted_idx[node];
     const int end_idx = start_idx + tree_num_particles[node] - 1;
     const int child_level = level + 1;
-    error_status = WRAP_TRACEBACK(binary_search_num_particles_per_octant(
+    TRY_GOTO(binary_search_num_particles_per_octant(
         num_particles_per_octant,
         octree->particle_morton_indices_deepest_level,
         node_morton_index_level,
@@ -451,9 +445,9 @@ static ErrorStatus setup_node(
         end_idx,
         child_level
     ));
-    if (error_status.return_code != GRAV_SUCCESS)
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
 
     /* Set up child nodes */
@@ -477,8 +471,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_num_particles)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_num_particles"
                 );
             }
@@ -490,8 +484,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_num_internal_children)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_num_internal_children"
                 );
             }
@@ -504,8 +498,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_first_particle_sorted_idx)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_first_particle_sorted_idx"
                 );
             }
@@ -518,8 +512,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_first_internal_children_idx)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_first_internal_children_idx"
                 );
             }
@@ -531,8 +525,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_mass)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR, "Failed to reallocate memory for tree_mass"
+                THROW(
+                    CTB_MEMORY_ERROR, "Failed to reallocate memory for tree_mass"
                 );
             }
             tree_mass = tmp_tree_mass;
@@ -544,8 +538,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_center_of_mass_x)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_center_of_mass_x"
                 );
             }
@@ -558,8 +552,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_center_of_mass_y)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_center_of_mass_y"
                 );
             }
@@ -572,8 +566,8 @@ static ErrorStatus setup_node(
             );
             if (!tmp_tree_center_of_mass_z)
             {
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for tree_center_of_mass_z"
                 );
             }
@@ -604,7 +598,7 @@ static ErrorStatus setup_node(
         cumulative_count += num_particles_per_octant[i];
     }
 
-    return make_success_error_status();
+    return;
 }
 
 /**
@@ -636,9 +630,6 @@ static ErrorStatus helper_construct_octree(
         double mass_times_distance[3];
         struct Stack *parent;
     } Stack;
-
-    ErrorStatus error_status;
-
     /* Create a stack */
     Stack stack[MORTON_MAX_LEVEL + 1];
     Stack *restrict current_stack = &(stack[0]);
@@ -669,12 +660,12 @@ static ErrorStatus helper_construct_octree(
     octree->tree_center_of_mass_y[0] = 0.0;
     octree->tree_center_of_mass_z[0] = 0.0;
 
-    error_status = WRAP_TRACEBACK(
+    TRY_GOTO(
         setup_node(octree, &allocated_internal_nodes, level, current_stack->node, 0)
     );
-    if (error_status.return_code != GRAV_SUCCESS)
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
     level++;
 
@@ -719,16 +710,16 @@ static ErrorStatus helper_construct_octree(
                 const int64 child_morton_index_level =
                     (particle_morton_indices_deepest_level[start_idx] >>
                      (3 * (MORTON_MAX_LEVEL - level)));
-                error_status = WRAP_TRACEBACK(setup_node(
+                TRY_GOTO(setup_node(
                     octree,
                     &allocated_internal_nodes,
                     level,
                     child,
                     child_morton_index_level
                 ));
-                if (error_status.return_code != GRAV_SUCCESS)
+                if (error_status.return_code != CTB_SUCCESS)
                 {
-                    return error_status;
+                    return;
                 }
 
                 Stack *restrict new_item = &(stack[level + 1]);
@@ -784,8 +775,8 @@ static ErrorStatus helper_construct_octree(
             realloc(octree->tree_num_particles, *num_internal_nodes_ptr * sizeof(int));
         if (!tmp_tree_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to reallocate memory for tree_num_particles"
+            THROW(
+                CTB_MEMORY_ERROR, "Failed to reallocate memory for tree_num_particles"
             );
         }
         octree->tree_num_particles = tmp_tree_num_particles;
@@ -795,8 +786,8 @@ static ErrorStatus helper_construct_octree(
         );
         if (!tmp_tree_num_internal_children)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR,
+            THROW(
+                CTB_MEMORY_ERROR,
                 "Failed to reallocate memory for tree_num_internal_children"
             );
         }
@@ -808,8 +799,8 @@ static ErrorStatus helper_construct_octree(
         );
         if (!tmp_tree_first_particle_sorted_idx)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR,
+            THROW(
+                CTB_MEMORY_ERROR,
                 "Failed to reallocate memory for tree_first_particle_sorted_idx"
             );
         }
@@ -821,8 +812,8 @@ static ErrorStatus helper_construct_octree(
         );
         if (!tmp_tree_first_internal_children_idx)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR,
+            THROW(
+                CTB_MEMORY_ERROR,
                 "Failed to reallocate memory for tree_first_internal_children_idx"
             );
         }
@@ -832,8 +823,8 @@ static ErrorStatus helper_construct_octree(
             realloc(octree->tree_mass, *num_internal_nodes_ptr * sizeof(double));
         if (!tmp_tree_mass)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to reallocate memory for tree_mass"
+            THROW(
+                CTB_MEMORY_ERROR, "Failed to reallocate memory for tree_mass"
             );
         }
         octree->tree_mass = tmp_tree_mass;
@@ -843,8 +834,8 @@ static ErrorStatus helper_construct_octree(
         );
         if (!tmp_tree_center_of_mass_x)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR,
+            THROW(
+                CTB_MEMORY_ERROR,
                 "Failed to reallocate memory for tree_center_of_mass_x"
             );
         }
@@ -855,8 +846,8 @@ static ErrorStatus helper_construct_octree(
         );
         if (!tmp_tree_center_of_mass_y)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR,
+            THROW(
+                CTB_MEMORY_ERROR,
                 "Failed to reallocate memory for tree_center_of_mass_y"
             );
         }
@@ -867,18 +858,18 @@ static ErrorStatus helper_construct_octree(
         );
         if (!tmp_tree_center_of_mass_z)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR,
+            THROW(
+                CTB_MEMORY_ERROR,
                 "Failed to reallocate memory for tree_center_of_mass_z"
             );
         }
         octree->tree_center_of_mass_z = tmp_tree_center_of_mass_z;
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus construct_octree(
+void construct_octree(
     LinearOctree *restrict octree,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param,
@@ -886,21 +877,19 @@ ErrorStatus construct_octree(
     const double box_width
 )
 {
-    ErrorStatus error_status;
-
     /* Check for pointers */
     if (!octree)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Octree pointer is NULL");
+        THROW(CTB_POINTER_ERROR, "Octree pointer is NULL");
     }
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System pointer is NULL");
+        THROW(CTB_POINTER_ERROR, "System pointer is NULL");
     }
     if (!acceleration_param)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_POINTER_ERROR, "Acceleration parameter pointer is NULL"
+        THROW(
+            CTB_POINTER_ERROR, "Acceleration parameter pointer is NULL"
         );
     }
 
@@ -933,7 +922,7 @@ ErrorStatus construct_octree(
     if (!octree->particle_morton_indices_deepest_level || !octree->sorted_indices)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
+            CTB_MEMORY_ERROR,
             "Failed to allocate memory for Morton indices and sorted indices"
         );
         goto err_indices_memory_alloc;
@@ -960,7 +949,7 @@ ErrorStatus construct_octree(
         !octree->tree_center_of_mass_z)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for internal nodes"
+            CTB_MEMORY_ERROR, "Failed to allocate memory for internal nodes"
         );
         goto err_internal_nodes_memory_alloc;
     }
@@ -981,32 +970,24 @@ ErrorStatus construct_octree(
     );
 
     /* Sort the particles based on their Morton indices */
-    error_status = WRAP_TRACEBACK(radix_sort_particles_morton_index(
+    TRY_GOTO(radix_sort_particles_morton_index(
         octree->particle_morton_indices_deepest_level,
         octree->sorted_indices,
         num_particles,
         MORTON_MAX_LEVEL
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_radix_sort;
-    }
+    ), err_radix_sort);
 
     /* Construct the octree */
-    error_status = WRAP_TRACEBACK(helper_construct_octree(
+    TRY_GOTO(helper_construct_octree(
         octree,
         allocated_internal_nodes,
         max_num_particles_per_leaf,
         num_particles,
         x,
         m
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_construct_octree;
-    }
+    ), err_construct_octree);
 
-    return make_success_error_status();
+    return;
 
 err_construct_octree:
 err_radix_sort:
@@ -1014,7 +995,7 @@ err_internal_nodes_memory_alloc:
 err_indices_memory_alloc:
     free_linear_octree(octree);
 
-    return error_status;
+    return;
 }
 
 void free_linear_octree(LinearOctree *restrict octree)

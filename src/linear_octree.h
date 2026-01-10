@@ -68,10 +68,8 @@ LinearOctree get_new_linear_octree(void);
  * \param octree Pointer to the linear octree
  * \param system Pointer to the system
  * \param acceleration_param Pointer to the acceleration parameters
- *
- * \return ErrorStatus
  */
-ErrorStatus construct_octree(
+void construct_octree(
     LinearOctree *restrict octree,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param,

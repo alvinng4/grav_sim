@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "c_traceback.h"
 #include "common.h"
 #include "progress_bar.h"
 #include "utils.h"
@@ -174,20 +175,17 @@ static void print_progress_bar(
     fflush(stdout);
 }
 
-ErrorStatus
+void
 start_progress_bar(ProgressBarParam *restrict progress_bar_param, const double total)
 {
-    ErrorStatus error_status;
-
     progress_bar_param->start = grav_get_current_time();
     progress_bar_param->time_last_update = progress_bar_param->start;
     progress_bar_param->current_progress = 0.0;
     progress_bar_param->total = total;
     if (progress_bar_param->total <= 0.0)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Total must be greater than 0.");
-        goto error;
+        THROW(CTB_VALUE_ERROR, "Total must be greater than 0.");
+        return;
     }
 
     progress_bar_param->last_five_progress_percent[0] = 0.0;
@@ -196,10 +194,7 @@ start_progress_bar(ProgressBarParam *restrict progress_bar_param, const double t
 
     print_progress_bar(progress_bar_param, 0.0, 0, false);
 
-    return make_success_error_status();
-
-error:
-    return error_status;
+    return;
 }
 
 static time_t least_squares_regression_remaining_time(

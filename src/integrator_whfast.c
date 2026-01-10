@@ -21,7 +21,7 @@
 
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "math_functions.h"
 #include "output.h"
 #include "progress_bar.h"
@@ -60,10 +60,10 @@ static void whfast_kick(
  *
  * \return ErrorStatus
  *
- * \exception GRAV_VALUE_ERROR If the input value to the stumpff function is infinite or
+ * \exception CTB_VALUE_ERROR If the input value to the stumpff function is infinite or
  * NaN
  */
-static ErrorStatus whfast_drift(
+static void whfast_drift(
     double *restrict jacobi_x,
     double *restrict jacobi_v,
     System *restrict system,
@@ -131,10 +131,10 @@ static void stumpff_functions(
  *
  * \return ErrorStatus
  *
- * \exception GRAV_VALUE_ERROR If the acceleration method is not supported
+ * \exception CTB_VALUE_ERROR If the acceleration method is not supported
  * \exception Errors from the acceleration functions if any error occurs
  */
-static ErrorStatus whfast_acceleration(
+static void whfast_acceleration(
     double *restrict a,
     const System *restrict system,
     const double *restrict jacobi_x,
@@ -157,7 +157,7 @@ static ErrorStatus whfast_acceleration(
  *
  * \return ErrorStatus
  */
-static ErrorStatus whfast_acceleration_pairwise(
+static void whfast_acceleration_pairwise(
     double *restrict a,
     const System *restrict system,
     const double *restrict jacobi_x,
@@ -183,9 +183,9 @@ static ErrorStatus whfast_acceleration_pairwise(
  *
  * \return ErrorStatus
  *
- * \exception GRAV_MEMORY_ERROR If memory allocation failed
+ * \exception CTB_MEMORY_ERROR If memory allocation failed
  */
-static ErrorStatus whfast_acceleration_massless(
+static void whfast_acceleration_massless(
     double *restrict a,
     const System *restrict system,
     const double *restrict jacobi_x,
@@ -195,7 +195,7 @@ static ErrorStatus whfast_acceleration_massless(
 
 static void whfast_compute_eta(double *restrict eta, const System *restrict system);
 
-ErrorStatus whfast(
+void whfast(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -205,8 +205,6 @@ ErrorStatus whfast(
     const double tf
 )
 {
-    ErrorStatus error_status;
-
     double *restrict x = system->x;
     double *restrict v = system->v;
 
@@ -232,45 +230,33 @@ ErrorStatus whfast(
     // Check if memory allocation is successful
     if (!jacobi_x || !jacobi_v || !temp_jacobi_v || !a || !eta)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
     /* Sort by distance */
-    error_status = WRAP_TRACEBACK(system_sort_by_distance(system, 0));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_sort_by_distance;
-    }
+    TRY_GOTO(system_sort_by_distance(system, 0), err_sort_by_distance);
 
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
+        TRY_GOTO(output_snapshot(
             output_param,
             system,
             integrator_param,
             acceleration_param,
             simulation_status,
             settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        ), err_initial_output);
     }
 
     /* Initialization */
     whfast_compute_eta(eta, system);
     cartesian_to_jacobi(jacobi_x, jacobi_v, system, eta);
-    error_status = WRAP_TRACEBACK(
+    TRY_GOTO(
         whfast_acceleration(a, system, jacobi_x, eta, acceleration_param)
-    );
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_acceleration;
-    }
+    , error);
+    
     whfast_kick(jacobi_v, system->num_particles, a, 0.5 * dt);
 
     /* Main Loop */
@@ -278,12 +264,8 @@ ErrorStatus whfast(
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, total_num_steps));
+        
     }
 
     *t_ptr = 0.0;
@@ -305,17 +287,13 @@ ErrorStatus whfast(
         v = system->v;
         system->x = jacobi_x;
         system->v = jacobi_v;
-        error_status = WRAP_TRACEBACK(system_sort_by_distance(system, 0));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_sort_by_distance;
-        }
+        TRY_GOTO(system_sort_by_distance(system, 0), err_sort_by_distance);
         system->x = x;
         system->v = v;
         whfast_compute_eta(eta, system);
 
         /* Drift */
-        error_status = WRAP_TRACEBACK(whfast_drift(
+        TRY_GOTO(whfast_drift(
             jacobi_x,
             jacobi_v,
             system,
@@ -323,23 +301,16 @@ ErrorStatus whfast(
             dt,
             integrator_param->whfast_remove_invalid_particles,
             settings->verbose
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_drift;
-        }
+        ), err_drift);
 
         /* Convert Jacobi coordinates to Cartesian coordinates */
         jacobi_to_cartesian(system, jacobi_x, jacobi_v, eta);
 
         /* Compute acceleration */
-        error_status = WRAP_TRACEBACK(
+        TRY_GOTO(
             whfast_acceleration(a, system, jacobi_x, eta, acceleration_param)
-        );
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        , error);
+        
 
         /* Kick */
         whfast_kick(jacobi_v, system->num_particles, a, dt);
@@ -354,18 +325,14 @@ ErrorStatus whfast(
             memcpy(temp_jacobi_v, jacobi_v, system->num_particles * 3 * sizeof(double));
             whfast_kick(temp_jacobi_v, system->num_particles, a, -0.5 * dt);
             jacobi_to_cartesian(system, jacobi_x, temp_jacobi_v, eta);
-            error_status = WRAP_TRACEBACK(output_snapshot(
+            TRY_GOTO(output_snapshot(
                 output_param,
                 system,
                 integrator_param,
                 acceleration_param,
                 simulation_status,
                 settings
-            ));
-            if (error_status.return_code != GRAV_SUCCESS)
-            {
-                goto err_output;
-            }
+            ), err_output);
 
             next_output_time = (*output_count_ptr) * output_interval;
         }
@@ -393,7 +360,7 @@ ErrorStatus whfast(
     free(a);
     free(eta);
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_start_progress_bar:
@@ -408,7 +375,7 @@ err_memory:
     free(jacobi_v);
     free(jacobi_x);
 
-    return error_status;
+    return;
 }
 
 static void whfast_kick(
@@ -426,7 +393,7 @@ static void whfast_kick(
     }
 }
 
-static ErrorStatus whfast_drift(
+static void whfast_drift(
     double *restrict jacobi_x,
     double *restrict jacobi_v,
     System *restrict system,
@@ -436,7 +403,7 @@ static ErrorStatus whfast_drift(
     const int verbose
 )
 {
-    ErrorStatus error_status = make_success_error_status();
+    
 
     const int num_particles = system->num_particles;
     const int *restrict particle_ids = system->particle_ids;
@@ -450,8 +417,8 @@ static ErrorStatus whfast_drift(
         remove_idx_list = malloc(num_particles * sizeof(int));
         if (!remove_idx_list)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to allocate memory for remove_idx_list"
+            THROW(
+                CTB_MEMORY_ERROR, "Failed to allocate memory for remove_idx_list"
             );
         }
     }
@@ -461,7 +428,7 @@ static ErrorStatus whfast_drift(
 #endif
     for (int i = 1; i < num_particles; i++)
     {
-        ErrorStatus local_error_status = make_success_error_status();
+        ErrorStatus local_error_status = ;
 
         const double gm = G * m[0] * eta[i] / eta[i - 1];
         const double x[3] = {jacobi_x[i * 3], jacobi_x[i * 3 + 1], jacobi_x[i * 3 + 2]};
@@ -494,7 +461,7 @@ static ErrorStatus whfast_drift(
             const double z = alpha * (s * s);
             if (!isfinite(z))
             {
-                if (verbose >= GRAV_VERBOSITY_IGNORE_INFO)
+                if (verbose >= CTB_VERBOSITY_IGNORE_INFO)
                 {
                     WRAP_RAISE_WARNING(
                         "Input value to Stumpff functions is NaN or Inf"
@@ -524,7 +491,7 @@ static ErrorStatus whfast_drift(
             }
         }
 
-        if (local_error_status.return_code == GRAV_SUCCESS)
+        if (local_error_status.return_code == CTB_SUCCESS)
         {
             // The raidal distance is equal to the derivative of F
             // double r = dF
@@ -539,7 +506,7 @@ static ErrorStatus whfast_drift(
                     r;
 
                 /* Print message */
-                if (verbose >= GRAV_VERBOSITY_VERBOSE)
+                if (verbose >= CTB_VERBOSITY_VERBOSE)
                 {
                     fprintf(
                         stderr,
@@ -582,20 +549,20 @@ static ErrorStatus whfast_drift(
             }
         }
 
-        if (local_error_status.return_code != GRAV_SUCCESS)
+        if (local_error_status.return_code != CTB_SUCCESS)
         {
 #ifdef USE_OPENMP
 #pragma omp critical
             {
 #endif
-                if (error_status.return_code == GRAV_SUCCESS)
+                if (error_status.return_code == CTB_SUCCESS)
                 {
                     error_status = local_error_status;
                 }
                 else
                 {
                     free_traceback(&local_error_status);
-                    local_error_status.return_code = GRAV_SUCCESS;
+                    local_error_status.return_code = CTB_SUCCESS;
                 }
 #ifdef USE_OPENMP
             }
@@ -603,14 +570,14 @@ static ErrorStatus whfast_drift(
         }
     }
 
-    if (error_status.return_code != GRAV_SUCCESS)
+    if (error_status.return_code != CTB_SUCCESS)
     {
         goto err;
     }
 
     if (remove_count > 0)
     {
-        if (verbose >= GRAV_VERBOSITY_VERBOSE)
+        if (verbose >= CTB_VERBOSITY_VERBOSE)
         {
             fprintf(
                 stderr,
@@ -625,33 +592,32 @@ static ErrorStatus whfast_drift(
             }
             fputs("]\n", stderr);
         }
-        error_status =
-            WRAP_TRACEBACK(remove_particles(system, remove_idx_list, remove_count));
-        if (error_status.return_code != GRAV_SUCCESS)
+        TRY_GOTO(remove_particles(system, remove_idx_list, remove_count));
+        if (error_status.return_code != CTB_SUCCESS)
         {
             goto err;
         }
 
-        error_status = WRAP_TRACEBACK(remove_particle_from_double_arr(
+        TRY_GOTO(remove_particle_from_double_arr(
             jacobi_x, remove_idx_list, remove_count, 3, num_particles
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
+        ), error);
+        if (error_status.return_code != CTB_SUCCESS)
         {
             goto err;
         }
 
-        error_status = WRAP_TRACEBACK(remove_particle_from_double_arr(
+        TRY_GOTO(remove_particle_from_double_arr(
             jacobi_v, remove_idx_list, remove_count, 3, num_particles
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
+        ), error);
+        if (error_status.return_code != CTB_SUCCESS)
         {
             goto err;
         }
 
-        error_status = WRAP_TRACEBACK(remove_particle_from_double_arr(
+        TRY_GOTO(remove_particle_from_double_arr(
             eta, remove_idx_list, remove_count, 1, num_particles
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
+        ), error);
+        if (error_status.return_code != CTB_SUCCESS)
         {
             goto err;
         }
@@ -661,11 +627,11 @@ static ErrorStatus whfast_drift(
 
     free(remove_idx_list);
 
-    return make_success_error_status();
+    return;
 
 err:
     free(remove_idx_list);
-    return error_status;
+    return;
 }
 
 static void cartesian_to_jacobi(
@@ -813,7 +779,7 @@ static void stumpff_functions(
     *c0 = temp_c0;
 }
 
-static ErrorStatus whfast_acceleration(
+static void whfast_acceleration(
     double *restrict a,
     const System *system,
     const double *restrict jacobi_x,
@@ -832,15 +798,15 @@ static ErrorStatus whfast_acceleration(
                 a, system, jacobi_x, eta, acceleration_param
             );
         default:
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Invalid acceleration method for WHFast integrator. Only pairwise and "
                 "massless methods are supported."
             );
     }
 }
 
-static ErrorStatus whfast_acceleration_pairwise(
+static void whfast_acceleration_pairwise(
     double *restrict a,
     const System *restrict system,
     const double *restrict jacobi_x,
@@ -962,10 +928,10 @@ static ErrorStatus whfast_acceleration_pairwise(
         aux[2] = 0.0;
     }
 
-    return make_success_error_status();
+    return;
 }
 
-static ErrorStatus whfast_acceleration_massless(
+static void whfast_acceleration_massless(
     double *restrict a,
     const System *restrict system,
     const double *restrict jacobi_x,
@@ -1008,8 +974,8 @@ static ErrorStatus whfast_acceleration_massless(
     {
         free(massive_indices);
         free(massless_indices);
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
+        THROW(
+            CTB_MEMORY_ERROR,
             "Failed to allocate memory for indices of massive and massless particles"
         );
     }
@@ -1278,7 +1244,7 @@ static ErrorStatus whfast_acceleration_massless(
     free(massive_indices);
     free(massless_indices);
 
-    return make_success_error_status();
+    return;
 }
 
 static void whfast_compute_eta(double *restrict eta, const System *restrict system)

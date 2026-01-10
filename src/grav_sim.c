@@ -103,7 +103,7 @@ int launch_simulation(
     {
         fputs("Launching simulation...\n", stdout);
     }
-    const double start_time = TRY_GOTO(grav_get_current_time(), error);
+    const double start_time = grav_get_current_time();
     TRY_GOTO(
         integrator_launch_simulation(
             system,
@@ -116,7 +116,7 @@ int launch_simulation(
         ),
         error
     );
-    const double end_time = TRY_GOTO(grav_get_current_time(), error);
+    const double end_time = grav_get_current_time();
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         printf("Done! Runtime: %.3g s\n", end_time - start_time);
@@ -220,7 +220,7 @@ int launch_cosmological_simulation(
     {
         fputs("Launching simulation...\n", stdout);
     }
-    const double start_time = TRY_GOTO(grav_get_current_time(), error);
+    const double start_time = grav_get_current_time();
     TRY_GOTO(
         leapfrog_cosmology(
             system,
@@ -233,7 +233,7 @@ int launch_cosmological_simulation(
         ),
         error
     );
-    const double end_time = TRY_GOTO(grav_get_current_time(), error);
+    const double end_time = grav_get_current_time();
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         printf("Done! Runtime: %.3g s\n", end_time - start_time);

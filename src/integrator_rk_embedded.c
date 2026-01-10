@@ -30,9 +30,9 @@
  *
  * \return ErrorStatus
  *
- * \exception GRAV_VALUE_ERROR if the given method is invalid
+ * \exception CTB_VALUE_ERROR if the given method is invalid
  */
-static ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
+static void get_rk_embedded_order(int *restrict order, const int method)
 {
     *order = 0;
     switch (method)
@@ -50,10 +50,10 @@ static ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
             *order = 78;
             break;
         default:
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Invalid integrator method");
+            return THROW(CTB_VALUE_ERROR, "Invalid integrator method");
     }
 
-    return make_success_error_status();
+    return;
 }
 
 /**
@@ -69,11 +69,11 @@ static ErrorStatus get_rk_embedded_order(int *restrict order, const int method)
  *
  * \return ErrorStatus
  *
- * \exception GRAV_VALUE_ERROR if the given order is invalid
- * \exception GRAV_MEMORY_ERROR if failed to allocate memory for coeff, weights and
+ * \exception CTB_VALUE_ERROR if the given order is invalid
+ * \exception CTB_MEMORY_ERROR if failed to allocate memory for coeff, weights and
  * weights_test
  */
-static ErrorStatus rk_embedded_butcher_tableaus(
+static void rk_embedded_butcher_tableaus(
     const int order,
     int *restrict power,
     int *restrict power_test,
@@ -116,8 +116,8 @@ static ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                THROW(
+                    CTB_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
                 );
             }
             memcpy(
@@ -189,8 +189,8 @@ static ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                THROW(
+                    CTB_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
                 );
             }
 
@@ -291,8 +291,8 @@ static ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                THROW(
+                    CTB_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
                 );
             }
 
@@ -500,8 +500,8 @@ static ErrorStatus rk_embedded_butcher_tableaus(
                 free(*weights);
                 free(*weights_test);
 
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
+                THROW(
+                    CTB_MEMORY_ERROR, "Failed to allocate memory for Butcher tableau"
                 );
             }
             memcpy(
@@ -585,12 +585,12 @@ static ErrorStatus rk_embedded_butcher_tableaus(
             break;
 
         default:
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR, "Invalid order for Embedded RK integrator"
+            THROW(
+                CTB_VALUE_ERROR, "Invalid order for Embedded RK integrator"
             );
     }
 
-    return make_success_error_status();
+    return;
 }
 
 /**
@@ -608,10 +608,10 @@ static ErrorStatus rk_embedded_butcher_tableaus(
  *
  * \return ErrorStatus
  *
- * \exception GRAV_MEMORY_ERROR if failed to allocate memory for arrays
- * \exception GRAV_VALUE_ERROR if initial_dt is negative
+ * \exception CTB_MEMORY_ERROR if failed to allocate memory for arrays
+ * \exception CTB_VALUE_ERROR if initial_dt is negative
  */
-static ErrorStatus rk_embedded_initial_dt(
+static void rk_embedded_initial_dt(
     double *restrict initial_dt,
     const double rel_tolerance,
     const double abs_tolerance,
@@ -620,7 +620,6 @@ static ErrorStatus rk_embedded_initial_dt(
     const AccelerationParam *acceleration_param
 )
 {
-    ErrorStatus error_status;
     *initial_dt = -1.0;
 
     const int num_particles = system->num_particles;
@@ -636,8 +635,7 @@ static ErrorStatus rk_embedded_initial_dt(
     double *restrict a = malloc(num_particles * 3 * sizeof(double));
     if (!tolerance_scale_x || !tolerance_scale_v || !x_1 || !v_1 || !a_1 || !a)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto error_memory;
     }
 
@@ -659,8 +657,8 @@ static ErrorStatus rk_embedded_initial_dt(
     };
 
     /* Compute acceleration */
-    error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-    if (error_status.return_code != GRAV_SUCCESS)
+    TRY_GOTO(acceleration(a, system, acceleration_param), error);
+    if (error_status.return_code != CTB_SUCCESS)
     {
         goto error_acc;
     }
@@ -720,8 +718,8 @@ static ErrorStatus rk_embedded_initial_dt(
         }
     }
 
-    error_status = WRAP_TRACEBACK(acceleration(a_1, &system_1, acceleration_param));
-    if (error_status.return_code != GRAV_SUCCESS)
+    TRY_GOTO(acceleration(a_1, &system_1, acceleration_param), error);
+    if (error_status.return_code != CTB_SUCCESS)
     {
         goto error_acc;
     }
@@ -757,7 +755,7 @@ static ErrorStatus rk_embedded_initial_dt(
     *initial_dt = dt * 1e-2;
     if (*initial_dt <= 0.0)
     {
-        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Initial dt is negative");
+        THROW(CTB_VALUE_ERROR, "Initial dt is negative");
         goto error_dt;
     }
 
@@ -768,7 +766,7 @@ static ErrorStatus rk_embedded_initial_dt(
     free(a_1);
     free(a);
 
-    return make_success_error_status();
+    return;
 
 error_dt:
 error_acc:
@@ -779,10 +777,10 @@ error_memory:
     free(v_1);
     free(a_1);
     free(a);
-    return error_status;
+    return;
 }
 
-ErrorStatus rk_embedded(
+void rk_embedded(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -792,15 +790,12 @@ ErrorStatus rk_embedded(
     const double tf
 )
 {
-    ErrorStatus error_status;
-
     /* Initialization */
     int order;
-    error_status =
-        WRAP_TRACEBACK(get_rk_embedded_order(&order, integrator_param->integrator));
-    if (error_status.return_code != GRAV_SUCCESS)
+    TRY_GOTO(get_rk_embedded_order(&order, integrator_param->integrator));
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
 
     int power;
@@ -810,12 +805,12 @@ ErrorStatus rk_embedded(
     double *weights = NULL;
     double *weights_test = NULL;
 
-    error_status = WRAP_TRACEBACK(rk_embedded_butcher_tableaus(
+    TRY_GOTO(rk_embedded_butcher_tableaus(
         order, &power, &power_test, &coeff, &len_weights, &weights, &weights_test
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
+    ), error);
+    if (error_status.return_code != CTB_SUCCESS)
     {
-        return error_status;
+        return;
     }
 
     const int stages = len_weights;
@@ -826,7 +821,7 @@ ErrorStatus rk_embedded(
     if (!error_estimation_delta_weights)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
+            CTB_MEMORY_ERROR,
             "Failed to allocate memory for error estimation delta weights"
         );
         goto error_error_estimation_delta_weights_memory_alloc;
@@ -898,8 +893,7 @@ ErrorStatus rk_embedded(
         !x_err_comp_sum || !v_err_comp_sum || !temp_x_err_comp_sum ||
         !temp_v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto error_memory;
     }
 
@@ -911,10 +905,10 @@ ErrorStatus rk_embedded(
     }
     else
     {
-        error_status = WRAP_TRACEBACK(rk_embedded_initial_dt(
+        TRY_GOTO(rk_embedded_initial_dt(
             &dt, rel_tolerance, abs_tolerance, power, system, acceleration_param
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
+        ), error);
+        if (error_status.return_code != CTB_SUCCESS)
         {
             goto error_initial_dt;
         }
@@ -928,29 +922,21 @@ ErrorStatus rk_embedded(
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
+        TRY_GOTO(output_snapshot(
             output_param,
             system,
             integrator_param,
             acceleration_param,
             simulation_status,
             settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        ), err_initial_output);
     }
 
     /* Main Loop */
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, tf));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, tf), err_start_progress_bar);
     }
 
     *t_ptr = 0.0;
@@ -959,8 +945,8 @@ ErrorStatus rk_embedded(
     while (*t_ptr < tf)
     {
         /* Compute xk and vk */
-        error_status = WRAP_TRACEBACK(acceleration(vk, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
+        TRY_GOTO(acceleration(vk, system, acceleration_param), error);
+        if (error_status.return_code != CTB_SUCCESS)
         {
             goto acc_error;
         }
@@ -1006,10 +992,10 @@ ErrorStatus rk_embedded(
 
             temp_system.x = temp_x;
             temp_system.v = temp_v;
-            error_status = WRAP_TRACEBACK(acceleration(
+            TRY_GOTO(acceleration(
                 &vk[stage * num_particles * 3], &temp_system, acceleration_param
-            ));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ), error);
+            if (error_status.return_code != CTB_SUCCESS)
             {
                 goto acc_error;
             }
@@ -1127,18 +1113,14 @@ ErrorStatus rk_embedded(
             /* Output */
             if (is_output && *t_ptr >= next_output_time)
             {
-                error_status = WRAP_TRACEBACK(output_snapshot(
+                TRY_GOTO(output_snapshot(
                     output_param,
                     system,
                     integrator_param,
                     acceleration_param,
                     simulation_status,
                     settings
-                ));
-                if (error_status.return_code != GRAV_SUCCESS)
-                {
-                    goto err_output;
-                }
+                ), err_output);
 
                 next_output_time = (*output_count_ptr) * output_interval;
             }
@@ -1212,7 +1194,7 @@ ErrorStatus rk_embedded(
     free(weights);
     free(weights_test);
 
-    return make_success_error_status();
+    return;
 
 err_output:
 acc_error:
@@ -1240,5 +1222,5 @@ error_error_estimation_delta_weights_memory_alloc:
     free(weights);
     free(weights_test);
 
-    return error_status;
+    return;
 }

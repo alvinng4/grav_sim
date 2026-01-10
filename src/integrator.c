@@ -16,8 +16,8 @@
 #include <string.h>
 
 #include "acceleration.h"
+#include "c_traceback.h"
 #include "common.h"
-#include "error.h"
 #include "integrator.h"
 #include "output.h"
 #include "progress_bar.h"
@@ -34,10 +34,8 @@
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-static ErrorStatus euler(
+static void euler(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -57,10 +55,8 @@ static ErrorStatus euler(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-static ErrorStatus euler_cromer(
+static void euler_cromer(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -80,10 +76,8 @@ static ErrorStatus euler_cromer(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-static ErrorStatus
+static void
 rk4(System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -102,10 +96,8 @@ rk4(System *restrict system,
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
- * \return ErrorStatus
  */
-static ErrorStatus leapfrog(
+static void leapfrog(
     System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
@@ -127,11 +119,12 @@ IntegratorParam get_new_integrator_param(void)
     return integrator_param;
 }
 
-ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_param)
+void finalize_integration_param(IntegratorParam *restrict integration_param)
 {
     if (!integration_param)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "integration_param is NULL");
+        THROW(CTB_POINTER_ERROR, "integration_param is NULL");
+        return;
     }
 
     if (integration_param->integrator != INTEGRATOR_EULER &&
@@ -145,14 +138,12 @@ ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_par
         integration_param->integrator != INTEGRATOR_IAS15 &&
         integration_param->integrator != INTEGRATOR_WHFAST)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(
+            CTB_VALUE_ERROR,
             "Unknown integrator. Got: %d",
             integration_param->integrator
         );
+        return;
     }
 
     if (integration_param->integrator == INTEGRATOR_EULER ||
@@ -163,14 +154,12 @@ ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_par
     {
         if (integration_param->dt <= 0.0)
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW_FMT(
+                CTB_VALUE_ERROR,
                 "dt must be positive. Got: %g",
                 integration_param->dt
             );
+            return;
         }
     }
 
@@ -178,21 +167,19 @@ ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_par
     {
         if (integration_param->tolerance <= 0.0)
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW_FMT(
+                CTB_VALUE_ERROR,
                 "tolerance must be positive. Got: %g",
                 integration_param->tolerance
             );
+            return;
         }
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus integrator_launch_simulation(
+void integrator_launch_simulation(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -205,7 +192,7 @@ ErrorStatus integrator_launch_simulation(
     switch (integrator_param->integrator)
     {
         case INTEGRATOR_EULER:
-            return WRAP_TRACEBACK(euler(
+            TRY_GOTO(euler(
                 system,
                 integrator_param,
                 acceleration_param,
@@ -213,9 +200,10 @@ ErrorStatus integrator_launch_simulation(
                 simulation_status,
                 settings,
                 tf
-            ));
+            ), error);
+            break;
         case INTEGRATOR_EULER_CROMER:
-            return WRAP_TRACEBACK(euler_cromer(
+            TRY_GOTO(euler_cromer(
                 system,
                 integrator_param,
                 acceleration_param,
@@ -223,19 +211,21 @@ ErrorStatus integrator_launch_simulation(
                 simulation_status,
                 settings,
                 tf
-            ));
+            ), error);
+            break;
         case INTEGRATOR_RK4:
-            return WRAP_TRACEBACK(
+            TRY_GOTO(
                 rk4(system,
                     integrator_param,
                     acceleration_param,
                     output_param,
                     simulation_status,
                     settings,
-                    tf)
+                    tf), error
             );
+            break;
         case INTEGRATOR_LEAPFROG:
-            return WRAP_TRACEBACK(leapfrog(
+            TRY_GOTO(leapfrog(
                 system,
                 integrator_param,
                 acceleration_param,
@@ -243,12 +233,13 @@ ErrorStatus integrator_launch_simulation(
                 simulation_status,
                 settings,
                 tf
-            ));
+            ), error);
+            break;
         case INTEGRATOR_RKF45:
         case INTEGRATOR_DOPRI:
         case INTEGRATOR_DVERK:
         case INTEGRATOR_RKF78:
-            return WRAP_TRACEBACK(rk_embedded(
+            TRY_GOTO(rk_embedded(
                 system,
                 integrator_param,
                 acceleration_param,
@@ -256,9 +247,10 @@ ErrorStatus integrator_launch_simulation(
                 simulation_status,
                 settings,
                 tf
-            ));
+            ), error);
+            break;
         case INTEGRATOR_IAS15:
-            return WRAP_TRACEBACK(ias15(
+            TRY_GOTO(ias15(
                 system,
                 integrator_param,
                 acceleration_param,
@@ -266,9 +258,10 @@ ErrorStatus integrator_launch_simulation(
                 simulation_status,
                 settings,
                 tf
-            ));
+            ), error);
+            break;
         case INTEGRATOR_WHFAST:
-            return WRAP_TRACEBACK(whfast(
+            TRY_GOTO(whfast(
                 system,
                 integrator_param,
                 acceleration_param,
@@ -276,13 +269,20 @@ ErrorStatus integrator_launch_simulation(
                 simulation_status,
                 settings,
                 tf
-            ));
+            ), error);
+            break;
         default:
-            return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Invalid integrator");
+            THROW(CTB_VALUE_ERROR, "Invalid integrator");
+            goto error;
     }
+
+    return;
+
+error:
+    return;
 }
 
-static ErrorStatus euler(
+static void euler(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -293,7 +293,6 @@ static ErrorStatus euler(
 )
 {
     /* Declare variables */
-    ErrorStatus error_status;
 
     const int num_particles = system->num_particles;
     double *restrict x = system->x;
@@ -323,26 +322,22 @@ static ErrorStatus euler(
     // Check if memory allocation is successful
     if (!x_0 || !v_0 || !a || !x_err_comp_sum || !v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
+        TRY_GOTO(output_snapshot(
             output_param,
             system,
             integrator_param,
             acceleration_param,
             simulation_status,
             settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        ), err_initial_output);
+        
     }
 
     /* Main Loop */
@@ -350,12 +345,7 @@ static ErrorStatus euler(
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, total_num_steps), err_start_progress_bar);
     }
 
     *t_ptr = 0.0;
@@ -374,11 +364,7 @@ static ErrorStatus euler(
         memcpy(v_0, v, num_particles * 3 * sizeof(double));
 
         /* Compute acceleration */
-        error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(a, system, acceleration_param), err_acceleration);
 
         /* Update step */
         for (int i = 0; i < num_particles; i++)
@@ -401,18 +387,14 @@ static ErrorStatus euler(
         /* Store solution */
         if (is_output && *t_ptr >= next_output_time)
         {
-            error_status = WRAP_TRACEBACK(output_snapshot(
+            TRY_GOTO(output_snapshot(
                 output_param,
                 system,
                 integrator_param,
                 acceleration_param,
                 simulation_status,
                 settings
-            ));
-            if (error_status.return_code != GRAV_SUCCESS)
-            {
-                goto err_output;
-            }
+            ), err_output);
 
             next_output_time = (*output_count_ptr) * output_interval;
         }
@@ -440,7 +422,7 @@ static ErrorStatus euler(
     free(x_err_comp_sum);
     free(v_err_comp_sum);
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_acceleration:
@@ -452,10 +434,10 @@ err_memory:
     free(a);
     free(x_err_comp_sum);
     free(v_err_comp_sum);
-    return error_status;
+    return;
 }
 
-static ErrorStatus euler_cromer(
+static void euler_cromer(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -466,7 +448,7 @@ static ErrorStatus euler_cromer(
 )
 {
     /* Declare variables */
-    ErrorStatus error_status;
+    
 
     const int num_particles = system->num_particles;
     double *restrict x = system->x;
@@ -496,26 +478,22 @@ static ErrorStatus euler_cromer(
     // Check if memory allocation is successful
     if (!x_0 || !v_0 || !a || !x_err_comp_sum || !v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
+        TRY_GOTO(output_snapshot(
             output_param,
             system,
             integrator_param,
             acceleration_param,
             simulation_status,
             settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        ), err_initial_output);
+        
     }
 
     /* Main Loop */
@@ -523,12 +501,7 @@ static ErrorStatus euler_cromer(
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, total_num_steps), err_start_progress_bar);
     }
 
     *t_ptr = 0.0;
@@ -547,11 +520,7 @@ static ErrorStatus euler_cromer(
         memcpy(v_0, v, num_particles * 3 * sizeof(double));
 
         /* Compute acceleration */
-        error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(a, system, acceleration_param), err_acceleration);
 
         /* Update step */
         for (int i = 0; i < num_particles; i++)
@@ -573,18 +542,15 @@ static ErrorStatus euler_cromer(
         /* Store solution */
         if (is_output && *t_ptr >= next_output_time)
         {
-            error_status = WRAP_TRACEBACK(output_snapshot(
+            TRY_GOTO(output_snapshot(
                 output_param,
                 system,
                 integrator_param,
                 acceleration_param,
                 simulation_status,
                 settings
-            ));
-            if (error_status.return_code != GRAV_SUCCESS)
-            {
-                goto err_output;
-            }
+            ), err_output);
+            
 
             next_output_time = (*output_count_ptr) * output_interval;
         }
@@ -612,7 +578,7 @@ static ErrorStatus euler_cromer(
     free(x_err_comp_sum);
     free(v_err_comp_sum);
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_acceleration:
@@ -624,10 +590,10 @@ err_memory:
     free(a);
     free(x_err_comp_sum);
     free(v_err_comp_sum);
-    return error_status;
+    return;
 }
 
-static ErrorStatus
+static void
 rk4(System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -637,7 +603,7 @@ rk4(System *system,
     const double tf)
 {
     /* Declare variables */
-    ErrorStatus error_status;
+    
 
     const int num_particles = system->num_particles;
     double *restrict x = system->x;
@@ -675,26 +641,22 @@ rk4(System *system,
     if (!x_0 || !v_0 || !vk1 || !vk2 || !vk3 || !vk4 || !xk1 || !xk2 || !xk3 || !xk4 ||
         !x_err_comp_sum || !v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
+        TRY_GOTO(output_snapshot(
             output_param,
             system,
             integrator_param,
             acceleration_param,
             simulation_status,
             settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        ), err_initial_output);
+        
     }
 
     /* Main Loop */
@@ -702,12 +664,7 @@ rk4(System *system,
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, total_num_steps), err_start_progress_bar);
     }
 
     *t_ptr = 0.0;
@@ -720,11 +677,7 @@ rk4(System *system,
         memcpy(v_0, v, num_particles * 3 * sizeof(double));
 
         /* Compute xk1 and vk1 */
-        error_status = WRAP_TRACEBACK(acceleration(vk1, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(vk1, system, acceleration_param), err_acceleration);
         memcpy(xk1, v, num_particles * 3 * sizeof(double));
 
         /* Compute xk2 and vk2 */
@@ -736,11 +689,7 @@ rk4(System *system,
                 v[i * 3 + j] = v_0[i * 3 + j] + 0.5 * vk1[i * 3 + j] * dt;
             }
         }
-        error_status = WRAP_TRACEBACK(acceleration(vk2, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(vk2, system, acceleration_param), err_acceleration);
         memcpy(xk2, v, num_particles * 3 * sizeof(double));
 
         /* Compute xk3 and vk3 */
@@ -752,11 +701,7 @@ rk4(System *system,
                 v[i * 3 + j] = v_0[i * 3 + j] + 0.5 * vk2[i * 3 + j] * dt;
             }
         }
-        error_status = WRAP_TRACEBACK(acceleration(vk3, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(vk3, system, acceleration_param), err_acceleration);
         memcpy(xk3, v, num_particles * 3 * sizeof(double));
 
         /* Compute xk4 and vk4 */
@@ -768,11 +713,7 @@ rk4(System *system,
                 v[i * 3 + j] = v_0[i * 3 + j] + vk3[i * 3 + j] * dt;
             }
         }
-        error_status = WRAP_TRACEBACK(acceleration(vk4, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(vk4, system, acceleration_param), err_acceleration);
         memcpy(xk4, v, num_particles * 3 * sizeof(double));
 
         /* Update step */
@@ -800,18 +741,15 @@ rk4(System *system,
         /* Store solution */
         if (is_output && *t_ptr >= next_output_time)
         {
-            error_status = WRAP_TRACEBACK(output_snapshot(
+            TRY_GOTO(output_snapshot(
                 output_param,
                 system,
                 integrator_param,
                 acceleration_param,
                 simulation_status,
                 settings
-            ));
-            if (error_status.return_code != GRAV_SUCCESS)
-            {
-                goto err_output;
-            }
+            ), err_output);
+            
 
             next_output_time = (*output_count_ptr) * output_interval;
         }
@@ -846,7 +784,7 @@ rk4(System *system,
     free(x_err_comp_sum);
     free(v_err_comp_sum);
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_acceleration:
@@ -865,10 +803,10 @@ err_memory:
     free(xk4);
     free(x_err_comp_sum);
     free(v_err_comp_sum);
-    return error_status;
+    return;
 }
 
-static ErrorStatus leapfrog(
+static void leapfrog(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -879,7 +817,7 @@ static ErrorStatus leapfrog(
 )
 {
     /* Declare variables */
-    ErrorStatus error_status;
+    
 
     const int num_particles = system->num_particles;
     double *restrict x = system->x;
@@ -909,34 +847,26 @@ static ErrorStatus leapfrog(
     // Check if memory allocation is successful
     if (!temp_x || !temp_v || !a || !x_err_comp_sum || !v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
+        TRY_GOTO(output_snapshot(
             output_param,
             system,
             integrator_param,
             acceleration_param,
             simulation_status,
             settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        ), err_initial_output);
+        
     }
 
     /* Compute initial acceleration and v_1/2 */
-    error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_acceleration;
-    }
+    TRY_GOTO(acceleration(a, system, acceleration_param), err_acceleration);
 
     memcpy(temp_v, v, num_particles * 3 * sizeof(double));
     for (int i = 0; i < num_particles; i++)
@@ -954,12 +884,7 @@ static ErrorStatus leapfrog(
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, total_num_steps), err_start_progress_bar);
     }
 
     *t_ptr = 0.0;
@@ -987,11 +912,7 @@ static ErrorStatus leapfrog(
         }
 
         /* Calculate v_1+1/2 */
-        error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration(a, system, acceleration_param), err_acceleration);
         memcpy(temp_v, v, num_particles * 3 * sizeof(double));
         for (int i = 0; i < num_particles; i++)
         {
@@ -1018,18 +939,15 @@ static ErrorStatus leapfrog(
                     v[i * 3 + j] -= 0.5 * a[i * 3 + j] * dt;
                 }
             }
-            error_status = WRAP_TRACEBACK(output_snapshot(
+            TRY_GOTO(output_snapshot(
                 output_param,
                 system,
                 integrator_param,
                 acceleration_param,
                 simulation_status,
                 settings
-            ));
-            if (error_status.return_code != GRAV_SUCCESS)
-            {
-                goto err_output;
-            }
+            ), err_output);
+            
 
             next_output_time = (*output_count_ptr) * output_interval;
 
@@ -1069,7 +987,7 @@ static ErrorStatus leapfrog(
     free(x_err_comp_sum);
     free(v_err_comp_sum);
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_acceleration:
@@ -1082,5 +1000,5 @@ err_memory:
     free(x_err_comp_sum);
     free(v_err_comp_sum);
 
-    return error_status;
+    return;
 }

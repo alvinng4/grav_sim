@@ -10,7 +10,7 @@
 
 #include "common.h"
 #include "cosmology.h"
-#include "error.h"
+#include "c_traceback.h"
 #include "math_functions.h"
 #include "settings.h"
 #include "system.h"
@@ -33,11 +33,11 @@ System get_new_system(void)
     return system;
 }
 
-ErrorStatus get_initialized_system(System *restrict system, const int num_particles)
+void get_initialized_system(System *restrict system, const int num_particles)
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     *system = get_new_system();
@@ -51,8 +51,8 @@ ErrorStatus get_initialized_system(System *restrict system, const int num_partic
     if (!system->particle_ids || !system->x || !system->v || !system->m)
     {
         free_system(system);
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for system"
+        THROW(
+            CTB_MEMORY_ERROR, "Failed to allocate memory for system"
         );
     }
 
@@ -61,58 +61,50 @@ ErrorStatus get_initialized_system(System *restrict system, const int num_partic
         (system->particle_ids)[i] = i;
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus finalize_system(System *restrict system)
+void finalize_system(System *restrict system)
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     if (system->num_particles <= 0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Number of particles must be positive. Got: %d",
             system->num_particles
         );
     }
     if (!system->particle_ids)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_POINTER_ERROR, "System array particle_ids is NULL"
+        THROW(
+            CTB_POINTER_ERROR, "System array particle_ids is NULL"
         );
     }
     if (!system->x)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array x is NULL");
+        THROW(CTB_POINTER_ERROR, "System array x is NULL");
     }
     if (!system->v)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array v is NULL");
+        THROW(CTB_POINTER_ERROR, "System array v is NULL");
     }
     if (!system->m)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array m is NULL");
+        THROW(CTB_POINTER_ERROR, "System array m is NULL");
     }
     if (system->G <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Gravitational constant G must be positive. Got: %g",
             system->G
         );
     }
 
-    return make_success_error_status();
+    return;
 }
 
 void free_system(System *restrict system)
@@ -146,13 +138,13 @@ CosmologicalSystem get_new_cosmological_system(void)
     return system;
 }
 
-ErrorStatus get_initialized_cosmological_system(
+void get_initialized_cosmological_system(
     CosmologicalSystem *restrict system, const int num_particles
 )
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     *system = get_new_cosmological_system();
@@ -165,8 +157,8 @@ ErrorStatus get_initialized_cosmological_system(
     if (!system->particle_ids || !system->x || !system->v || !system->m)
     {
         free_cosmological_system(system);
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for system"
+        THROW(
+            CTB_MEMORY_ERROR, "Failed to allocate memory for system"
         );
     }
 
@@ -175,52 +167,44 @@ ErrorStatus get_initialized_cosmological_system(
         (system->particle_ids)[i] = i;
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
+void finalize_cosmological_system(CosmologicalSystem *restrict system)
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     if (system->num_particles <= 0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Number of particles must be positive. Got: %d",
             system->num_particles
         );
     }
     if (!system->particle_ids)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_POINTER_ERROR, "System array particle_ids is NULL"
+        THROW(
+            CTB_POINTER_ERROR, "System array particle_ids is NULL"
         );
     }
     if (!system->x)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array x is NULL");
+        THROW(CTB_POINTER_ERROR, "System array x is NULL");
     }
     if (!system->v)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array v is NULL");
+        THROW(CTB_POINTER_ERROR, "System array v is NULL");
     }
     if (!system->m)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System array m is NULL");
+        THROW(CTB_POINTER_ERROR, "System array m is NULL");
     }
     if (system->h <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Hubble parameter system->h must be positive. Got: %g",
             system->h
         );
@@ -228,11 +212,7 @@ ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
 
     if (system->scale_factor <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Scale factor must be positive. Got: %g",
             system->scale_factor
         );
@@ -240,11 +220,7 @@ ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
 
     if (system->omega_m <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "omega_m must be positive. Got: %g",
             system->omega_m
         );
@@ -252,11 +228,7 @@ ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
 
     if (system->omega_lambda <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "omega_lambda must be positive. Got: %g",
             system->omega_lambda
         );
@@ -264,17 +236,13 @@ ErrorStatus finalize_cosmological_system(CosmologicalSystem *restrict system)
 
     if (system->box_width <= 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "Box width must be positive. Got: %g",
             system->box_width
         );
     }
 
-    return make_success_error_status();
+    return;
 }
 
 void free_cosmological_system(CosmologicalSystem *restrict system)
@@ -285,7 +253,7 @@ void free_cosmological_system(CosmologicalSystem *restrict system)
     free(system->m);
 }
 
-ErrorStatus check_invalid_idx_double(
+void check_invalid_idx_double(
     bool *restrict has_invalid_idx,
     int **invalid_idx_array,
     const double *restrict array,
@@ -294,11 +262,11 @@ ErrorStatus check_invalid_idx_double(
 {
     if (!array)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Array is NULL");
+        THROW(CTB_POINTER_ERROR, "Array is NULL");
     }
     if (!has_invalid_idx)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "has_invalid_idx is NULL");
+        THROW(CTB_POINTER_ERROR, "has_invalid_idx is NULL");
     }
 
     int invalid_count = 0;
@@ -306,8 +274,8 @@ ErrorStatus check_invalid_idx_double(
     int *restrict invalid_particle_idx = malloc(buffer_size * sizeof(int));
     if (!invalid_particle_idx)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for invalid particle index"
+        THROW(
+            CTB_MEMORY_ERROR, "Failed to allocate memory for invalid particle index"
         );
     }
 
@@ -327,8 +295,8 @@ ErrorStatus check_invalid_idx_double(
             if (!new_invalid_particle_idx)
             {
                 free(invalid_particle_idx);
-                return WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                THROW(
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for invalid particle index"
                 );
             }
@@ -340,7 +308,7 @@ ErrorStatus check_invalid_idx_double(
     {
         free(invalid_particle_idx);
         *has_invalid_idx = false;
-        return make_success_error_status();
+        return;
     }
     else
     {
@@ -348,17 +316,16 @@ ErrorStatus check_invalid_idx_double(
         *invalid_idx_array = invalid_particle_idx;
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus check_and_remove_invalid_particles(
+void check_and_remove_invalid_particles(
     System *restrict system, const Settings *restrict settings
 )
 {
-    ErrorStatus error_status;
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     /* Declare variables */
@@ -370,7 +337,7 @@ ErrorStatus check_and_remove_invalid_particles(
 
     if (!x || !v || !m || !particle_ids)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System members are NULL");
+        THROW(CTB_POINTER_ERROR, "System members are NULL");
     }
 
     int invalid_count = 0;
@@ -379,7 +346,7 @@ ErrorStatus check_and_remove_invalid_particles(
     if (!invalid_particle_idx)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for invalid particle index"
+            CTB_MEMORY_ERROR, "Failed to allocate memory for invalid particle index"
         );
         goto err_memory;
     }
@@ -402,7 +369,7 @@ ErrorStatus check_and_remove_invalid_particles(
             if (!new_invalid_particle_idx)
             {
                 error_status = WRAP_RAISE_ERROR(
-                    GRAV_MEMORY_ERROR,
+                    CTB_MEMORY_ERROR,
                     "Failed to reallocate memory for invalid particle index"
                 );
                 goto err_memory;
@@ -413,26 +380,22 @@ ErrorStatus check_and_remove_invalid_particles(
 
     if (invalid_count != 0)
     {
-        error_status = WRAP_TRACEBACK(remove_invalid_particles(
+        TRY_GOTO(remove_invalid_particles(
             system, invalid_particle_idx, invalid_count, settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_remove_particles;
-        }
+        ), err_remove_particles);
     }
 
     free(invalid_particle_idx);
 
-    return make_success_error_status();
+    return;
 
 err_remove_particles:
 err_memory:
     free(invalid_particle_idx);
-    return error_status;
+    return;
 }
 
-ErrorStatus remove_invalid_particles(
+void remove_invalid_particles(
     System *restrict system,
     const int *restrict remove_idx_list,
     const int num_to_remove,
@@ -441,26 +404,26 @@ ErrorStatus remove_invalid_particles(
 {
     if (num_to_remove == 0)
     {
-        return make_success_error_status();
+        return;
     }
 
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
     if (!remove_idx_list)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Remove index list is NULL");
+        THROW(CTB_POINTER_ERROR, "Remove index list is NULL");
     }
     if (!settings)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Settings is NULL");
+        THROW(CTB_POINTER_ERROR, "Settings is NULL");
     }
 
     if (num_to_remove < 0)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Number of particles to remove must be positive"
+        THROW(
+            CTB_VALUE_ERROR, "Number of particles to remove must be positive"
         );
     }
 
@@ -480,10 +443,11 @@ ErrorStatus remove_invalid_particles(
         fputs("]\n", stderr);
     }
 
-    return WRAP_TRACEBACK(remove_particles(system, remove_idx_list, num_to_remove));
+    TRY_GOTO(remove_particles(system, remove_idx_list, num_to_remove), error);
+    return;
 }
 
-ErrorStatus remove_particles(
+void remove_particles(
     System *restrict system,
     const int *restrict remove_idx_list,
     const int num_to_remove
@@ -491,7 +455,7 @@ ErrorStatus remove_particles(
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     const int num_particles = system->num_particles;
@@ -502,7 +466,7 @@ ErrorStatus remove_particles(
 
     if (!x || !v || !m || !particle_ids)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System members are NULL");
+        THROW(CTB_POINTER_ERROR, "System members are NULL");
     }
 
     for (int i = 0, last_shifted_idx = remove_idx_list[i]; i < num_to_remove; i++)
@@ -541,7 +505,7 @@ ErrorStatus remove_particles(
     // int *new_particle_ids = realloc(system->particle_ids, new_size * sizeof(int));
     // if (!new_particle_ids)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     THROW(CTB_MEMORY_ERROR, "Failed to reallocate memory for
     //     particle ids");
     // }
     // system->particle_ids = new_particle_ids;
@@ -549,7 +513,7 @@ ErrorStatus remove_particles(
     // double *new_x = realloc(system->x, new_size * 3 * sizeof(double));
     // if (!new_x)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     THROW(CTB_MEMORY_ERROR, "Failed to reallocate memory for
     //     x");
     // }
     // system->x = new_x;
@@ -557,7 +521,7 @@ ErrorStatus remove_particles(
     // double *new_v = realloc(system->v, new_size * 3 * sizeof(double));
     // if (!new_v)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     THROW(CTB_MEMORY_ERROR, "Failed to reallocate memory for
     //     v");
     // }
     // system->v = new_v;
@@ -565,15 +529,15 @@ ErrorStatus remove_particles(
     // double *new_m = realloc(system->m, new_size * sizeof(double));
     // if (!new_m)
     // {
-    //     return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to reallocate memory for
+    //     THROW(CTB_MEMORY_ERROR, "Failed to reallocate memory for
     //     m");
     // }
     // system->m = new_m;
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus remove_particle_from_double_arr(
+void remove_particle_from_double_arr(
     double *restrict arr,
     const int *restrict remove_idx_list,
     const int num_to_remove,
@@ -583,16 +547,16 @@ ErrorStatus remove_particle_from_double_arr(
 {
     if (!arr)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Array is NULL");
+        THROW(CTB_POINTER_ERROR, "Array is NULL");
     }
     if (!remove_idx_list)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Remove index list is NULL");
+        THROW(CTB_POINTER_ERROR, "Remove index list is NULL");
     }
     if (num_to_remove <= 0)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Number of particles to remove must be positive"
+        THROW(
+            CTB_VALUE_ERROR, "Number of particles to remove must be positive"
         );
     }
 
@@ -621,10 +585,10 @@ ErrorStatus remove_particle_from_double_arr(
         }
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus initialize_built_in_system(
+void initialize_built_in_system(
     System *restrict system,
     const char *restrict system_name,
     const bool is_memory_initialized
@@ -632,11 +596,11 @@ ErrorStatus initialize_built_in_system(
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
     if (!system_name)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System name is NULL");
+        THROW(CTB_POINTER_ERROR, "System name is NULL");
     }
 
     /* Pre-defined constants */
@@ -790,17 +754,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 2;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -829,17 +792,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 2;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -868,17 +830,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -918,17 +879,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -966,17 +926,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -1014,17 +973,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 3;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -1062,17 +1020,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 9;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -1139,17 +1096,16 @@ ErrorStatus initialize_built_in_system(
         const int system_num_particles = 12;
         if (!is_memory_initialized)
         {
-            ErrorStatus error_status =
-                WRAP_TRACEBACK(get_initialized_system(system, system_num_particles));
-            if (error_status.return_code != GRAV_SUCCESS)
+            ErrorStatus TRY_GOTO(get_initialized_system(system, system_num_particles));
+            if (error_status.return_code != CTB_SUCCESS)
             {
-                return error_status;
+                return;
             }
         }
         else if (system->num_particles < system_num_particles)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Initialized system is not big enough for the built-in system"
             );
         }
@@ -1224,24 +1180,20 @@ ErrorStatus initialize_built_in_system(
     }
     else
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(CTB_VALUE_ERROR,
             "System name not recognized. Got: \"%s\".",
             system_name
         );
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus system_set_center_of_mass_zero(System *restrict system)
+void system_set_center_of_mass_zero(System *restrict system)
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     /* Declare variables */
@@ -1250,7 +1202,7 @@ ErrorStatus system_set_center_of_mass_zero(System *restrict system)
     double *restrict m = system->m;
     if (!x || !m)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System member is NULL");
+        THROW(CTB_POINTER_ERROR, "System member is NULL");
     }
 
     double R_CM[3] = {0.0, 0.0, 0.0};
@@ -1267,7 +1219,7 @@ ErrorStatus system_set_center_of_mass_zero(System *restrict system)
 
     if (total_mass <= 0.0)
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Total mass is non-positive");
+        THROW(CTB_VALUE_ERROR, "Total mass is non-positive");
     }
 
     R_CM[0] /= total_mass;
@@ -1276,7 +1228,7 @@ ErrorStatus system_set_center_of_mass_zero(System *restrict system)
 
     if (!isfinite(R_CM[0]) || !isfinite(R_CM[1]) || !isfinite(R_CM[2]))
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Invalid value for center of mass");
+        THROW(CTB_VALUE_ERROR, "Invalid value for center of mass");
     }
 
     /* Set the center of mass to zero */
@@ -1287,14 +1239,14 @@ ErrorStatus system_set_center_of_mass_zero(System *restrict system)
         x[i * 3 + 2] -= R_CM[2];
     }
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus system_set_total_momentum_zero(System *restrict system)
+void system_set_total_momentum_zero(System *restrict system)
 {
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     /* Declare variables */
@@ -1303,7 +1255,7 @@ ErrorStatus system_set_total_momentum_zero(System *restrict system)
     double *restrict m = system->m;
     if (!v || !m)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System member is NULL");
+        THROW(CTB_POINTER_ERROR, "System member is NULL");
     }
 
     double V_CM[3] = {0.0, 0.0, 0.0};
@@ -1320,7 +1272,7 @@ ErrorStatus system_set_total_momentum_zero(System *restrict system)
 
     if (total_mass <= 0.0)
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Total mass is non-positive");
+        THROW(CTB_VALUE_ERROR, "Total mass is non-positive");
     }
 
     V_CM[0] /= total_mass;
@@ -1329,7 +1281,7 @@ ErrorStatus system_set_total_momentum_zero(System *restrict system)
 
     if (!isfinite(V_CM[0]) || !isfinite(V_CM[1]) || !isfinite(V_CM[2]))
     {
-        return WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Invalid value for V_CM");
+        THROW(CTB_VALUE_ERROR, "Invalid value for V_CM");
     }
 
     /* Set the center of mass to zero */
@@ -1340,7 +1292,7 @@ ErrorStatus system_set_total_momentum_zero(System *restrict system)
         v[i * 3 + 2] -= V_CM[2];
     }
 
-    return make_success_error_status();
+    return;
 }
 
 static int compare_distance(const void *a, const void *b)
@@ -1353,11 +1305,9 @@ static int compare_distance(const void *a, const void *b)
 ErrorStatus
 system_sort_by_distance(System *restrict system, const int primary_particle_id)
 {
-    ErrorStatus error_status;
-
     if (!system)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System is NULL");
+        THROW(CTB_POINTER_ERROR, "System is NULL");
     }
 
     const int num_particles = system->num_particles;
@@ -1367,7 +1317,7 @@ system_sort_by_distance(System *restrict system, const int primary_particle_id)
     double *restrict m = system->m;
     if (!particle_ids || !x || !v || !m)
     {
-        return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "System member is NULL");
+        THROW(CTB_POINTER_ERROR, "System member is NULL");
     }
 
     /* Find the primary particle index */
@@ -1390,8 +1340,8 @@ system_sort_by_distance(System *restrict system, const int primary_particle_id)
     }
     if (primary_particle_index == -1)
     {
-        return WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Primary particle ID not found in system"
+        THROW(
+            CTB_VALUE_ERROR, "Primary particle ID not found in system"
         );
     }
 
@@ -1400,7 +1350,7 @@ system_sort_by_distance(System *restrict system, const int primary_particle_id)
     if (!helper_arr)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for helper arrays"
+            CTB_MEMORY_ERROR, "Failed to allocate memory for helper arrays"
         );
         goto err_helper_arr_malloc;
     }
@@ -1434,7 +1384,7 @@ system_sort_by_distance(System *restrict system, const int primary_particle_id)
     if (!new_particle_ids || !new_x || !new_v || !new_m)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for new arrays"
+            CTB_MEMORY_ERROR, "Failed to allocate memory for new arrays"
         );
         goto err_temp_arr_malloc;
     }
@@ -1467,7 +1417,7 @@ system_sort_by_distance(System *restrict system, const int primary_particle_id)
     free(new_v);
     free(new_m);
 
-    return make_success_error_status();
+    return;
 
 err_temp_arr_malloc:
     free(new_particle_ids);
@@ -1476,7 +1426,7 @@ err_temp_arr_malloc:
     free(new_m);
 err_helper_arr_malloc:
     free(helper_arr);
-    return error_status;
+    return;
 }
 
 void set_periodic_boundary_conditions(CosmologicalSystem *restrict system)

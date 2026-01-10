@@ -48,7 +48,7 @@ void acceleration_barnes_hut(
     }
 
     /* Construct octree */
-    LinearOctree octree = TRY_GOTO(get_new_linear_octree(), error);
+    LinearOctree octree = get_new_linear_octree();
     TRY_GOTO(construct_octree(&octree, system, acceleration_param, NULL, -1.0), error);
 
     /* Compute acceleration */

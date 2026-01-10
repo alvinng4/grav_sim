@@ -101,10 +101,7 @@ void finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
         }
         else if (acceleration_param->max_num_particles_per_leaf < 1)
         {
-            THROW(
-                CTB_VALUE_ERROR,
-                "Maximum number of particles per leaf must be positive. Got: %d",
-                acceleration_param->max_num_particles_per_leaf
+            THROW_FMT(CTB_VALUE_ERROR, "Maximum number of particles per leaf must be positive. Got: %d", acceleration_param->max_num_particles_per_leaf
             );
             goto error;
         }
@@ -462,7 +459,6 @@ void benchmark_acceleration(
 
 err_unknown_acceleration_method:
 error:
-    free(run_time);
 err_malloc:
     free(reference_a);
     free(a);
