@@ -5,5 +5,6 @@ set(PCG_SOURCES
 )
 
 add_library(pcg STATIC ${PCG_SOURCES})
+add_library(pcg::pcg ALIAS pcg)
 
 target_include_directories(pcg PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_traceback.h"
+
 #include "grav_sim.h"
 
 #ifdef USE_OPENMP
@@ -66,78 +68,55 @@ int launch_simulation(
     const double tf
 )
 {
-    ErrorStatus error_status;
+    ctb_clear_context();
+    ctb_install_signal_handler();
 
     /* Check system parameters */
-    error_status = WRAP_TRACEBACK(finalize_system(system));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
+    TRY_GOTO(finalize_system(system), error);
 
     /* Check acceleration parameters */
-    error_status = WRAP_TRACEBACK(finalize_acceleration_param(acceleration_param));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
+    TRY_GOTO(finalize_acceleration_param(acceleration_param), error);
 
     /* Check integrator parameters */
-    error_status = WRAP_TRACEBACK(finalize_integration_param(integrator_param));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
+    TRY_GOTO(finalize_integration_param(integrator_param), error);
 
     /* Check output parameters */
-    error_status = WRAP_TRACEBACK(finalize_output_param(output_param, settings));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
+    TRY_GOTO(finalize_output_param(output_param, settings), error);
 
     /* Check tf */
     if (tf < 0.0)
     {
-        error_status = raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
-            "tf must be non-negative. Got: %g",
-            tf
-        );
+        THROW_FMT(CTB_VALUE_ERROR, "tf must be non-negative. Got: %g", tf);
         goto error;
     }
 
     /* Print message */
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
-        print_compilation_info();
-        print_simulation_info(
+        TRACE(print_compilation_info());
+        TRACE(print_simulation_info(
             system, integrator_param, acceleration_param, output_param, settings, tf
-        );
+        ));
     }
 
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         fputs("Launching simulation...\n", stdout);
     }
-    const double start_time = grav_get_current_time();
-    error_status = WRAP_TRACEBACK(integrator_launch_simulation(
-        system,
-        integrator_param,
-        acceleration_param,
-        output_param,
-        simulation_status,
-        settings,
-        tf
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
-    const double end_time = grav_get_current_time();
+    const double start_time = TRY_GOTO(grav_get_current_time(), error);
+    TRY_GOTO(
+        integrator_launch_simulation(
+            system,
+            integrator_param,
+            acceleration_param,
+            output_param,
+            simulation_status,
+            settings,
+            tf
+        ),
+        error
+    );
+    const double end_time = TRY_GOTO(grav_get_current_time(), error);
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         printf("Done! Runtime: %.3g s\n", end_time - start_time);
@@ -146,7 +125,7 @@ int launch_simulation(
     return 0;
 
 error:
-    print_and_free_traceback(&error_status);
+    ctb_dump_traceback();
     return 1;
 }
 
@@ -160,6 +139,9 @@ int launch_cosmological_simulation(
     const int pm_grid_size
 )
 {
+    ctb_clear_context();
+    ctb_install_signal_handler();
+
 #if !defined(USE_FFTW3) || !defined(USE_HDF5)
     (void)system;
     (void)output_param;
@@ -168,59 +150,40 @@ int launch_cosmological_simulation(
     (void)a_final;
     (void)num_steps;
     (void)pm_grid_size;
-    ErrorStatus error_status = WRAP_RAISE_ERROR(
-        GRAV_VALUE_ERROR,
+    THROW(
+        CTB_VALUE_ERROR,
         "FFTW3 and HDF5 are required for cosmological simulations. Please recompile "
-        "with FFTW3 and HDF5 support."
+        "with FFTW3 and HDF5 support. (-DUSE_FFTW3=ON -DUSE_HDF5=ON)"
     );
-    print_and_free_traceback(&error_status);
+    ctb_dump_traceback();
     return 1;
 #else
-    ErrorStatus error_status;
 
     /* Check system parameters */
-    error_status = WRAP_TRACEBACK(finalize_cosmological_system(system));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
+    TRY_GOTO(finalize_cosmological_system(system), error);
 
     /* Check output parameters */
     if (output_param->method == OUTPUT_METHOD_CSV)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR,
+        THROW(
+            CTB_VALUE_ERROR,
             "CSV output is not supported for cosmological simulations. Please use HDF5 "
             "output format."
         );
         goto error;
     }
-    error_status = WRAP_TRACEBACK(finalize_output_param(output_param, settings));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
+    TRY_GOTO(finalize_output_param(output_param, settings), error);
 
     /* Check a_final */
     if (a_final <= 0.0)
     {
-        error_status = raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
-            "a_final must be positive. Got: %g",
-            a_final
-        );
+        THROW_FMT(CTB_VALUE_ERROR, "a_final must be positive. Got: %g", a_final);
         goto error;
     }
     if (a_final < system->scale_factor)
     {
-        error_status = raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(
+            CTB_VALUE_ERROR,
             "a_final must be greater or equal to initial scale factor. Got: "
             "a_final=%g, system->scale_factor=%g",
             a_final,
@@ -232,58 +195,45 @@ int launch_cosmological_simulation(
     /* Check num_steps */
     if (num_steps <= 0)
     {
-        error_status = raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
-            "num_steps must be positive. Got: %d",
-            num_steps
-        );
+        THROW_FMT(CTB_VALUE_ERROR, "num_steps must be positive. Got: %d", num_steps);
         goto error;
     }
 
     /* Check pm_grid_size */
     if (pm_grid_size <= 0)
     {
-        error_status = raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
-            "pm_grid_size must be positive. Got: %d",
-            pm_grid_size
+        THROW_FMT(
+            CTB_VALUE_ERROR, "pm_grid_size must be positive. Got: %d", pm_grid_size
         );
         goto error;
     }
 
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
-        print_compilation_info();
-        print_cosmological_simulation_info(
+        TRACE(print_compilation_info());
+        TRACE(print_cosmological_simulation_info(
             system, output_param, settings, a_final, num_steps, pm_grid_size
-        );
+        ));
     }
 
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         fputs("Launching simulation...\n", stdout);
     }
-    const double start_time = grav_get_current_time();
-    error_status = WRAP_TRACEBACK(leapfrog_cosmology(
-        system,
-        output_param,
-        simulation_status,
-        settings,
-        a_final,
-        num_steps,
-        pm_grid_size
-    ));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error;
-    }
-    const double end_time = grav_get_current_time();
+    const double start_time = TRY_GOTO(grav_get_current_time(), error);
+    TRY_GOTO(
+        leapfrog_cosmology(
+            system,
+            output_param,
+            simulation_status,
+            settings,
+            a_final,
+            num_steps,
+            pm_grid_size
+        ),
+        error
+    );
+    const double end_time = TRY_GOTO(grav_get_current_time(), error);
     if (settings->verbose >= GRAV_VERBOSITY_NORMAL)
     {
         printf("Done! Runtime: %.3g s\n", end_time - start_time);
@@ -292,7 +242,7 @@ int launch_cosmological_simulation(
     return 0;
 
 error:
-    print_and_free_traceback(&error_status);
+    ctb_dump_traceback();
     return 1;
 #endif
 }

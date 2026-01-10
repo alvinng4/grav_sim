@@ -15,7 +15,6 @@ set(SRCS
     src/acceleration.c
     src/acceleration_barnes_hut.c
     src/cosmology.c
-    src/error.c
     src/grav_sim.c
     src/integrator.c
     src/integrator_rk_embedded.c
@@ -40,7 +39,7 @@ set(FFTW3_SRCS
 add_library(grav_sim SHARED ${SRCS})
 
 # Use the current source directory as a public include for this target
-target_include_directories(grav_sim PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/pcg)
+target_include_directories(grav_sim PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Debug mode
 option(DEBUG "Debug mode" OFF)
@@ -100,9 +99,13 @@ if (USE_FFTW3)
     endif()
 endif()
 
-# Add the PCG library as a subdirectory
+# Add the PCG library
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/libs/pcg)
-target_link_libraries(grav_sim PRIVATE pcg)
+target_link_libraries(grav_sim PUBLIC pcg::pcg)
+
+# Add the C Traceback library
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/libs/c_traceback)
+target_link_libraries(grav_sim PRIVATE c_traceback::c_traceback)
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(grav_sim PRIVATE rt)

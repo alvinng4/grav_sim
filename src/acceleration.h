@@ -10,7 +10,6 @@
 #define ACCELERATION_H
 
 #include "common.h"
-#include "error.h"
 #include "system.h"
 
 #define ACCELERATION_METHOD_PAIRWISE 1
@@ -37,7 +36,7 @@ AccelerationParam get_new_acceleration_param(void);
  *
  * \param acceleration_param Pointer to the acceleration parameters
  */
-ErrorStatus finalize_acceleration_param(AccelerationParam *restrict acceleration_param);
+void finalize_acceleration_param(AccelerationParam *restrict acceleration_param);
 
 /**
  * \brief Wrapper function for computing acceleration
@@ -45,10 +44,8 @@ ErrorStatus finalize_acceleration_param(AccelerationParam *restrict acceleration
  * \param[out] a Array of acceleration vectors to be modified
  * \param[in] system Pointer to the gravitational system
  * \param[in] acceleration_param Pointer to the acceleration parameters
- *
- * \return ErrorStatus
  */
-ErrorStatus acceleration(
+void acceleration(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -61,14 +58,14 @@ ErrorStatus acceleration(
  * \param[in] system Pointer to the gravitational system
  * \param[in] acceleration_param Pointer to the acceleration parameters
  */
-ErrorStatus acceleration_barnes_hut(
+void acceleration_barnes_hut(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
 );
 
 #ifdef USE_FFTW3
-ErrorStatus acceleration_PM(
+void acceleration_PM(
     double *restrict a,
     const CosmologicalSystem *restrict system,
     const double G,
@@ -84,10 +81,8 @@ ErrorStatus acceleration_PM(
  * \param num_acceleration_params Number of acceleration parameters
  * \param num_times_acceleration_param Array of number of times to run for each
  * acceleration parameter
- *
- * \return ErrorStatus
  */
-ErrorStatus benchmark_acceleration(
+void benchmark_acceleration(
     const System *restrict system,
     const AccelerationParam *acceleration_params,
     const int num_acceleration_params,

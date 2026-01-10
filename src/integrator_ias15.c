@@ -15,9 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_traceback.h"
+
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
 #include "math_functions.h"
 #include "output.h"
 #include "progress_bar.h"
@@ -56,12 +57,10 @@ static void initialize_aux_r(double *restrict aux_r);
  * \param[in] acceleration_param Pointer to the acceleration parameters
  * \param[in] a Pointer to the acceleration array with already computed values
  *
- * \return ErrorStatus
- *
  * \exception GRAV_MEMORY_ERROR if failed to allocate memory for arrays
  * \exception GRAV_VALUE_ERROR if initial_dt is negative
  */
-static ErrorStatus ias15_initial_dt(
+static void ias15_initial_dt(
     double *restrict initial_dt,
     const int power,
     const System *restrict system,
@@ -226,7 +225,7 @@ static void refine_aux_b(
     const bool refine_flag
 );
 
-ErrorStatus ias15(
+void ias15(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
@@ -236,8 +235,6 @@ ErrorStatus ias15(
     const double tf
 )
 {
-    ErrorStatus error_status;
-
     /* Declare variables and allocate memory */
     // tolerance
     double tolerance = integrator_param->tolerance;
@@ -285,14 +282,12 @@ ErrorStatus ias15(
         calloc((dim_nodes - 1) * num_particles * 3, sizeof(double));
     if (!nodes || !aux_c || !aux_r || !aux_b0 || !aux_b || !aux_g || !aux_e)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for auxiliary arrays"
-        );
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for auxiliary arrays");
         goto err_aux_memory;
     }
-    initialize_radau_spacing(nodes);
-    initialize_aux_c(aux_c);
-    initialize_aux_r(aux_r);
+    TRACE(initialize_radau_spacing(nodes));
+    TRACE(initialize_aux_c(aux_c));
+    TRACE(initialize_aux_r(aux_r));
 
     // Arrays
     double *restrict a = malloc(num_particles * 3 * sizeof(double));
@@ -319,8 +314,7 @@ ErrorStatus ias15(
         !x_err_comp_sum || !v_err_comp_sum || !temp_x_err_comp_sum ||
         !temp_v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -333,11 +327,7 @@ ErrorStatus ias15(
     };
 
     /* Get initial dt */
-    error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_acc_error;
-    }
+    TRY_GOTO(acceleration(a, system, acceleration_param), err_acc_error);
 
     double dt;
     double dt_new;
@@ -347,12 +337,9 @@ ErrorStatus ias15(
     }
     else
     {
-        error_status =
-            WRAP_TRACEBACK(ias15_initial_dt(&dt, 15, system, acceleration_param, a));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_dt;
-        }
+        TRY_GOTO(
+            ias15_initial_dt(&dt, 15, system, acceleration_param, a), err_initial_dt
+        );
 
         if (dt > tf)
         {
@@ -363,29 +350,24 @@ ErrorStatus ias15(
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(output_snapshot(
-            output_param,
-            system,
-            integrator_param,
-            acceleration_param,
-            simulation_status,
-            settings
-        ));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
+        TRY_GOTO(
+            output_snapshot(
+                output_param,
+                system,
+                integrator_param,
+                acceleration_param,
+                simulation_status,
+                settings
+            ),
+            err_initial_output
+        );
     }
 
     /* Main Loop */
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, tf));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(start_progress_bar(&progress_bar_param, tf), err_start_progress_bar);
     }
 
     *t_ptr = 0.0;
@@ -407,52 +389,54 @@ ErrorStatus ias15(
                 );
 
                 // Evaluate force function and store result
-                error_status = WRAP_TRACEBACK(acceleration(
-                    &aux_a[i * num_particles * 3], &temp_system, acceleration_param
-                ));
-                if (error_status.return_code != GRAV_SUCCESS)
-                {
-                    goto err_acc_error;
-                }
-
-                compute_aux_g(aux_g, num_particles, dim_nodes, aux_r, aux_a, i, F);
-                compute_aux_b(aux_b, num_particles, dim_nodes_minus_1, aux_g, aux_c, i);
+                TRY_GOTO(
+                    acceleration(
+                        &aux_a[i * num_particles * 3], &temp_system, acceleration_param
+                    ),
+                    err_acc_error
+                );
             }
 
-            // Estimate convergence
-            for (int i = 0; i < num_particles; i++)
+            compute_aux_g(aux_g, num_particles, dim_nodes, aux_r, aux_a, i, F);
+            compute_aux_b(aux_b, num_particles, dim_nodes_minus_1, aux_g, aux_c, i);
+        }
+
+        // Estimate convergence
+        for (int i = 0; i < num_particles; i++)
+        {
+            for (int j = 0; j < 3; j++)
             {
-                for (int j = 0; j < 3; j++)
-                {
-                    delta_b7[i * 3 + j] =
-                        aux_b[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j] -
-                        aux_b0[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j];
-                }
+                delta_b7[i * 3 + j] =
+                    aux_b[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j] -
+                    aux_b0[dim_nodes_minus_2 * num_particles * 3 + i * 3 + j];
             }
-            memcpy(
-                aux_b0, aux_b, dim_nodes_minus_1 * num_particles * 3 * sizeof(double)
-            );
-            if ((abs_max_vec(delta_b7, num_particles * 3) /
-                 abs_max_vec(
-                     &aux_a[dim_nodes_minus_1 * num_particles * 3], num_particles * 3
-                 )) < tolerance_pc)
-            {
-                break;
-            }
+        }
+        TRACE(memcpy(
+            aux_b0, aux_b, dim_nodes_minus_1 * num_particles * 3 * sizeof(double)
+        ));
+        if ((abs_max_vec(delta_b7, num_particles * 3) /
+             abs_max_vec(
+                 &aux_a[dim_nodes_minus_1 * num_particles * 3], num_particles * 3
+             )) < tolerance_pc)
+        {
+            break;
         }
 
         /* Advance step */
-        memcpy(temp_x_err_comp_sum, x_err_comp_sum, num_particles * 3 * sizeof(double));
-        memcpy(temp_v_err_comp_sum, v_err_comp_sum, num_particles * 3 * sizeof(double));
+        TRACE(memcpy(
+            temp_x_err_comp_sum, x_err_comp_sum, num_particles * 3 * sizeof(double)
+        ));
+        TRACE(memcpy(
+            temp_v_err_comp_sum, v_err_comp_sum, num_particles * 3 * sizeof(double)
+        ));
 
-        approx_pos_step(x_1, temp_x_err_comp_sum, num_particles, x, v, a, aux_b, dt);
-        approx_vel_step(v_1, temp_v_err_comp_sum, num_particles, v, a, aux_b, dt);
-        error_status =
-            WRAP_TRACEBACK(acceleration(a_1, &temp_system, acceleration_param));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acc_error;
-        }
+        TRACE(
+            approx_pos_step(x_1, temp_x_err_comp_sum, num_particles, x, v, a, aux_b, dt)
+        );
+        TRACE(
+            approx_vel_step(v_1, temp_v_err_comp_sum, num_particles, v, a, aux_b, dt)
+        );
+        TRY_GOTO(acceleration(a_1, &temp_system, acceleration_param), err_acc_error);
 
         /* Estimate relative error */
         error_b7 = abs_max_vec(
@@ -475,7 +459,7 @@ ErrorStatus ias15(
             (*num_steps_ptr)++;
             *t_ptr += dt;
 
-            refine_aux_b(
+            TRACE(refine_aux_b(
                 aux_b,
                 aux_e,
                 delta_aux_b,
@@ -484,39 +468,38 @@ ErrorStatus ias15(
                 dt,
                 dt_new,
                 refine_flag
-            );
+            ));
             refine_flag = true;
 
-            memcpy(
+            TRACE(memcpy(
                 x_err_comp_sum, temp_x_err_comp_sum, num_particles * 3 * sizeof(double)
-            );
-            memcpy(
+            ));
+            TRACE(memcpy(
                 v_err_comp_sum, temp_v_err_comp_sum, num_particles * 3 * sizeof(double)
-            );
+            ));
         }
 
         if (accept_step_flag)
         {
             accept_step_flag = false;
-            memcpy(x, x_1, num_particles * 3 * sizeof(double));
-            memcpy(v, v_1, num_particles * 3 * sizeof(double));
-            memcpy(a, a_1, num_particles * 3 * sizeof(double));
+            TRACE(memcpy(x, x_1, num_particles * 3 * sizeof(double)));
+            TRACE(memcpy(v, v_1, num_particles * 3 * sizeof(double)));
+            TRACE(memcpy(a, a_1, num_particles * 3 * sizeof(double)));
 
             /* Output */
             if (is_output && *t_ptr >= next_output_time)
             {
-                error_status = WRAP_TRACEBACK(output_snapshot(
-                    output_param,
-                    system,
-                    integrator_param,
-                    acceleration_param,
-                    simulation_status,
-                    settings
-                ));
-                if (error_status.return_code != GRAV_SUCCESS)
-                {
-                    goto err_output;
-                }
+                TRY_GOTO(
+                    output_snapshot(
+                        output_param,
+                        system,
+                        integrator_param,
+                        acceleration_param,
+                        simulation_status,
+                        settings
+                    ),
+                    err_output
+                );
 
                 next_output_time = (*output_count_ptr) * output_interval;
             }
@@ -524,7 +507,7 @@ ErrorStatus ias15(
 
         if (enable_progress_bar)
         {
-            update_progress_bar(&progress_bar_param, *t_ptr, false);
+            TRACE(update_progress_bar(&progress_bar_param, *t_ptr, false));
         }
 
         /* Actual step size for the next step */
@@ -562,31 +545,27 @@ ErrorStatus ias15(
 
     if (enable_progress_bar)
     {
-        update_progress_bar(&progress_bar_param, *t_ptr, true);
+        TRACE(update_progress_bar(&progress_bar_param, *t_ptr, true));
     }
 
     /* Free memory */
-    free(nodes);
-    free(aux_c);
-    free(aux_r);
-    free(aux_b0);
-    free(aux_b);
-    free(aux_g);
-    free(aux_e);
-    free(a);
-    free(aux_a);
-    free(x_1);
-    free(v_1);
-    free(a_1);
-    free(delta_b7);
-    free(F);
-    free(delta_aux_b);
-    free(x_err_comp_sum);
-    free(v_err_comp_sum);
-    free(temp_x_err_comp_sum);
-    free(temp_v_err_comp_sum);
+    TRACE_BLOCK(free(nodes); free(aux_c); free(aux_r); free(aux_b0); free(aux_b);
+                free(aux_g);
+                free(aux_e);
+                free(a);
+                free(aux_a);
+                free(x_1);
+                free(v_1);
+                free(a_1);
+                free(delta_b7);
+                free(F);
+                free(delta_aux_b);
+                free(x_err_comp_sum);
+                free(v_err_comp_sum);
+                free(temp_x_err_comp_sum);
+                free(temp_v_err_comp_sum););
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_acc_error:
@@ -594,28 +573,22 @@ err_start_progress_bar:
 err_initial_output:
 err_initial_dt:
 err_memory:
-    free(x_err_comp_sum);
-    free(v_err_comp_sum);
-    free(temp_x_err_comp_sum);
-    free(temp_v_err_comp_sum);
-    free(delta_aux_b);
-    free(F);
-    free(delta_b7);
-    free(a_1);
-    free(v_1);
-    free(x_1);
-    free(aux_a);
-    free(a);
+    TRACE_BLOCK(free(x_err_comp_sum); free(v_err_comp_sum); free(temp_x_err_comp_sum);
+                free(temp_v_err_comp_sum);
+                free(delta_aux_b);
+                free(F);
+                free(delta_b7);
+                free(a_1);
+                free(v_1);
+                free(x_1);
+                free(aux_a);
+                free(a););
 err_aux_memory:
-    free(aux_e);
-    free(aux_g);
-    free(aux_b);
-    free(aux_b0);
-    free(aux_r);
-    free(aux_c);
-    free(nodes);
+    TRACE_BLOCK(free(aux_e); free(aux_g); free(aux_b); free(aux_b0); free(aux_r);
+                free(aux_c);
+                free(nodes););
 
-    return error_status;
+    return;
 }
 
 static void initialize_radau_spacing(double *restrict nodes)
@@ -703,7 +676,7 @@ void initialize_aux_r(double *restrict aux_r)
     aux_r[7 * 8 + 6] = 10.846026190236844684706431007823415424143683137181L;
 }
 
-static ErrorStatus ias15_initial_dt(
+static void ias15_initial_dt(
     double *restrict initial_dt,
     const int power,
     const System *restrict system,
@@ -711,7 +684,6 @@ static ErrorStatus ias15_initial_dt(
     const double *restrict a
 )
 {
-    ErrorStatus error_status;
     *initial_dt = -1.0;
 
     const int num_particles = system->num_particles;
@@ -723,9 +695,7 @@ static ErrorStatus ias15_initial_dt(
     double *restrict a_1 = malloc(num_particles * 3 * sizeof(double));
     if (!x_1 || !a_1)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for initial_dt calculation"
-        );
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for initial_dt calculation");
         goto error_memory;
     }
 
@@ -758,11 +728,7 @@ static ErrorStatus ias15_initial_dt(
         x_1[i * 3 + 2] = x[i * 3 + 2] + dt_0 * v[i * 3 + 2];
     }
 
-    error_status = WRAP_TRACEBACK(acceleration(a_1, &system_1, acceleration_param));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto error_acc;
-    }
+    TRY_GOTO(acceleration(a_1, &system_1, acceleration_param), error_acc);
 
     for (int i = 0; i < num_particles; i++)
     {
@@ -784,23 +750,20 @@ static ErrorStatus ias15_initial_dt(
     *initial_dt = fmin(100.0 * dt_0, dt_1);
     if (*initial_dt <= 0.0)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Initial dt is less than or equal to zero"
-        );
+        THROW(CTB_VALUE_ERROR, "Initial dt is less than or equal to zero");
         goto error_dt;
     }
 
     free(x_1);
     free(a_1);
 
-    return make_success_error_status();
+    return;
 
 error_dt:
 error_acc:
 error_memory:
-    free(x_1);
-    free(a_1);
-    return error_status;
+    TRACE_BLOCK(free(x_1); free(a_1););
+    return;
 }
 
 static void approx_pos_pc(

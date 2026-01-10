@@ -17,7 +17,6 @@
 
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
 #include "integrator.h"
 #include "output.h"
 #include "progress_bar.h"

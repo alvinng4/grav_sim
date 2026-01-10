@@ -11,9 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_traceback.h"
+
 #include "acceleration.h"
 #include "common.h"
-#include "error.h"
 #include "math_functions.h"
 #include "system.h"
 #include "utils.h"
@@ -22,10 +23,8 @@
  * \brief Check the acceleration method
  *
  * \param acceleration_method Acceleration method
- *
- * \return ErrorStatus
  */
-static ErrorStatus check_acceleration_method(const int acceleration_method);
+static void check_acceleration_method(const int acceleration_method);
 
 /**
  * \brief Compute acceleration with direct pairwise method
@@ -33,10 +32,8 @@ static ErrorStatus check_acceleration_method(const int acceleration_method);
  * \param a Array of acceleration vectors to be modified
  * \param system Pointer to the gravitational system
  * \param acceleration_param Pointer to the acceleration parameters
- *
- * \return ErrorStatus
  */
-static ErrorStatus acceleration_pairwise(
+static void acceleration_pairwise(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -49,10 +46,8 @@ static ErrorStatus acceleration_pairwise(
  * \param a Array of acceleration vectors to be modified
  * \param system Pointer to the gravitational system
  * \param acceleration_param Pointer to the acceleration parameters
- *
- * \return ErrorStatus
  */
-static ErrorStatus acceleration_massless(
+static void acceleration_massless(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -69,43 +64,32 @@ AccelerationParam get_new_acceleration_param(void)
     return acceleration_param;
 }
 
-ErrorStatus finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
+void finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
 {
-    ErrorStatus error_status;
-
     /* Check the acceleration method */
-    error_status =
-        WRAP_TRACEBACK(check_acceleration_method(acceleration_param->method));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        return error_status;
-    }
+    TRY_GOTO(check_acceleration_method(acceleration_param->method), error);
 
     /* Check the softening length */
     if (acceleration_param->softening_length < 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(
+            CTB_VALUE_ERROR,
             "Softening length is negative. Got: %.3g",
             acceleration_param->softening_length
         );
+        goto error;
     }
 
     /* Check the opening angle */
     if (acceleration_param->method == ACCELERATION_METHOD_BARNES_HUT &&
         acceleration_param->opening_angle < 0.0)
     {
-        return raise_error_fmt(
-            __FILE__,
-            __LINE__,
-            __func__,
-            GRAV_VALUE_ERROR,
+        THROW_FMT(
+            CTB_VALUE_ERROR,
             "Opening angle is negative. Got: %.3g",
             acceleration_param->opening_angle
         );
+        goto error;
     }
 
     /* Check the maximum number of particles per leaf */
@@ -117,21 +101,22 @@ ErrorStatus finalize_acceleration_param(AccelerationParam *restrict acceleration
         }
         else if (acceleration_param->max_num_particles_per_leaf < 1)
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW(
+                CTB_VALUE_ERROR,
                 "Maximum number of particles per leaf must be positive. Got: %d",
                 acceleration_param->max_num_particles_per_leaf
             );
+            goto error;
         }
     }
 
-    return make_success_error_status();
+    return;
+
+error:
+    return;
 }
 
-ErrorStatus acceleration(
+void acceleration(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -140,18 +125,18 @@ ErrorStatus acceleration(
     switch (acceleration_param->method)
     {
         case ACCELERATION_METHOD_PAIRWISE:
-            return acceleration_pairwise(a, system, acceleration_param);
+            acceleration_pairwise(a, system, acceleration_param);
+            break;
         case ACCELERATION_METHOD_MASSLESS:
-            return acceleration_massless(a, system, acceleration_param);
+            acceleration_massless(a, system, acceleration_param);
+            break;
         case ACCELERATION_METHOD_BARNES_HUT:
-            return acceleration_barnes_hut(a, system, acceleration_param);
+            acceleration_barnes_hut(a, system, acceleration_param);
+            break;
         default:
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW_FMT(
+                CTB_VALUE_ERROR,
                 "Unknown acceleration method. Got: %d",
                 acceleration_param->method
             );
@@ -159,7 +144,7 @@ ErrorStatus acceleration(
     }
 }
 
-static ErrorStatus check_acceleration_method(const int acceleration_method)
+static void check_acceleration_method(const int acceleration_method)
 {
     switch (acceleration_method)
     {
@@ -169,21 +154,18 @@ static ErrorStatus check_acceleration_method(const int acceleration_method)
             break;
         default:
         {
-            return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
-                GRAV_VALUE_ERROR,
+            THROW_FMT(
+                CTB_VALUE_ERROR,
                 "Unknown acceleration method. Got: %d",
                 acceleration_method
             );
         }
     }
 
-    return make_success_error_status();
+    return;
 }
 
-static ErrorStatus acceleration_pairwise(
+static void acceleration_pairwise(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -235,10 +217,10 @@ static ErrorStatus acceleration_pairwise(
         }
     }
 
-    return make_success_error_status();
+    return;
 }
 
-static ErrorStatus acceleration_massless(
+static void acceleration_massless(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -283,8 +265,8 @@ static ErrorStatus acceleration_massless(
     {
         free(massive_indices);
         free(massless_indices);
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
+        THROW(
+            CTB_MEMORY_ERROR,
             "Failed to allocate memory for massive and massless indices"
         );
     }
@@ -367,25 +349,21 @@ static ErrorStatus acceleration_massless(
     free(massive_indices);
     free(massless_indices);
 
-    return make_success_error_status();
+    return;
 }
 
-ErrorStatus benchmark_acceleration(
+void benchmark_acceleration(
     const System *restrict system,
     const AccelerationParam *acceleration_params,
     const int num_acceleration_params,
     const int *restrict num_times_acceleration_param
 )
 {
-    ErrorStatus error_status;
-
     double *restrict reference_a = malloc(system->num_particles * 3 * sizeof(double));
     double *restrict a = malloc(system->num_particles * 3 * sizeof(double));
     if (!reference_a || !a)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for acceleration arrays"
-        );
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for acceleration arrays");
         goto err_malloc;
     }
 
@@ -407,10 +385,7 @@ ErrorStatus benchmark_acceleration(
 
         if (!run_time)
         {
-            free(run_time);
-            error_status = WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to allocate memory for runtime array"
-            );
+            THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for runtime array");
             goto err_malloc;
         }
 
@@ -419,25 +394,14 @@ ErrorStatus benchmark_acceleration(
             if (i == 0 && j == 0)
             {
                 double start_time = grav_get_current_time();
-                error_status = WRAP_TRACEBACK(
-                    acceleration(reference_a, system, acceleration_param)
-                );
-                if (error_status.return_code != GRAV_SUCCESS)
-                {
-                    return error_status;
-                }
+                TRY_GOTO(acceleration(reference_a, system, acceleration_param), error);
                 double end_time = grav_get_current_time();
                 run_time[j] += (end_time - start_time);
             }
             else
             {
                 double start_time = grav_get_current_time();
-                error_status =
-                    WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
-                if (error_status.return_code != GRAV_SUCCESS)
-                {
-                    return error_status;
-                }
+                TRY_GOTO(acceleration(a, system, acceleration_param), error);
                 double end_time = grav_get_current_time();
                 run_time[j] += (end_time - start_time);
             }
@@ -471,11 +435,8 @@ ErrorStatus benchmark_acceleration(
                 fputs("    Method: Barnes-Hut\n", stdout);
                 break;
             default:
-                error_status = raise_error_fmt(
-                    __FILE__,
-                    __LINE__,
-                    __func__,
-                    GRAV_VALUE_ERROR,
+                THROW_FMT(
+                    CTB_VALUE_ERROR,
                     "Unknown acceleration method. Got: %d",
                     acceleration_param->method
                 );
@@ -497,11 +458,13 @@ ErrorStatus benchmark_acceleration(
     free(reference_a);
     free(a);
 
-    return make_success_error_status();
+    return;
 
 err_unknown_acceleration_method:
+error:
+    free(run_time);
 err_malloc:
     free(reference_a);
     free(a);
-    return error_status;
+    return;
 }

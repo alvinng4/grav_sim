@@ -7,6 +7,8 @@
 #include <omp.h>
 #endif
 
+#include "c_traceback.h"
+
 #include "acceleration.h"
 #include "error.h"
 #include "math_functions.h"
@@ -260,15 +262,13 @@ static void compute_acceleration_with_gradient(
     }
 }
 
-ErrorStatus acceleration_PM(
+void acceleration_PM(
     double *restrict a,
     const CosmologicalSystem *restrict system,
     const double G,
     const int pm_grid_size
 )
 {
-    ErrorStatus error_status;
-
     /* Declare variables */
     const int num_particles = system->num_particles;
     const double *restrict x = system->x;
@@ -288,9 +288,8 @@ ErrorStatus acceleration_PM(
     double *restrict phi = fftw_malloc(grid_size_3 * sizeof(double));
     if (!acc_grid || !delta || !delta_fourier || !phi)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for particle mesh acceleration"
+        THROW(
+            CTB_MEMORY_ERROR, "Failed to allocate memory for particle mesh acceleration"
         );
         goto err_malloc;
     }
@@ -304,9 +303,7 @@ ErrorStatus acceleration_PM(
     );
     if (!plan_forward)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to create FFTW plan for forward transform"
-        );
+        THROW(CTB_MEMORY_ERROR, "Failed to create FFTW plan for forward transform");
         goto err_fftw_plan_forward;
     }
     fftw_execute(plan_forward);
@@ -345,9 +342,7 @@ ErrorStatus acceleration_PM(
     );
     if (!plan_backward)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to create FFTW plan for backward transform"
-        );
+        THROW(CTB_MEMORY_ERROR, "Failed to create FFTW plan for backward transform");
         goto err_fftw_plan_backward;
     }
     fftw_execute(plan_backward);
@@ -359,22 +354,20 @@ ErrorStatus acceleration_PM(
     }
 
     /* Compute the force by taking the gradient of the potential */
-    compute_acceleration_with_gradient(acc_grid, phi, pm_grid_size, box_length);
+    TRACE(compute_acceleration_with_gradient(acc_grid, phi, pm_grid_size, box_length));
 
     /* Add the acceleration to the particles */
-    get_cloud_in_cell_acceleration(
+    TRACE(get_cloud_in_cell_acceleration(
         a, x, acc_grid, num_particles, pm_grid_size, box_center, box_length
-    );
+    ));
 
     /* Free memory */
-    free(acc_grid);
-    fftw_free(delta);
-    fftw_free(delta_fourier);
-    fftw_free(phi);
-    fftw_destroy_plan(plan_forward);
-    fftw_destroy_plan(plan_backward);
+    TRACE_BLOCK(free(acc_grid); fftw_free(delta); fftw_free(delta_fourier);
+                fftw_free(phi);
+                fftw_destroy_plan(plan_forward);
+                fftw_destroy_plan(plan_backward););
 
-    return make_success_error_status();
+    return;
 
 err_fftw_plan_backward:
     fftw_destroy_plan(plan_backward);
@@ -386,5 +379,5 @@ err_malloc:
     fftw_free(delta_fourier);
     fftw_free(phi);
 
-    return error_status;
+    return;
 }

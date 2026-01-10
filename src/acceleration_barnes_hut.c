@@ -12,6 +12,8 @@
 #include <omp.h>
 #endif
 
+#include "c_traceback.h"
+
 #include "acceleration.h"
 #include "linear_octree.h"
 
@@ -30,14 +32,12 @@ static void helper_compute_acceleration(
     const LinearOctree *restrict octree
 );
 
-ErrorStatus acceleration_barnes_hut(
+void acceleration_barnes_hut(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
 )
 {
-    ErrorStatus error_status;
-
     /* Empty the input array */
     const int num_particles = system->num_particles;
     for (int i = 0; i < num_particles; i++)
@@ -48,22 +48,21 @@ ErrorStatus acceleration_barnes_hut(
     }
 
     /* Construct octree */
-    LinearOctree octree = get_new_linear_octree();
-    error_status = WRAP_TRACEBACK(
-        construct_octree(&octree, system, acceleration_param, NULL, -1.0)
-    );
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        return error_status;
-    }
+    LinearOctree octree = TRY_GOTO(get_new_linear_octree(), error);
+    TRY_GOTO(construct_octree(&octree, system, acceleration_param, NULL, -1.0), error);
 
     /* Compute acceleration */
-    helper_compute_acceleration(a, system, acceleration_param, &octree);
+    TRY_GOTO(
+        helper_compute_acceleration(a, system, acceleration_param, &octree), error
+    );
 
     /* Free memory */
-    free_linear_octree(&octree);
+    TRY_GOTO(free_linear_octree(&octree), error);
 
-    return make_success_error_status();
+    return;
+
+error:
+    return;
 }
 
 static void helper_compute_acceleration(

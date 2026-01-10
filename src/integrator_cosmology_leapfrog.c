@@ -11,10 +11,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_traceback.h"
+
 #include "acceleration.h"
 #include "common.h"
 #include "cosmology.h"
-#include "error.h"
 #include "integrator.h"
 #include "math_functions.h"
 #include "output.h"
@@ -23,7 +24,7 @@
 #include "system.h"
 #include "utils.h"
 
-ErrorStatus leapfrog_cosmology(
+void leapfrog_cosmology(
     CosmologicalSystem *restrict system,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,
@@ -34,8 +35,6 @@ ErrorStatus leapfrog_cosmology(
 )
 {
     /* Declare variables */
-    ErrorStatus error_status;
-
     const int num_particles = system->num_particles;
     double *restrict x = system->x;
     double *restrict v = system->v;
@@ -65,8 +64,7 @@ ErrorStatus leapfrog_cosmology(
     // Check if memory allocation is successful
     if (!momentum || !a)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        THROW(CTB_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -79,17 +77,16 @@ ErrorStatus leapfrog_cosmology(
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(
-            output_snapshot_cosmology(output_param, system, simulation_status, settings)
+        TRY_GOTO(
+            output_snapshot_cosmology(
+                output_param, system, simulation_status, settings
+            ),
+            err_initial_output
         );
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_initial_output;
-        }
     }
 
     /* Set periodic boundary conditions */
-    set_periodic_boundary_conditions(system);
+    TRACE(set_periodic_boundary_conditions(system));
 
     /* Initialize momentum */
     for (int i = 0; i < num_particles; i++)
@@ -102,11 +99,7 @@ ErrorStatus leapfrog_cosmology(
     }
 
     /* Compute initial acceleration */
-    error_status = WRAP_TRACEBACK(acceleration_PM(a, system, G, pm_grid_size));
-    if (error_status.return_code != GRAV_SUCCESS)
-    {
-        goto err_acceleration;
-    }
+    TRY_GOTO(acceleration_PM(a, system, G, pm_grid_size), err_acceleration);
 
     /* Main Loop */
     double dt = (tf - t0) / num_steps;
@@ -114,12 +107,10 @@ ErrorStatus leapfrog_cosmology(
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_start_progress_bar;
-        }
+        TRY_GOTO(
+            start_progress_bar(&progress_bar_param, total_num_steps),
+            err_start_progress_bar
+        );
     }
 
     simulation_status->dt = dt;
@@ -134,7 +125,7 @@ ErrorStatus leapfrog_cosmology(
         simulation_status->dt = dt;
 
         /* Kick (p_1/2) */
-        H_a = compute_H(system->scale_factor, H0, omega_m, omega_lambda);
+        H_a = TRACE(compute_H(system->scale_factor, H0, omega_m, omega_lambda));
         for (int i = 0; i < num_particles; i++)
         {
             for (int j = 0; j < 3; j++)
@@ -146,7 +137,7 @@ ErrorStatus leapfrog_cosmology(
         system->scale_factor = exp(*t_ptr);
 
         /* Drift (x_1) */
-        H_a = compute_H(system->scale_factor, H0, omega_m, omega_lambda);
+        H_a = TRACE(compute_H(system->scale_factor, H0, omega_m, omega_lambda));
         for (int i = 0; i < num_particles; i++)
         {
             for (int j = 0; j < 3; j++)
@@ -157,14 +148,10 @@ ErrorStatus leapfrog_cosmology(
         }
 
         /* Set periodic boundary conditions */
-        set_periodic_boundary_conditions(system);
+        TRACE(set_periodic_boundary_conditions(system));
 
         /* Kick (p_1) */
-        error_status = WRAP_TRACEBACK(acceleration_PM(a, system, G, pm_grid_size));
-        if (error_status.return_code != GRAV_SUCCESS)
-        {
-            goto err_acceleration;
-        }
+        TRY_GOTO(acceleration_PM(a, system, G, pm_grid_size), err_acceleration);
 
         for (int i = 0; i < num_particles; i++)
         {
@@ -190,20 +177,16 @@ ErrorStatus leapfrog_cosmology(
                                    (system->scale_factor * system->scale_factor);
                 }
             }
-            error_status = WRAP_TRACEBACK(output_snapshot_cosmology(
+            TRY_GOTO(output_snapshot_cosmology(
                 output_param, system, simulation_status, settings
             ));
-            if (error_status.return_code != GRAV_SUCCESS)
-            {
-                goto err_output;
-            }
 
             next_output_time = (*output_count_ptr) * output_interval;
         }
 
         if (enable_progress_bar)
         {
-            update_progress_bar(&progress_bar_param, *num_steps_ptr, false);
+            TRACE(update_progress_bar(&progress_bar_param, *num_steps_ptr, false));
         }
 
         /* Check exit */
@@ -215,21 +198,19 @@ ErrorStatus leapfrog_cosmology(
 
     if (enable_progress_bar)
     {
-        update_progress_bar(&progress_bar_param, *num_steps_ptr, true);
+        TRACE(update_progress_bar(&progress_bar_param, *num_steps_ptr, true));
     }
 
-    free(momentum);
-    free(a);
+    TRACE_BLOCK(free(momentum); free(a););
 
-    return make_success_error_status();
+    return;
 
 err_output:
 err_acceleration:
 err_start_progress_bar:
 err_initial_output:
 err_memory:
-    free(momentum);
-    free(a);
+    TRACE_BLOCK(free(momentum); free(a););
 
-    return error_status;
+    return;
 }
