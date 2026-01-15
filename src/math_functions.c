@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-double vec_sum(const double *restrict vec, const int vec_length)
+WIN32DLL_API double vec_sum(const double *restrict vec, const int vec_length)
 {
     double sum = 0.0;
     for (int i = 0; i < vec_length; i++)
@@ -20,17 +20,17 @@ double vec_sum(const double *restrict vec, const int vec_length)
     return sum;
 }
 
-double vec_sum_3d(const double *restrict vec)
+WIN32DLL_API double vec_sum_3d(const double *restrict vec)
 {
     return vec[0] + vec[1] + vec[2];
 }
 
-double vec_norm_3d(const double *restrict vec)
+WIN32DLL_API double vec_norm_3d(const double *restrict vec)
 {
     return sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
 }
 
-double vec_norm(const double *restrict vec, const int vec_length)
+WIN32DLL_API double vec_norm(const double *restrict vec, const int vec_length)
 {
     double sum = 0.0;
     for (int i = 0; i < vec_length; i++)
@@ -41,7 +41,7 @@ double vec_norm(const double *restrict vec, const int vec_length)
     return sqrt(sum);
 }
 
-double abs_max_vec(const double *restrict vec, const int vec_length)
+WIN32DLL_API double abs_max_vec(const double *restrict vec, const int vec_length)
 {
     double max = fabs(vec[0]);
     for (int i = 1; i < vec_length; i++)
@@ -52,12 +52,13 @@ double abs_max_vec(const double *restrict vec, const int vec_length)
     return max;
 }
 
-double vec_dot_3d(const double *restrict vec_1, const double *restrict vec_2)
+WIN32DLL_API double
+vec_dot_3d(const double *restrict vec_1, const double *restrict vec_2)
 {
     return vec_1[0] * vec_2[0] + vec_1[1] * vec_2[1] + vec_1[2] * vec_2[2];
 }
 
-double vec_dot(
+WIN32DLL_API double vec_dot(
     const double *restrict vec_1, const double *restrict vec_2, const int vec_length
 )
 {
@@ -70,7 +71,7 @@ double vec_dot(
     return sum;
 }
 
-double compute_mean(const double *restrict vec, const int vec_length)
+WIN32DLL_API double compute_mean(const double *restrict vec, const int vec_length)
 {
     double sum = 0.0;
     for (int i = 0; i < vec_length; i++)
@@ -80,7 +81,7 @@ double compute_mean(const double *restrict vec, const int vec_length)
     return sum / vec_length;
 }
 
-double
+WIN32DLL_API double
 compute_variance(const double *restrict vec, const int vec_length, const double ddof)
 {
     if (vec_length <= 1)
@@ -100,7 +101,8 @@ compute_variance(const double *restrict vec, const int vec_length, const double 
     return variance;
 }
 
-double compute_std(const double *restrict vec, const int vec_length, const double ddof)
+WIN32DLL_API double
+compute_std(const double *restrict vec, const int vec_length, const double ddof)
 {
     return sqrt(compute_variance(vec, vec_length, ddof));
 }

@@ -226,7 +226,7 @@ static void refine_aux_b(
     const bool refine_flag
 );
 
-ErrorStatus ias15(
+WIN32DLL_API ErrorStatus ias15(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,

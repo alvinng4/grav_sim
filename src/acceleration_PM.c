@@ -260,7 +260,7 @@ static void compute_acceleration_with_gradient(
     }
 }
 
-ErrorStatus acceleration_PM(
+WIN32DLL_API ErrorStatus acceleration_PM(
     double *restrict a,
     const CosmologicalSystem *restrict system,
     const double G,

@@ -23,7 +23,7 @@
 #include "system.h"
 #include "utils.h"
 
-ErrorStatus leapfrog_cosmology(
+WIN32DLL_API ErrorStatus leapfrog_cosmology(
     CosmologicalSystem *restrict system,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,

@@ -195,7 +195,7 @@ static ErrorStatus whfast_acceleration_massless(
 
 static void whfast_compute_eta(double *restrict eta, const System *restrict system);
 
-ErrorStatus whfast(
+WIN32DLL_API ErrorStatus whfast(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,

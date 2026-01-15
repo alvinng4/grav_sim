@@ -878,7 +878,7 @@ static ErrorStatus helper_construct_octree(
     return make_success_error_status();
 }
 
-ErrorStatus construct_octree(
+WIN32DLL_API ErrorStatus construct_octree(
     LinearOctree *restrict octree,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param,
@@ -1017,7 +1017,7 @@ err_indices_memory_alloc:
     return error_status;
 }
 
-void free_linear_octree(LinearOctree *restrict octree)
+WIN32DLL_API void free_linear_octree(LinearOctree *restrict octree)
 {
     free(octree->particle_morton_indices_deepest_level);
     free(octree->sorted_indices);
@@ -1031,7 +1031,7 @@ void free_linear_octree(LinearOctree *restrict octree)
     free(octree->tree_center_of_mass_z);
 }
 
-bool linear_octree_check_if_included(
+WIN32DLL_API bool linear_octree_check_if_included(
     const int64 morton_index_i, const int64 morton_index_j, const int level
 )
 {

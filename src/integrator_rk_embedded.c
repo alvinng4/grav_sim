@@ -783,7 +783,7 @@ error_memory:
     return error_status;
 }
 
-ErrorStatus rk_embedded(
+WIN32DLL_API ErrorStatus rk_embedded(
     System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,

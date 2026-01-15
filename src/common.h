@@ -11,6 +11,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* For exporting functions in Windows for dynamic-link library */
+#ifdef WIN32DLL_EXPORTS
+#define WIN32DLL_API __declspec(dllexport)
+#else
+#define WIN32DLL_API
+#endif
+
 typedef int32_t int32;
 typedef int64_t int64;
 typedef uint32_t uint32;

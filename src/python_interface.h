@@ -115,7 +115,7 @@ int launch_simulation_python(
     const double tf
 );
 
-int launch_cosmological_simulation_python(
+WIN32DLL_API int launch_cosmological_simulation_python(
     int32 *restrict num_particles,
     int32 *particle_ids,
     double *x,

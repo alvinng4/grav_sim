@@ -21,6 +21,12 @@
  *       http://www.pcg-random.org
  */
 
+/**
+ *  Modified at March 2025 by Ching-Yin Ng:
+ *  - Included WIN32DLL_API for exporting functions in Windows for dynamic-link library
+ *  - Add "void" to functions without input parameters
+ */
+
 /*
  * This code is derived from the full C implementation, which is in turn
  * derived from the canonical C++ PCG implementation. The C++ version
@@ -39,7 +45,7 @@ static pcg32_random_t pcg32_global = PCG32_INITIALIZER;
 //     Seed the rng.  Specified in two parts, state initializer and a
 //     sequence selection constant (a.k.a. stream id)
 
-void pcg32_srandom_r(pcg32_random_t *rng, uint64_t initstate, uint64_t initseq)
+WIN32DLL_API void pcg32_srandom_r(pcg32_random_t* rng, uint64_t initstate, uint64_t initseq)
 {
     rng->state = 0U;
     rng->inc = (initseq << 1u) | 1u;
@@ -48,7 +54,7 @@ void pcg32_srandom_r(pcg32_random_t *rng, uint64_t initstate, uint64_t initseq)
     pcg32_random_r(rng);
 }
 
-void pcg32_srandom(uint64_t seed, uint64_t seq)
+WIN32DLL_API void pcg32_srandom(uint64_t seed, uint64_t seq)
 {
     pcg32_srandom_r(&pcg32_global, seed, seq);
 }
@@ -57,7 +63,7 @@ void pcg32_srandom(uint64_t seed, uint64_t seq)
 // pcg32_random_r(rng)
 //     Generate a uniformly distributed 32-bit random number
 
-uint32_t pcg32_random_r(pcg32_random_t *rng)
+WIN32DLL_API uint32_t pcg32_random_r(pcg32_random_t* rng)
 {
     uint64_t oldstate = rng->state;
     rng->state = oldstate * 6364136223846793005ULL + rng->inc;
@@ -66,16 +72,17 @@ uint32_t pcg32_random_r(pcg32_random_t *rng)
     return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
 }
 
-uint32_t pcg32_random(void)
+WIN32DLL_API uint32_t pcg32_random(void)
 {
     return pcg32_random_r(&pcg32_global);
 }
+
 
 // pcg32_boundedrand(bound):
 // pcg32_boundedrand_r(rng, bound):
 //     Generate a uniformly distributed number, r, where 0 <= r < bound
 
-uint32_t pcg32_boundedrand_r(pcg32_random_t *rng, uint32_t bound)
+WIN32DLL_API uint32_t pcg32_boundedrand_r(pcg32_random_t* rng, uint32_t bound)
 {
     // To avoid bias, we need to make the range of the RNG a multiple of
     // bound, which we do by dropping output less than a threshold.
@@ -97,20 +104,19 @@ uint32_t pcg32_boundedrand_r(pcg32_random_t *rng, uint32_t bound)
     // should usually terminate quickly; on average (assuming all bounds are
     // equally likely), 82.25% of the time, we can expect it to require just
     // one iteration.  In the worst case, someone passes a bound of 2^31 + 1
-    // (i.e., 2147483649), which invalidates almost 50% of the range.  In
+    // (i.e., 2147483649), which invalidates almost 50% of the range.  In 
     // practice, bounds are typically small and only a tiny amount of the range
     // is eliminated.
-    for (;;)
-    {
+    for (;;) {
         uint32_t r = pcg32_random_r(rng);
         if (r >= threshold)
-        {
             return r % bound;
-        }
     }
 }
 
-uint32_t pcg32_boundedrand(uint32_t bound)
+
+WIN32DLL_API uint32_t pcg32_boundedrand(uint32_t bound)
 {
     return pcg32_boundedrand_r(&pcg32_global, bound);
 }
+

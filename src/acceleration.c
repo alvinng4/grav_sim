@@ -58,7 +58,7 @@ static ErrorStatus acceleration_massless(
     const AccelerationParam *restrict acceleration_param
 );
 
-AccelerationParam get_new_acceleration_param(void)
+WIN32DLL_API AccelerationParam get_new_acceleration_param(void)
 {
     AccelerationParam acceleration_param = {
         .method = ACCELERATION_METHOD_PAIRWISE,
@@ -69,7 +69,8 @@ AccelerationParam get_new_acceleration_param(void)
     return acceleration_param;
 }
 
-ErrorStatus finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
+WIN32DLL_API ErrorStatus
+finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
 {
     ErrorStatus error_status;
 
@@ -131,7 +132,7 @@ ErrorStatus finalize_acceleration_param(AccelerationParam *restrict acceleration
     return make_success_error_status();
 }
 
-ErrorStatus acceleration(
+WIN32DLL_API ErrorStatus acceleration(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -370,7 +371,7 @@ static ErrorStatus acceleration_massless(
     return make_success_error_status();
 }
 
-ErrorStatus benchmark_acceleration(
+WIN32DLL_API ErrorStatus benchmark_acceleration(
     const System *restrict system,
     const AccelerationParam *acceleration_params,
     const int num_acceleration_params,

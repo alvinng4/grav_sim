@@ -21,6 +21,12 @@
  *     http://www.pcg-random.org
  */
 
+/**
+ *  Modified at March 2025 by Ching-Yin Ng:
+ *  - Included WIN32DLL_API for exporting functions in Windows for dynamic-link library
+ *  - Add "void" to functions without input parameters
+ */
+
 /*
  * This code is derived from the full C implementation, which is in turn
  * derived from the canonical C++ PCG implementation. The C++ version
@@ -33,44 +39,50 @@
 
 #include <inttypes.h>
 
-#if __cplusplus
-extern "C"
-{
+/* For exporting functions in Windows for dynamic-link library */
+#ifdef WIN32DLL_EXPORTS
+    #define WIN32DLL_API __declspec(dllexport)
+#else
+    #define WIN32DLL_API 
 #endif
 
-    struct pcg_state_setseq_64
-    {                   // Internals are *Private*.
-        uint64_t state; // RNG state.  All values are possible.
-        uint64_t inc;   // Controls which RNG sequence (stream) is
-                        // selected. Must *always* be odd.
-    };
-    typedef struct pcg_state_setseq_64 pcg32_random_t;
+#if __cplusplus
+extern "C" {
+#endif
 
-    // If you *must* statically initialize it, here's one.
+struct pcg_state_setseq_64 {    // Internals are *Private*.
+    uint64_t state;             // RNG state.  All values are possible.
+    uint64_t inc;               // Controls which RNG sequence (stream) is
+                                // selected. Must *always* be odd.
+};
+typedef struct pcg_state_setseq_64 pcg32_random_t;
 
-#define PCG32_INITIALIZER {0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL}
+// If you *must* statically initialize it, here's one.
 
-    // pcg32_srandom(initstate, initseq)
-    // pcg32_srandom_r(rng, initstate, initseq):
-    //     Seed the rng.  Specified in two parts, state initializer and a
-    //     sequence selection constant (a.k.a. stream id)
+#define PCG32_INITIALIZER   { 0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL }
 
-    void pcg32_srandom(uint64_t initstate, uint64_t initseq);
-    void pcg32_srandom_r(pcg32_random_t *rng, uint64_t initstate, uint64_t initseq);
+// pcg32_srandom(initstate, initseq)
+// pcg32_srandom_r(rng, initstate, initseq):
+//     Seed the rng.  Specified in two parts, state initializer and a
+//     sequence selection constant (a.k.a. stream id)
 
-    // pcg32_random()
-    // pcg32_random_r(rng)
-    //     Generate a uniformly distributed 32-bit random number
+void pcg32_srandom(uint64_t initstate, uint64_t initseq);
+void pcg32_srandom_r(pcg32_random_t* rng, uint64_t initstate,
+                     uint64_t initseq);
 
-    uint32_t pcg32_random(void);
-    uint32_t pcg32_random_r(pcg32_random_t *rng);
+// pcg32_random()
+// pcg32_random_r(rng)
+//     Generate a uniformly distributed 32-bit random number
 
-    // pcg32_boundedrand(bound):
-    // pcg32_boundedrand_r(rng, bound):
-    //     Generate a uniformly distributed number, r, where 0 <= r < bound
+uint32_t pcg32_random(void);
+uint32_t pcg32_random_r(pcg32_random_t* rng);
 
-    uint32_t pcg32_boundedrand(uint32_t bound);
-    uint32_t pcg32_boundedrand_r(pcg32_random_t *rng, uint32_t bound);
+// pcg32_boundedrand(bound):
+// pcg32_boundedrand_r(rng, bound):
+//     Generate a uniformly distributed number, r, where 0 <= r < bound
+
+uint32_t pcg32_boundedrand(uint32_t bound);
+uint32_t pcg32_boundedrand_r(pcg32_random_t* rng, uint32_t bound);
 
 #if __cplusplus
 }

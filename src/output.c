@@ -128,7 +128,7 @@ static ErrorStatus check_output_method(const int output_method)
     return make_success_error_status();
 }
 
-ErrorStatus finalize_output_param(
+WIN32DLL_API ErrorStatus finalize_output_param(
     OutputParam *restrict output_param, const Settings *restrict settings
 )
 {
@@ -262,7 +262,7 @@ ErrorStatus finalize_output_param(
     return make_success_error_status();
 }
 
-ErrorStatus output_snapshot(
+WIN32DLL_API ErrorStatus output_snapshot(
     OutputParam *output_param,
     const System *system,
     const IntegratorParam *integrator_param,
@@ -318,7 +318,7 @@ ErrorStatus output_snapshot(
     return make_success_error_status();
 }
 
-ErrorStatus output_snapshot_cosmology(
+WIN32DLL_API ErrorStatus output_snapshot_cosmology(
     OutputParam *output_param,
     const CosmologicalSystem *system,
     const SimulationStatus *simulation_status,

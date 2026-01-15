@@ -30,7 +30,7 @@ static void helper_compute_acceleration(
     const LinearOctree *restrict octree
 );
 
-ErrorStatus acceleration_barnes_hut(
+WIN32DLL_API ErrorStatus acceleration_barnes_hut(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param

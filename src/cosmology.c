@@ -2,12 +2,12 @@
 
 #include "common.h"
 
-double compute_omega_k(const double omega_m, const double omega_lambda)
+WIN32DLL_API double compute_omega_k(const double omega_m, const double omega_lambda)
 {
     return 1.0 - omega_m - omega_lambda;
 }
 
-double compute_H(
+WIN32DLL_API double compute_H(
     const double a, const double H0, const double omega_m, const double omega_lambda
 )
 {
