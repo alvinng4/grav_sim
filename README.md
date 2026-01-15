@@ -17,6 +17,10 @@ N-body gravity simulation library with C and Python API
 * Particle-Mesh method for cosmological structure formation
 * Multiple sample projects
 
+## Rewrite of grav_sim
+This library is under a full rewrite. I am not sure how long it will take, but
+a version 2.0 should be released before the end of 2026.
+
 ## 5 steps to N-body simulation
 
 A short course to teach beginners how to write fast and clean N-body gravity simulations code in Python.
