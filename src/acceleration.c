@@ -25,7 +25,7 @@
  *
  * \return ErrorStatus
  */
-static ErrorStatus check_acceleration_method(const int acceleration_method);
+IN_FILE ErrorStatus check_acceleration_method(const int acceleration_method);
 
 /**
  * \brief Compute acceleration with direct pairwise method
@@ -36,7 +36,7 @@ static ErrorStatus check_acceleration_method(const int acceleration_method);
  *
  * \return ErrorStatus
  */
-static ErrorStatus acceleration_pairwise(
+IN_FILE ErrorStatus acceleration_pairwise(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -52,7 +52,7 @@ static ErrorStatus acceleration_pairwise(
  *
  * \return ErrorStatus
  */
-static ErrorStatus acceleration_massless(
+IN_FILE ErrorStatus acceleration_massless(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -160,7 +160,7 @@ WIN32DLL_API ErrorStatus acceleration(
     }
 }
 
-static ErrorStatus check_acceleration_method(const int acceleration_method)
+IN_FILE ErrorStatus check_acceleration_method(const int acceleration_method)
 {
     switch (acceleration_method)
     {
@@ -184,7 +184,7 @@ static ErrorStatus check_acceleration_method(const int acceleration_method)
     return make_success_error_status();
 }
 
-static ErrorStatus acceleration_pairwise(
+IN_FILE ErrorStatus acceleration_pairwise(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
@@ -239,7 +239,7 @@ static ErrorStatus acceleration_pairwise(
     return make_success_error_status();
 }
 
-static ErrorStatus acceleration_massless(
+IN_FILE ErrorStatus acceleration_massless(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param

@@ -23,7 +23,7 @@
  * \param[in] acceleration_param Pointer to the acceleration parameters
  * \param[in] octree Pointer to the linear octree
  */
-static void helper_compute_acceleration(
+IN_FILE void helper_compute_acceleration(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param,
@@ -66,7 +66,7 @@ WIN32DLL_API ErrorStatus acceleration_barnes_hut(
     return make_success_error_status();
 }
 
-static void helper_compute_acceleration(
+IN_FILE void helper_compute_acceleration(
     double *restrict a,
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param,

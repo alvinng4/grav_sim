@@ -20,7 +20,7 @@
 #include "linear_octree.h"
 
 // // For debug only
-// static void print_octree_nodes(
+// IN_FILE void print_octree_nodes(
 //     const LinearOctree *restrict octree,
 //     const double *restrict x,
 //     const double *restrict m,
@@ -110,7 +110,7 @@ LinearOctree get_new_linear_octree(void)
  * \param[in] num_particles Number of particles
  * \param[in] x Array of position vectors
  */
-static void calculate_bounding_box(
+IN_FILE void calculate_bounding_box(
     double *restrict center,
     double *restrict width,
     const int num_particles,
@@ -156,7 +156,7 @@ static void calculate_bounding_box(
  *
  * \ref https://stackoverflow.com/a/18528775, Stack Overflow
  */
-static void compute_3d_particle_morton_indices_deepest_level(
+IN_FILE void compute_3d_particle_morton_indices_deepest_level(
     int64 *restrict morton_indices,
     const int object_count,
     const double *restrict x,
@@ -213,7 +213,7 @@ static void compute_3d_particle_morton_indices_deepest_level(
  *
  * \exception GRAV_MEMORY_ERROR if memory allocation for temporary arrays failed
  */
-static ErrorStatus radix_sort_particles_morton_index(
+IN_FILE ErrorStatus radix_sort_particles_morton_index(
     int64 *restrict morton_indices,
     int *restrict indices,
     const int object_count,
@@ -341,7 +341,7 @@ static ErrorStatus radix_sort_particles_morton_index(
  *
  * \exception GRAV_VALUE_ERROR if the Morton index is out of range
  */
-static ErrorStatus binary_search_num_particles_per_octant(
+IN_FILE ErrorStatus binary_search_num_particles_per_octant(
     int *restrict num_particles_per_octant,
     const int64 *restrict particle_morton_indices_deepest_level,
     const int64 node_morton_index_level,
@@ -413,7 +413,7 @@ static ErrorStatus binary_search_num_particles_per_octant(
  *
  * \return ErrorStatus
  */
-static ErrorStatus setup_node(
+IN_FILE ErrorStatus setup_node(
     LinearOctree *restrict octree,
     int *restrict allocated_internal_nodes_ptr,
     const int level,
@@ -619,7 +619,7 @@ static ErrorStatus setup_node(
  *
  * \return ErrorStatus
  */
-static ErrorStatus helper_construct_octree(
+IN_FILE ErrorStatus helper_construct_octree(
     LinearOctree *restrict octree,
     int allocated_internal_nodes,
     const int max_num_particles_per_leaf,

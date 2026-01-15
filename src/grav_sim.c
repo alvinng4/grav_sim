@@ -26,7 +26,7 @@
  * \param settings Pointer to the settings.
  * \param tf Simulation time.
  */
-static void print_simulation_info(
+IN_FILE void print_simulation_info(
     const System *restrict system,
     const IntegratorParam *restrict integrator_param,
     const AccelerationParam *restrict acceleration_param,
@@ -46,7 +46,7 @@ static void print_simulation_info(
  * \param num_steps Number of steps.
  * \param pm_grid_size Size of the PM grid.
  */
-static void print_cosmological_simulation_info(
+IN_FILE void print_cosmological_simulation_info(
     const CosmologicalSystem *restrict system,
     const OutputParam *restrict output_param,
     const Settings *restrict settings,
@@ -316,7 +316,7 @@ WIN32DLL_API const char *get_grav_sim_logo_string(void)
     return logo;
 }
 
-static void print_simulation_info(
+IN_FILE void print_simulation_info(
     const System *restrict system,
     const IntegratorParam *restrict integrator_param,
     const AccelerationParam *restrict acceleration_param,
@@ -547,7 +547,7 @@ static void print_simulation_info(
 }
 
 #if defined(USE_FFTW3) && defined(USE_HDF5)
-static void print_cosmological_simulation_info(
+IN_FILE void print_cosmological_simulation_info(
     const CosmologicalSystem *restrict system,
     const OutputParam *restrict output_param,
     const Settings *restrict settings,

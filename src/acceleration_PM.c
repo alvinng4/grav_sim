@@ -12,7 +12,7 @@
 #include "math_functions.h"
 #include "system.h"
 
-static void cloud_in_cell(
+IN_FILE void cloud_in_cell(
     double *restrict delta,
     const double *restrict x,
     const double *restrict m,
@@ -98,7 +98,7 @@ static void cloud_in_cell(
     }
 }
 
-static void get_cloud_in_cell_acceleration(
+IN_FILE void get_cloud_in_cell_acceleration(
     double *restrict a,
     const double *restrict x,
     const double *restrict acc_grid,
@@ -198,7 +198,7 @@ static void get_cloud_in_cell_acceleration(
     }
 }
 
-static void compute_acceleration_with_gradient(
+IN_FILE void compute_acceleration_with_gradient(
     double *restrict acc_grid,
     const double *restrict phi,
     const int pm_grid_size,

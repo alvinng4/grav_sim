@@ -1345,7 +1345,7 @@ WIN32DLL_API ErrorStatus system_set_total_momentum_zero(System *restrict system)
     return make_success_error_status();
 }
 
-static int compare_distance(const void *a, const void *b)
+IN_FILE int compare_distance(const void *a, const void *b)
 {
     const HelperSystemSortByDistanceStruct *d1 = a;
     const HelperSystemSortByDistanceStruct *d2 = b;
