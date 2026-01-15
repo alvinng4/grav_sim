@@ -1,7 +1,7 @@
 /**
  * \file acceleration.c
  * \brief Functions for computing gravitational acceleration
- *
+ * 
  * \author Ching-Yin Ng
  */
 
@@ -20,20 +20,20 @@
 
 /**
  * \brief Check the acceleration method
- *
+ * 
  * \param acceleration_method Acceleration method
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus check_acceleration_method(const int acceleration_method);
 
 /**
  * \brief Compute acceleration with direct pairwise method
- *
+ * 
  * \param a Array of acceleration vectors to be modified
  * \param system Pointer to the gravitational system
  * \param acceleration_param Pointer to the acceleration parameters
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus acceleration_pairwise(
@@ -45,11 +45,11 @@ IN_FILE ErrorStatus acceleration_pairwise(
 /**
  * \brief Compute acceleration with direct pairwise method,
  *        ignoring the contribution of massless particles
- *
+ * 
  * \param a Array of acceleration vectors to be modified
  * \param system Pointer to the gravitational system
  * \param acceleration_param Pointer to the acceleration parameters
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus acceleration_massless(
@@ -57,6 +57,7 @@ IN_FILE ErrorStatus acceleration_massless(
     const System *restrict system,
     const AccelerationParam *restrict acceleration_param
 );
+
 
 WIN32DLL_API AccelerationParam get_new_acceleration_param(void)
 {
@@ -69,14 +70,16 @@ WIN32DLL_API AccelerationParam get_new_acceleration_param(void)
     return acceleration_param;
 }
 
-WIN32DLL_API ErrorStatus
-finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
+WIN32DLL_API ErrorStatus finalize_acceleration_param(
+    AccelerationParam *restrict acceleration_param
+)
 {
     ErrorStatus error_status;
 
     /* Check the acceleration method */
-    error_status =
-        WRAP_TRACEBACK(check_acceleration_method(acceleration_param->method));
+    error_status = WRAP_TRACEBACK(
+        check_acceleration_method(acceleration_param->method)
+    );
     if (error_status.return_code != GRAV_SUCCESS)
     {
         return error_status;
@@ -96,8 +99,10 @@ finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
     }
 
     /* Check the opening angle */
-    if (acceleration_param->method == ACCELERATION_METHOD_BARNES_HUT &&
-        acceleration_param->opening_angle < 0.0)
+    if (
+        acceleration_param->method == ACCELERATION_METHOD_BARNES_HUT
+        && acceleration_param->opening_angle < 0.0
+    )
     {
         return raise_error_fmt(
             __FILE__,
@@ -119,9 +124,9 @@ finalize_acceleration_param(AccelerationParam *restrict acceleration_param)
         else if (acceleration_param->max_num_particles_per_leaf < 1)
         {
             return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
+            __FILE__,
+            __LINE__,
+            __func__,
                 GRAV_VALUE_ERROR,
                 "Maximum number of particles per leaf must be positive. Got: %d",
                 acceleration_param->max_num_particles_per_leaf
@@ -149,9 +154,9 @@ WIN32DLL_API ErrorStatus acceleration(
         default:
         {
             return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
+            __FILE__,
+            __LINE__,
+            __func__,
                 GRAV_VALUE_ERROR,
                 "Unknown acceleration method. Got: %d",
                 acceleration_param->method
@@ -171,9 +176,9 @@ IN_FILE ErrorStatus check_acceleration_method(const int acceleration_method)
         default:
         {
             return raise_error_fmt(
-                __FILE__,
-                __LINE__,
-                __func__,
+            __FILE__,
+            __LINE__,
+            __func__,
                 GRAV_VALUE_ERROR,
                 "Unknown acceleration method. Got: %d",
                 acceleration_method
@@ -217,7 +222,9 @@ IN_FILE ErrorStatus acceleration_pairwise(
                 x[i * 3 + 2] - x[j * 3 + 2]
             };
             const double R_norm = sqrt(
-                R[0] * R[0] + R[1] * R[1] + R[2] * R[2] +
+                R[0] * R[0] + 
+                R[1] * R[1] + 
+                R[2] * R[2] +
                 softening_length * softening_length
             );
 
@@ -225,7 +232,9 @@ IN_FILE ErrorStatus acceleration_pairwise(
             const double temp_value = G / (R_norm * R_norm * R_norm);
             const double m_j = m[j];
             double temp_vec[3] = {
-                temp_value * R[0], temp_value * R[1], temp_value * R[2]
+                temp_value * R[0],
+                temp_value * R[1],
+                temp_value * R[2]
             };
             a[i * 3 + 0] -= temp_vec[0] * m_j;
             a[i * 3 + 1] -= temp_vec[1] * m_j;
@@ -284,10 +293,7 @@ IN_FILE ErrorStatus acceleration_massless(
     {
         free(massive_indices);
         free(massless_indices);
-        return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR,
-            "Failed to allocate memory for massive and massless indices"
-        );
+        return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for massive and massless indices");
     }
 
     for (int i = 0; i < num_particles; i++)
@@ -321,7 +327,9 @@ IN_FILE ErrorStatus acceleration_massless(
             R[1] = x[idx_i * 3 + 1] - x[idx_j * 3 + 1];
             R[2] = x[idx_i * 3 + 2] - x[idx_j * 3 + 2];
             const double R_norm = sqrt(
-                R[0] * R[0] + R[1] * R[1] + R[2] * R[2] +
+                R[0] * R[0] + 
+                R[1] * R[1] + 
+                R[2] * R[2] +
                 softening_length * softening_length
             );
 
@@ -353,7 +361,9 @@ IN_FILE ErrorStatus acceleration_massless(
             R[1] = x[idx_i * 3 + 1] - x[idx_j * 3 + 1];
             R[2] = x[idx_i * 3 + 2] - x[idx_j * 3 + 2];
             double R_norm = sqrt(
-                R[0] * R[0] + R[1] * R[1] + R[2] * R[2] +
+                R[0] * R[0] + 
+                R[1] * R[1] + 
+                R[2] * R[2] +
                 softening_length * softening_length
             );
 
@@ -375,17 +385,22 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
     const System *restrict system,
     const AccelerationParam *acceleration_params,
     const int num_acceleration_params,
-    const int *restrict num_times_acceleration_param
+    const int *restrict num_times_acceleration_param    
 )
 {
     ErrorStatus error_status;
 
-    double *restrict reference_a = malloc(system->num_particles * 3 * sizeof(double));
-    double *restrict a = malloc(system->num_particles * 3 * sizeof(double));
+    double *restrict reference_a = malloc(
+        system->num_particles * 3 * sizeof(double)
+    );
+    double *restrict a = malloc(
+        system->num_particles * 3 * sizeof(double)
+    );
     if (!reference_a || !a)
     {
         error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for acceleration arrays"
+            GRAV_MEMORY_ERROR,
+            "Failed to allocate memory for acceleration arrays"
         );
         goto err_malloc;
     }
@@ -410,7 +425,8 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
         {
             free(run_time);
             error_status = WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to allocate memory for runtime array"
+                GRAV_MEMORY_ERROR,
+                "Failed to allocate memory for runtime array"
             );
             goto err_malloc;
         }
@@ -420,9 +436,11 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
             if (i == 0 && j == 0)
             {
                 double start_time = grav_get_current_time();
-                error_status = WRAP_TRACEBACK(
-                    acceleration(reference_a, system, acceleration_param)
-                );
+                error_status = WRAP_TRACEBACK(acceleration(
+                    reference_a,
+                    system,
+                    acceleration_param
+                ));
                 if (error_status.return_code != GRAV_SUCCESS)
                 {
                     return error_status;
@@ -433,8 +451,11 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
             else
             {
                 double start_time = grav_get_current_time();
-                error_status =
-                    WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
+                error_status = WRAP_TRACEBACK(acceleration(
+                    a,
+                    system,
+                    acceleration_param
+                ));
                 if (error_status.return_code != GRAV_SUCCESS)
                 {
                     return error_status;
@@ -460,7 +481,7 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
         }
 
         printf("Test %d:", i);
-        switch (acceleration_param->method)
+        switch(acceleration_param->method)
         {
             case ACCELERATION_METHOD_PAIRWISE:
                 fputs("    Method: Pairwise\n", stdout);
@@ -473,22 +494,18 @@ WIN32DLL_API ErrorStatus benchmark_acceleration(
                 break;
             default:
                 error_status = raise_error_fmt(
-                    __FILE__,
-                    __LINE__,
-                    __func__,
+            __FILE__,
+            __LINE__,
+            __func__,
                     GRAV_VALUE_ERROR,
                     "Unknown acceleration method. Got: %d",
                     acceleration_param->method
                 );
                 goto err_unknown_acceleration_method;
         }
-
+        
         printf("    Number of times: %d\n", num_times);
-        printf(
-            "    Avg time: %.3g (+- %.3g) s\n",
-            compute_mean(run_time, num_times),
-            compute_std(run_time, num_times, 1) / sqrt(num_times)
-        );
+        printf("    Avg time: %.3g (+- %.3g) s\n", compute_mean(run_time, num_times), compute_std(run_time, num_times, 1) / sqrt(num_times));
         printf("    MAE: %.3g\n", mae);
         printf("\n");
 

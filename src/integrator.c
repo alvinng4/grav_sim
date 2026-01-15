@@ -1,11 +1,11 @@
 /**
  * \file integrator.c
  * \brief Function definitions for integrator-related functions and simple integrators
- *
- * This file contains the definitions for integrator-related functions and
+ * 
+ * This file contains the definitions for integrator-related functions and 
  * simple integrators including Euler, Euler-Cromer, Runge-Kutta 4th order (RK4),
  * and Leapfrog.
- *
+ * 
  * \author Ching-Yin Ng
  */
 
@@ -26,7 +26,7 @@
 
 /**
  * \brief Euler first-order integrator
- *
+ * 
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -34,7 +34,7 @@
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus euler(
@@ -49,7 +49,7 @@ IN_FILE ErrorStatus euler(
 
 /**
  * \brief Euler-Cromer first-order integrator
- *
+ * 
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -57,7 +57,7 @@ IN_FILE ErrorStatus euler(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus euler_cromer(
@@ -72,7 +72,7 @@ IN_FILE ErrorStatus euler_cromer(
 
 /**
  * \brief Runge-Kutta 4th order (RK4) integrator
- *
+ * 
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -80,21 +80,22 @@ IN_FILE ErrorStatus euler_cromer(
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
+ * 
  * \return ErrorStatus
  */
-IN_FILE ErrorStatus
-rk4(System *restrict system,
+IN_FILE ErrorStatus rk4(
+    System *restrict system,
     IntegratorParam *restrict integrator_param,
     AccelerationParam *restrict acceleration_param,
     OutputParam *restrict output_param,
     SimulationStatus *restrict simulation_status,
     Settings *restrict settings,
-    const double tf);
+    const double tf
+);
 
 /**
  * \brief Leapfrog integrator
- *
+ * 
  * \param system Pointer to the gravitational system
  * \param integrator_param Pointer to the integrator parameters
  * \param acceleration_param Pointer to the acceleration parameters
@@ -102,7 +103,7 @@ rk4(System *restrict system,
  * \param simulation_status Pointer to the simulation status
  * \param settings Pointer to the settings
  * \param simulation_param Pointer to the simulation parameters
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus leapfrog(
@@ -127,24 +128,25 @@ WIN32DLL_API IntegratorParam get_new_integrator_param(void)
     return integrator_param;
 }
 
-WIN32DLL_API ErrorStatus
-finalize_integration_param(IntegratorParam *restrict integration_param)
+WIN32DLL_API ErrorStatus finalize_integration_param(IntegratorParam *restrict integration_param)
 {
     if (!integration_param)
     {
         return WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "integration_param is NULL");
     }
 
-    if (integration_param->integrator != INTEGRATOR_EULER &&
-        integration_param->integrator != INTEGRATOR_EULER_CROMER &&
-        integration_param->integrator != INTEGRATOR_RK4 &&
-        integration_param->integrator != INTEGRATOR_LEAPFROG &&
-        integration_param->integrator != INTEGRATOR_RKF45 &&
-        integration_param->integrator != INTEGRATOR_DOPRI &&
-        integration_param->integrator != INTEGRATOR_DVERK &&
-        integration_param->integrator != INTEGRATOR_RKF78 &&
-        integration_param->integrator != INTEGRATOR_IAS15 &&
-        integration_param->integrator != INTEGRATOR_WHFAST)
+    if (
+        integration_param->integrator != INTEGRATOR_EULER
+        && integration_param->integrator != INTEGRATOR_EULER_CROMER
+        && integration_param->integrator != INTEGRATOR_RK4
+        && integration_param->integrator != INTEGRATOR_LEAPFROG
+        && integration_param->integrator != INTEGRATOR_RKF45
+        && integration_param->integrator != INTEGRATOR_DOPRI
+        && integration_param->integrator != INTEGRATOR_DVERK
+        && integration_param->integrator != INTEGRATOR_RKF78
+        && integration_param->integrator != INTEGRATOR_IAS15
+        && integration_param->integrator != INTEGRATOR_WHFAST
+    )
     {
         return raise_error_fmt(
             __FILE__,
@@ -156,11 +158,13 @@ finalize_integration_param(IntegratorParam *restrict integration_param)
         );
     }
 
-    if (integration_param->integrator == INTEGRATOR_EULER ||
-        integration_param->integrator == INTEGRATOR_EULER_CROMER ||
-        integration_param->integrator == INTEGRATOR_RK4 ||
-        integration_param->integrator == INTEGRATOR_LEAPFROG ||
-        integration_param->integrator == INTEGRATOR_WHFAST)
+    if (
+        integration_param->integrator == INTEGRATOR_EULER
+        || integration_param->integrator == INTEGRATOR_EULER_CROMER
+        || integration_param->integrator == INTEGRATOR_RK4
+        || integration_param->integrator == INTEGRATOR_LEAPFROG
+        || integration_param->integrator == INTEGRATOR_WHFAST
+    )
     {
         if (integration_param->dt <= 0.0)
         {
@@ -226,15 +230,15 @@ WIN32DLL_API ErrorStatus integrator_launch_simulation(
                 tf
             ));
         case INTEGRATOR_RK4:
-            return WRAP_TRACEBACK(
-                rk4(system,
-                    integrator_param,
-                    acceleration_param,
-                    output_param,
-                    simulation_status,
-                    settings,
-                    tf)
-            );
+            return WRAP_TRACEBACK(rk4(
+                system,
+                integrator_param,
+                acceleration_param,
+                output_param,
+                simulation_status,
+                settings,
+                tf
+            ));
         case INTEGRATOR_LEAPFROG:
             return WRAP_TRACEBACK(leapfrog(
                 system,
@@ -324,8 +328,7 @@ IN_FILE ErrorStatus euler(
     // Check if memory allocation is successful
     if (!x_0 || !v_0 || !a || !x_err_comp_sum || !v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -347,12 +350,11 @@ IN_FILE ErrorStatus euler(
     }
 
     /* Main Loop */
-    int64 total_num_steps = (int64)ceil(tf / dt);
+    int64 total_num_steps = (int64) ceil(tf / dt);
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
+        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_start_progress_bar;
@@ -375,7 +377,11 @@ IN_FILE ErrorStatus euler(
         memcpy(v_0, v, num_particles * 3 * sizeof(double));
 
         /* Compute acceleration */
-        error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            a,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -384,7 +390,7 @@ IN_FILE ErrorStatus euler(
         /* Update step */
         for (int i = 0; i < num_particles; i++)
         {
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < 3; j++) 
             {
                 x_err_comp_sum[i * 3 + j] += v[i * 3 + j] * dt;
                 v_err_comp_sum[i * 3 + j] += a[i * 3 + j] * dt;
@@ -497,8 +503,7 @@ IN_FILE ErrorStatus euler_cromer(
     // Check if memory allocation is successful
     if (!x_0 || !v_0 || !a || !x_err_comp_sum || !v_err_comp_sum)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -520,12 +525,11 @@ IN_FILE ErrorStatus euler_cromer(
     }
 
     /* Main Loop */
-    int64 total_num_steps = (int64)ceil(tf / dt);
+    int64 total_num_steps = (int64) ceil(tf / dt);
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
+        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_start_progress_bar;
@@ -548,7 +552,11 @@ IN_FILE ErrorStatus euler_cromer(
         memcpy(v_0, v, num_particles * 3 * sizeof(double));
 
         /* Compute acceleration */
-        error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            a,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -557,7 +565,7 @@ IN_FILE ErrorStatus euler_cromer(
         /* Update step */
         for (int i = 0; i < num_particles; i++)
         {
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < 3; j++) 
             {
                 v_err_comp_sum[i * 3 + j] += a[i * 3 + j] * dt;
                 v[i * 3 + j] = v_0[i * 3 + j] + v_err_comp_sum[i * 3 + j];
@@ -628,14 +636,15 @@ err_memory:
     return error_status;
 }
 
-IN_FILE ErrorStatus
-rk4(System *system,
+IN_FILE ErrorStatus rk4(
+    System *system,
     IntegratorParam *integrator_param,
     AccelerationParam *acceleration_param,
     OutputParam *output_param,
     SimulationStatus *simulation_status,
     Settings *settings,
-    const double tf)
+    const double tf
+)
 {
     /* Declare variables */
     ErrorStatus error_status;
@@ -673,11 +682,22 @@ rk4(System *system,
     double *restrict v_err_comp_sum = calloc(num_particles * 3, sizeof(double));
 
     // Check if memory allocation is successful
-    if (!x_0 || !v_0 || !vk1 || !vk2 || !vk3 || !vk4 || !xk1 || !xk2 || !xk3 || !xk4 ||
-        !x_err_comp_sum || !v_err_comp_sum)
+    if (
+        !x_0 ||
+        !v_0 ||
+        !vk1 ||
+        !vk2 ||
+        !vk3 ||
+        !vk4 ||
+        !xk1 ||
+        !xk2 ||
+        !xk3 ||
+        !xk4 ||
+        !x_err_comp_sum ||
+        !v_err_comp_sum
+    )
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -699,12 +719,11 @@ rk4(System *system,
     }
 
     /* Main Loop */
-    int64 total_num_steps = (int64)ceil(tf / dt);
+    int64 total_num_steps = (int64) ceil(tf / dt);
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
+        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_start_progress_bar;
@@ -721,7 +740,11 @@ rk4(System *system,
         memcpy(v_0, v, num_particles * 3 * sizeof(double));
 
         /* Compute xk1 and vk1 */
-        error_status = WRAP_TRACEBACK(acceleration(vk1, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            vk1,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -737,7 +760,11 @@ rk4(System *system,
                 v[i * 3 + j] = v_0[i * 3 + j] + 0.5 * vk1[i * 3 + j] * dt;
             }
         }
-        error_status = WRAP_TRACEBACK(acceleration(vk2, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            vk2,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -753,7 +780,11 @@ rk4(System *system,
                 v[i * 3 + j] = v_0[i * 3 + j] + 0.5 * vk2[i * 3 + j] * dt;
             }
         }
-        error_status = WRAP_TRACEBACK(acceleration(vk3, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            vk3,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -769,7 +800,11 @@ rk4(System *system,
                 v[i * 3 + j] = v_0[i * 3 + j] + vk3[i * 3 + j] * dt;
             }
         }
-        error_status = WRAP_TRACEBACK(acceleration(vk4, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            vk4,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -781,12 +816,8 @@ rk4(System *system,
         {
             for (int j = 0; j < 3; j++)
             {
-                v_err_comp_sum[i * 3 + j] += (vk1[i * 3 + j] + 2 * vk2[i * 3 + j] +
-                                              2 * vk3[i * 3 + j] + vk4[i * 3 + j]) *
-                                             dt / 6.0;
-                x_err_comp_sum[i * 3 + j] += (xk1[i * 3 + j] + 2 * xk2[i * 3 + j] +
-                                              2 * xk3[i * 3 + j] + xk4[i * 3 + j]) *
-                                             dt / 6.0;
+                v_err_comp_sum[i * 3 + j] += (vk1[i * 3 + j] + 2 * vk2[i * 3 + j] + 2 * vk3[i * 3 + j] + vk4[i * 3 + j]) * dt / 6.0;
+                x_err_comp_sum[i * 3 + j] += (xk1[i * 3 + j] + 2 * xk2[i * 3 + j] + 2 * xk3[i * 3 + j] + xk4[i * 3 + j]) * dt / 6.0;
 
                 v[i * 3 + j] = v_0[i * 3 + j] + v_err_comp_sum[i * 3 + j];
                 x[i * 3 + j] = x_0[i * 3 + j] + x_err_comp_sum[i * 3 + j];
@@ -868,7 +899,7 @@ err_memory:
     free(v_err_comp_sum);
     return error_status;
 }
-
+ 
 IN_FILE ErrorStatus leapfrog(
     System *system,
     IntegratorParam *integrator_param,
@@ -908,10 +939,15 @@ IN_FILE ErrorStatus leapfrog(
     double *restrict v_err_comp_sum = calloc(num_particles * 3, sizeof(double));
 
     // Check if memory allocation is successful
-    if (!temp_x || !temp_v || !a || !x_err_comp_sum || !v_err_comp_sum)
+    if (
+        !temp_x ||
+        !temp_v ||
+        !a ||
+        !x_err_comp_sum ||
+        !v_err_comp_sum
+    )
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
@@ -933,7 +969,11 @@ IN_FILE ErrorStatus leapfrog(
     }
 
     /* Compute initial acceleration and v_1/2 */
-    error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
+    error_status = WRAP_TRACEBACK(acceleration(
+        a,
+        system,
+        acceleration_param
+    ));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto err_acceleration;
@@ -951,12 +991,11 @@ IN_FILE ErrorStatus leapfrog(
     }
 
     /* Main Loop */
-    int64 total_num_steps = (int64)ceil(tf / dt);
+    int64 total_num_steps = (int64) ceil(tf / dt);
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
+        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_start_progress_bar;
@@ -988,7 +1027,11 @@ IN_FILE ErrorStatus leapfrog(
         }
 
         /* Calculate v_1+1/2 */
-        error_status = WRAP_TRACEBACK(acceleration(a, system, acceleration_param));
+        error_status = WRAP_TRACEBACK(acceleration(
+            a,
+            system,
+            acceleration_param
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;

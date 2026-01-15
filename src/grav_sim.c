@@ -18,7 +18,7 @@
 
 /**
  * \brief Print simulation information.
- *
+ * 
  * \param system Pointer to the system.
  * \param integrator_param Pointer to the integrator parameters.
  * \param acceleration_param Pointer to the acceleration parameters.
@@ -38,7 +38,7 @@ IN_FILE void print_simulation_info(
 #if defined(USE_FFTW3) && defined(USE_HDF5)
 /**
  * \brief Print cosmological simulation information.
- *
+ * 
  * \param system Pointer to the cosmological system.
  * \param output_param Pointer to the output parameters.
  * \param settings Pointer to the settings.
@@ -115,7 +115,12 @@ WIN32DLL_API int launch_simulation(
     {
         print_compilation_info();
         print_simulation_info(
-            system, integrator_param, acceleration_param, output_param, settings, tf
+            system,
+            integrator_param,
+            acceleration_param,
+            output_param,
+            settings,
+            tf
         );
     }
 
@@ -161,17 +166,16 @@ WIN32DLL_API int launch_cosmological_simulation(
 )
 {
 #if !defined(USE_FFTW3) || !defined(USE_HDF5)
-    (void)system;
-    (void)output_param;
-    (void)simulation_status;
-    (void)settings;
-    (void)a_final;
-    (void)num_steps;
-    (void)pm_grid_size;
+    (void) system;
+    (void) output_param;
+    (void) simulation_status;
+    (void) settings;
+    (void) a_final;
+    (void) num_steps;
+    (void) pm_grid_size;
     ErrorStatus error_status = WRAP_RAISE_ERROR(
         GRAV_VALUE_ERROR,
-        "FFTW3 and HDF5 are required for cosmological simulations. Please recompile "
-        "with FFTW3 and HDF5 support."
+        "FFTW3 and HDF5 are required for cosmological simulations. Please recompile with FFTW3 and HDF5 support."
     );
     print_and_free_traceback(&error_status);
     return 1;
@@ -190,8 +194,7 @@ WIN32DLL_API int launch_cosmological_simulation(
     {
         error_status = WRAP_RAISE_ERROR(
             GRAV_VALUE_ERROR,
-            "CSV output is not supported for cosmological simulations. Please use HDF5 "
-            "output format."
+            "CSV output is not supported for cosmological simulations. Please use HDF5 output format."
         );
         goto error;
     }
@@ -221,8 +224,7 @@ WIN32DLL_API int launch_cosmological_simulation(
             __LINE__,
             __func__,
             GRAV_VALUE_ERROR,
-            "a_final must be greater or equal to initial scale factor. Got: "
-            "a_final=%g, system->scale_factor=%g",
+            "a_final must be greater or equal to initial scale factor. Got: a_final=%g, system->scale_factor=%g",
             a_final,
             system->scale_factor
         );
@@ -261,7 +263,12 @@ WIN32DLL_API int launch_cosmological_simulation(
     {
         print_compilation_info();
         print_cosmological_simulation_info(
-            system, output_param, settings, a_final, num_steps, pm_grid_size
+            system,
+            output_param,
+            settings,
+            a_final,
+            num_steps,
+            pm_grid_size
         );
     }
 
@@ -297,21 +304,18 @@ error:
 #endif
 }
 
-WIN32DLL_API const char *get_grav_sim_logo_string(void)
+WIN32DLL_API const char* get_grav_sim_logo_string(void)
 {
-    const char *logo =
-        ("                                              __                   \n"
-         "    __   _ __    __     __  __           ____/\\_\\    ___ ___       \n"
-         "  /'_ `\\/\\`'__\\/'__`\\  /\\ \\/\\ \\         /',__\\/\\ \\ /' __` __`\\   "
-         "  \n"
-         " /\\ \\L\\ \\ \\ \\//\\ \\L\\.\\_\\ \\ \\_/ |       /\\__, `\\ \\ \\/\\ "
-         "\\/\\ \\/\\ \\    \n"
-         " \\ \\____ \\ \\_\\\\ \\__/.\\_\\\\ \\___/        \\/\\____/\\ \\_\\ \\_\\ "
-         "\\_\\ \\_\\   \n"
-         "  \\/___L\\ \\/_/ \\/__/\\/_/ \\/__/   _______\\/___/  \\/_/\\/_/\\/_/\\/_/  "
-         " \n"
-         "    /\\____/                     /\\______\\                          \n"
-         "    \\_/__/                      \\/______/                          \n");
+    const char *logo = (
+        "                                              __                   \n"
+        "    __   _ __    __     __  __           ____/\\_\\    ___ ___       \n"
+        "  /'_ `\\/\\`'__\\/'__`\\  /\\ \\/\\ \\         /',__\\/\\ \\ /' __` __`\\     \n"
+        " /\\ \\L\\ \\ \\ \\//\\ \\L\\.\\_\\ \\ \\_/ |       /\\__, `\\ \\ \\/\\ \\/\\ \\/\\ \\    \n"
+        " \\ \\____ \\ \\_\\\\ \\__/.\\_\\\\ \\___/        \\/\\____/\\ \\_\\ \\_\\ \\_\\ \\_\\   \n"
+        "  \\/___L\\ \\/_/ \\/__/\\/_/ \\/__/   _______\\/___/  \\/_/\\/_/\\/_/\\/_/   \n"
+        "    /\\____/                     /\\______\\                          \n"
+        "    \\_/__/                      \\/______/                          \n"
+    );
 
     return logo;
 }
@@ -326,9 +330,8 @@ IN_FILE void print_simulation_info(
 )
 {
     const char *restrict new_line = "\n";
-    const char *restrict straight_line =
-        "-----------------------------------------------------------------\n";
-
+    const char *restrict straight_line = "-----------------------------------------------------------------\n";
+    
     fputs("Simulation parameters:\n", stdout);
 
     /* TF */
@@ -345,7 +348,7 @@ IN_FILE void print_simulation_info(
     fputs("Integrator parameters:\n", stdout);
 
     // Integrator name
-    switch (integrator_param->integrator)
+    switch(integrator_param->integrator)
     {
         case INTEGRATOR_EULER:
             fputs("  Integrator: Euler\n", stdout);
@@ -405,13 +408,10 @@ IN_FILE void print_simulation_info(
     // WHFast remove invalid particles
     if (integrator_param->integrator == INTEGRATOR_WHFAST)
     {
-        printf(
-            "  WHFast remove invalid particles: %s\n",
-            integrator_param->whfast_remove_invalid_particles ? "true" : "false"
-        );
+        printf("  WHFast remove invalid particles: %s\n", integrator_param->whfast_remove_invalid_particles ? "true" : "false");
     }
     fputs(new_line, stdout);
-
+    
     /* Acceleration */
     fputs("Acceleration parameters:\n", stdout);
 
@@ -439,10 +439,7 @@ IN_FILE void print_simulation_info(
     if (acceleration_param->method == ACCELERATION_METHOD_BARNES_HUT)
     {
         printf("  Opening angle: %g\n", acceleration_param->opening_angle);
-        printf(
-            "  Max number of particles per leaf: %d\n",
-            acceleration_param->max_num_particles_per_leaf
-        );
+        printf("  Max number of particles per leaf: %d\n", acceleration_param->max_num_particles_per_leaf);
     }
     fputs(new_line, stdout);
 
@@ -470,10 +467,7 @@ IN_FILE void print_simulation_info(
     printf("  Output directory: %s\n", output_param->output_dir);
 
     // Output initial
-    printf(
-        "  Output initial condition: %s\n",
-        output_param->output_initial ? "true" : "false"
-    );
+    printf("  Output initial condition: %s\n", output_param->output_initial ? "true" : "false");
 
     // Output interval
     printf("  Output interval: %g\n", output_param->output_interval);
@@ -519,7 +513,7 @@ IN_FILE void print_simulation_info(
 
     /* Settings */
     fputs("Settings:\n", stdout);
-
+    
     // Verbose
     switch (settings->verbose)
     {
@@ -540,9 +534,7 @@ IN_FILE void print_simulation_info(
             break;
     }
 
-    printf(
-        "  Enable progress bar: %s\n", settings->enable_progress_bar ? "true" : "false"
-    );
+    printf("  Enable progress bar: %s\n", settings->enable_progress_bar ? "true" : "false");
     fputs(straight_line, stdout);
 }
 
@@ -557,9 +549,8 @@ IN_FILE void print_cosmological_simulation_info(
 )
 {
     const char *restrict new_line = "\n";
-    const char *restrict straight_line =
-        "-----------------------------------------------------------------\n";
-
+    const char *restrict straight_line = "-----------------------------------------------------------------\n";
+    
     fputs("Simulation parameters:\n", stdout);
 
     /* System */
@@ -569,12 +560,7 @@ IN_FILE void print_cosmological_simulation_info(
     printf("  Omega_m: %g\n", system->omega_m);
     printf("  Omega_lambda: %g\n", system->omega_lambda);
     printf("  Omega k: %g\n", system->omega_k);
-    printf(
-        "  Box center: (%g, %g, %g)\n",
-        system->box_center[0],
-        system->box_center[1],
-        system->box_center[2]
-    );
+    printf("  Box center: (%g, %g, %g)\n", system->box_center[0], system->box_center[1], system->box_center[2]);
     printf("  Box width: %g\n", system->box_width);
     printf("  Unit mass in cgs: %g\n", system->unit_mass);
     printf("  Unit length in cgs: %g\n", system->unit_length);
@@ -613,10 +599,7 @@ IN_FILE void print_cosmological_simulation_info(
     printf("  Output directory: %s\n", output_param->output_dir);
 
     // Output initial
-    printf(
-        "  Output initial condition: %s\n",
-        output_param->output_initial ? "true" : "false"
-    );
+    printf("  Output initial condition: %s\n", output_param->output_initial ? "true" : "false");
 
     // Output interval
     printf("  Output interval: %g\n", output_param->output_interval);
@@ -662,7 +645,7 @@ IN_FILE void print_cosmological_simulation_info(
 
     /* Settings */
     fputs("Settings:\n", stdout);
-
+    
     // Verbose
     switch (settings->verbose)
     {
@@ -683,9 +666,7 @@ IN_FILE void print_cosmological_simulation_info(
             break;
     }
 
-    printf(
-        "  Enable progress bar: %s\n", settings->enable_progress_bar ? "true" : "false"
-    );
+    printf("  Enable progress bar: %s\n", settings->enable_progress_bar ? "true" : "false");
     fputs(straight_line, stdout);
 }
 #endif
@@ -693,8 +674,7 @@ IN_FILE void print_cosmological_simulation_info(
 WIN32DLL_API void print_compilation_info(void)
 {
     const char *new_line = "\n";
-    const char *straight_line =
-        "-----------------------------------------------------------------\n";
+    const char *straight_line = "-----------------------------------------------------------------\n";
 
     fputs(straight_line, stdout);
     fputs(get_grav_sim_logo_string(), stdout);
@@ -728,9 +708,9 @@ WIN32DLL_API void print_compilation_info(void)
     /* HDF5 */
 #ifdef USE_HDF5
     fputs("  Compiled with HDF5: true\n", stdout);
-#ifdef H5_VERS_MAJOR
-    printf("    Version: %d.%d.%d\n", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-#endif
+    #ifdef H5_VERS_MAJOR
+        printf("    Version: %d.%d.%d\n", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+    #endif
 #else
     fputs("  Compiled with HDF5: false\n", stdout);
 #endif
@@ -738,8 +718,7 @@ WIN32DLL_API void print_compilation_info(void)
     /* FFTW3 */
 #ifdef USE_FFTW3
     fputs("  Compiled with FFTW3: true\n", stdout);
-    printf("    Version: %s\n", fftw_version);
-    ;
+    printf("    Version: %s\n", fftw_version);;
 #else
     fputs("  Compiled with FFTW3: false\n", stdout);
 #endif

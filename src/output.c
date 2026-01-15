@@ -1,7 +1,7 @@
 /**
  * \file output.c
  * \brief Function definitions for simulation output
- *
+ * 
  * \author Ching-Yin Ng
  */
 
@@ -17,8 +17,8 @@
 
 /* For mkdir */
 #ifndef _WIN32
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #else
 #include <direct.h>
 #include <windows.h>
@@ -33,14 +33,14 @@
 
 /**
  * \brief Output a snapshot of the simulation in CSV format.
- *
+ * 
  * \param system Pointer to the gravitational system.
  * \param integrator_param Pointer to the integrator parameters.
  * \param acceleration_param Pointer to the acceleration parameters.
  * \param output_param Pointer to the output parameters.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus output_snapshot_csv(
@@ -55,14 +55,14 @@ IN_FILE ErrorStatus output_snapshot_csv(
 #ifdef USE_HDF5
 /**
  * \brief Output a snapshot of the simulation in HDF5 format.
- *
+ * 
  * \param system Pointer to the gravitational system.
  * \param integrator_param Pointer to the integrator parameters.
  * \param acceleration_param Pointer to the acceleration parameters.
  * \param output_param Pointer to the output parameters.
  * \param simulation_status Pointer to the simulation status.
  * \param settings Pointer to the settings.
- *
+ * 
  * \return ErrorStatus
  */
 IN_FILE ErrorStatus output_snapshot_hdf5(
@@ -108,9 +108,7 @@ IN_FILE ErrorStatus check_output_method(const int output_method)
 #ifdef USE_HDF5
             break;
 #else
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "HDF5 output method is not available"
-            );
+            return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "HDF5 output method is not available");
 #endif
         default:
         {
@@ -129,7 +127,8 @@ IN_FILE ErrorStatus check_output_method(const int output_method)
 }
 
 WIN32DLL_API ErrorStatus finalize_output_param(
-    OutputParam *restrict output_param, const Settings *restrict settings
+    OutputParam *restrict output_param,
+    const Settings *restrict settings
 )
 {
     ErrorStatus error_status;
@@ -166,9 +165,7 @@ WIN32DLL_API ErrorStatus finalize_output_param(
         char *output_dir = malloc(path_str_len * sizeof(char));
         if (!output_dir)
         {
-            return WRAP_RAISE_ERROR(
-                GRAV_MEMORY_ERROR, "Failed to allocate memory for directory path."
-            );
+            return WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for directory path.");
         }
         const time_t raw_time = time(NULL);
         struct tm *time_info = localtime(&raw_time);
@@ -184,8 +181,7 @@ WIN32DLL_API ErrorStatus finalize_output_param(
                 __LINE__,
                 __func__,
                 GRAV_VALUE_ERROR,
-                "Directory path for storing snapshots must end with a trailing slash "
-                "(\"/\"). Got: \"%s\".",
+                "Directory path for storing snapshots must end with a trailing slash (\"/\"). Got: \"%s\".",
                 output_param->output_dir
             );
         }
@@ -206,16 +202,16 @@ WIN32DLL_API ErrorStatus finalize_output_param(
                 output_param->output_dir
             );
         }
-        else if ((GetFileAttributes(output_param->output_dir) &
-                  FILE_ATTRIBUTE_DIRECTORY) &&
-                 (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO))
+        else if (
+            (GetFileAttributes(output_param->output_dir) & FILE_ATTRIBUTE_DIRECTORY)
+            && (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO)
+        )
         {
             error_status = raise_warning_fmt(
                 __FILE__,
                 __LINE__,
                 __func__,
-                "Directory for storing snapshots already exists. The files will be "
-                "overwritten. Directory: \"%s\".",
+                "Directory for storing snapshots already exists. The files will be overwritten. Directory: \"%s\".",
                 output_param->output_dir
             );
             if (error_status.return_code != GRAV_SUCCESS)
@@ -228,7 +224,7 @@ WIN32DLL_API ErrorStatus finalize_output_param(
     struct stat st = {0};
     if (mkdir(output_param->output_dir, 0777) == -1)
     {
-        if (stat(output_param->output_dir, &st) != 0)
+        if(stat(output_param->output_dir, &st) != 0)
         {
             return raise_error_fmt(
                 __FILE__,
@@ -240,15 +236,16 @@ WIN32DLL_API ErrorStatus finalize_output_param(
             );
         }
 
-        else if ((st.st_mode & S_IFDIR) &&
-                 (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO))
+        else if (
+            (st.st_mode & S_IFDIR)
+            && (settings->verbose >= GRAV_VERBOSITY_IGNORE_INFO)
+        )
         {
             error_status = raise_warning_fmt(
                 __FILE__,
                 __LINE__,
                 __func__,
-                "Directory for storing snapshots already exists. The files will be "
-                "overwritten. Directory: \"%s\".",
+                "Directory for storing snapshots already exists. The files will be overwritten. Directory: \"%s\".",
                 output_param->output_dir
             );
             if (error_status.return_code != GRAV_SUCCESS)
@@ -299,9 +296,7 @@ WIN32DLL_API ErrorStatus output_snapshot(
             ));
             break;
 #else
-            error_status = WRAP_RAISE_ERROR(
-                GRAV_VALUE_ERROR, "HDF5 output method is not available"
-            );
+            error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "HDF5 output method is not available");
             break;
 #endif
         default:
@@ -340,17 +335,19 @@ WIN32DLL_API ErrorStatus output_snapshot_cosmology(
         case OUTPUT_METHOD_HDF5:
 #ifdef USE_HDF5
             error_status = WRAP_TRACEBACK(output_snapshot_cosmology_hdf5(
-                output_param, system, simulation_status, settings
+                output_param,
+                system,
+                simulation_status,
+                settings
             ));
             break;
 #else
-            (void)system;
-            (void)simulation_status;
-            (void)settings;
+            (void) system;
+            (void) simulation_status;
+            (void) settings;
             error_status = WRAP_RAISE_ERROR(
                 GRAV_VALUE_ERROR,
-                "HDF5 output method is not available. Please recompile with HDF5 "
-                "support."
+                "HDF5 output method is not available. Please recompile with HDF5 support."
             );
             break;
 #endif
@@ -386,14 +383,13 @@ IN_FILE ErrorStatus output_snapshot_csv(
 {
     ErrorStatus error_status;
 
-    (void)integrator_param;
-    (void)acceleration_param;
-    (void)settings;
+    (void) integrator_param;
+    (void) acceleration_param;
+    (void) settings;
 
     if (!output_param->output_dir)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
+        error_status = WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
         goto err_output_dir_null;
     }
 
@@ -406,31 +402,19 @@ IN_FILE ErrorStatus output_snapshot_csv(
     char *restrict file_path = malloc(file_path_length * sizeof(char));
     if (!file_path)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string.");
         goto err_file_path_memory_alloc;
     }
-    int actual_file_path_length = snprintf(
-        file_path,
-        file_path_length,
-        "%ssnapshot_%05d.csv",
-        output_param->output_dir,
-        output_param->output_count_
-    );
+    int actual_file_path_length = snprintf(file_path, file_path_length, "%ssnapshot_%05d.csv", output_param->output_dir, output_param->output_count_);
 
     if (actual_file_path_length < 0)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Failed to get storing file path string"
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Failed to get storing file path string");
         goto err_write_file_path_string;
     }
     else if (actual_file_path_length >= file_path_length)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Storing file path string is truncated."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Storing file path string is truncated.");
         goto err_write_file_path_string;
     }
 
@@ -534,14 +518,13 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
 {
     ErrorStatus error_status;
 
-    (void)integrator_param;
-    (void)acceleration_param;
-    (void)settings;
+    (void) integrator_param;
+    (void) acceleration_param;
+    (void) settings;
 
     if (!output_param->output_dir)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
+        error_status = WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
         goto err_output_dir_null;
     }
 
@@ -561,31 +544,19 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     char *restrict file_path = malloc(file_path_length * sizeof(char));
     if (!file_path)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string.");
         goto err_file_path_memory_alloc;
     }
-    int actual_file_path_length = snprintf(
-        file_path,
-        file_path_length,
-        "%ssnapshot_%05d.hdf5",
-        output_param->output_dir,
-        output_param->output_count_
-    );
+    int actual_file_path_length = snprintf(file_path, file_path_length, "%ssnapshot_%05d.hdf5", output_param->output_dir, output_param->output_count_);
 
     if (actual_file_path_length < 0)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Failed to get storing file path string"
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Failed to get storing file path string");
         goto err_write_file_path_string;
     }
     else if (actual_file_path_length >= file_path_length)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Storing file path string is truncated."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Storing file path string is truncated.");
         goto err_write_file_path_string;
     }
 
@@ -605,10 +576,8 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     }
 
     /* Create group */
-    hid_t header_group =
-        H5Gcreate(file, "/Header", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    hid_t part_type_0_group =
-        H5Gcreate(file, "/PartType0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_group = H5Gcreate(file, "/Header", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t part_type_0_group = H5Gcreate(file, "/PartType0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (header_group == H5I_INVALID_HID || part_type_0_group == H5I_INVALID_HID)
     {
         H5Gclose(header_group);
@@ -624,170 +593,83 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     hid_t dataspace_1d_1 = H5Screate_simple(1, dims_1d_1, NULL);
     hid_t dataspace_1d_objects_count = H5Screate_simple(1, dims_1d_objects_count, NULL);
     hid_t dataspace_3d_objects_count = H5Screate_simple(2, dims_3d_objects_count, NULL);
-    if (dataspace_1d_1 == H5I_INVALID_HID ||
-        dataspace_1d_objects_count == H5I_INVALID_HID ||
-        dataspace_3d_objects_count == H5I_INVALID_HID)
+    if (
+        dataspace_1d_1 == H5I_INVALID_HID
+        || dataspace_1d_objects_count == H5I_INVALID_HID
+        || dataspace_3d_objects_count == H5I_INVALID_HID
+    )
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 dataspace.");
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 dataspace.");
         goto err_create_hdf5_dataspace;
     }
-
+    
     /* Create attributes for header */
-    hid_t header_attr_num_files_per_snapshot = H5Acreate(
-        header_group,
-        "NumFilesPerSnapshot",
-        H5T_NATIVE_INT,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_num_part_this_file = H5Acreate(
-        header_group,
-        "NumPart_ThisFile",
-        H5T_NATIVE_INT,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_num_part_total = H5Acreate(
-        header_group,
-        "NumPart_Total",
-        H5T_NATIVE_INT,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_time = H5Acreate(
-        header_group,
-        "Time",
-        H5T_NATIVE_DOUBLE,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_dt = H5Acreate(
-        header_group, "dt", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT
-    );
-    hid_t header_attr_G = H5Acreate(
-        header_group, "G", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT
-    );
-    if (header_attr_num_files_per_snapshot == H5I_INVALID_HID ||
-        header_attr_num_part_this_file == H5I_INVALID_HID ||
-        header_attr_num_part_total == H5I_INVALID_HID ||
-        header_attr_time == H5I_INVALID_HID || header_attr_dt == H5I_INVALID_HID ||
-        header_attr_G == H5I_INVALID_HID)
+    hid_t header_attr_num_files_per_snapshot = H5Acreate(header_group, "NumFilesPerSnapshot", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_num_part_this_file = H5Acreate(header_group, "NumPart_ThisFile", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_num_part_total = H5Acreate(header_group, "NumPart_Total", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_time = H5Acreate(header_group, "Time", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_dt = H5Acreate(header_group, "dt", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_G = H5Acreate(header_group, "G", H5T_NATIVE_DOUBLE, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    if (
+        header_attr_num_files_per_snapshot == H5I_INVALID_HID
+        || header_attr_num_part_this_file == H5I_INVALID_HID
+        || header_attr_num_part_total == H5I_INVALID_HID
+        || header_attr_time == H5I_INVALID_HID
+        || header_attr_dt == H5I_INVALID_HID
+        || header_attr_G == H5I_INVALID_HID
+    )
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_OS_ERROR, "Failed to create HDF5 attribute for header."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 attribute for header.");
         goto err_create_hdf5_header_attr;
     }
 
     /* Create datasets for PartType0 */
-    hid_t part_type_0_dataset_part_ids = H5Dcreate(
-        part_type_0_group,
-        "ParticleIDs",
-        H5T_NATIVE_INT,
-        dataspace_1d_objects_count,
-        H5P_DEFAULT,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
+    hid_t part_type_0_dataset_part_ids = H5Dcreate(part_type_0_group, "ParticleIDs", H5T_NATIVE_INT, dataspace_1d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     hid_t part_type_0_dataset_masses;
     hid_t part_type_0_dataset_coordinates;
     hid_t part_type_0_dataset_velocities;
-
+    
     if (output_param->mass_output_dtype == OUTPUT_DTYPE_FLOAT)
     {
-        part_type_0_dataset_masses = H5Dcreate(
-            part_type_0_group,
-            "Masses",
-            H5T_NATIVE_FLOAT,
-            dataspace_1d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_masses = H5Dcreate(part_type_0_group, "Masses", H5T_NATIVE_FLOAT, dataspace_1d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     else
     {
-        part_type_0_dataset_masses = H5Dcreate(
-            part_type_0_group,
-            "Masses",
-            H5T_NATIVE_DOUBLE,
-            dataspace_1d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_masses = H5Dcreate(part_type_0_group, "Masses", H5T_NATIVE_DOUBLE, dataspace_1d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
     if (output_param->coordinate_output_dtype == OUTPUT_DTYPE_FLOAT)
     {
-        part_type_0_dataset_coordinates = H5Dcreate(
-            part_type_0_group,
-            "Coordinates",
-            H5T_NATIVE_FLOAT,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_coordinates = H5Dcreate(part_type_0_group, "Coordinates", H5T_NATIVE_FLOAT, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     else
     {
-        part_type_0_dataset_coordinates = H5Dcreate(
-            part_type_0_group,
-            "Coordinates",
-            H5T_NATIVE_DOUBLE,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_coordinates = H5Dcreate(part_type_0_group, "Coordinates", H5T_NATIVE_DOUBLE, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
     if (output_param->velocity_output_dtype == OUTPUT_DTYPE_FLOAT)
     {
-        part_type_0_dataset_velocities = H5Dcreate(
-            part_type_0_group,
-            "Velocities",
-            H5T_NATIVE_FLOAT,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_velocities = H5Dcreate(part_type_0_group, "Velocities", H5T_NATIVE_FLOAT, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     else
     {
-        part_type_0_dataset_velocities = H5Dcreate(
-            part_type_0_group,
-            "Velocities",
-            H5T_NATIVE_DOUBLE,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_velocities = H5Dcreate(part_type_0_group, "Velocities", H5T_NATIVE_DOUBLE, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
-    if (part_type_0_dataset_part_ids == H5I_INVALID_HID ||
-        part_type_0_dataset_masses == H5I_INVALID_HID ||
-        part_type_0_dataset_coordinates == H5I_INVALID_HID ||
-        part_type_0_dataset_velocities == H5I_INVALID_HID)
+    if (
+        part_type_0_dataset_part_ids == H5I_INVALID_HID
+        || part_type_0_dataset_masses == H5I_INVALID_HID
+        || part_type_0_dataset_coordinates == H5I_INVALID_HID
+        || part_type_0_dataset_velocities == H5I_INVALID_HID
+    )
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 datasets.");
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 datasets.");
         goto err_create_hdf5_datasets;
     }
-
+    
     /* Write attributes for header */
     const int num_files_per_snapshot = 1;
-    H5Awrite(
-        header_attr_num_files_per_snapshot, H5T_NATIVE_INT, &num_files_per_snapshot
-    );
+    H5Awrite(header_attr_num_files_per_snapshot, H5T_NATIVE_INT, &num_files_per_snapshot);
     H5Awrite(header_attr_num_part_this_file, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_num_part_total, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_time, H5T_NATIVE_DOUBLE, &simulation_status->t);
@@ -795,33 +677,10 @@ IN_FILE ErrorStatus output_snapshot_hdf5(
     H5Awrite(header_attr_G, H5T_NATIVE_DOUBLE, &system->G);
 
     /* Write data to HDF5 dataset */
-    H5Dwrite(
-        part_type_0_dataset_part_ids,
-        H5T_NATIVE_INT,
-        H5S_ALL,
-        H5S_ALL,
-        H5P_DEFAULT,
-        particle_ids
-    );
-    H5Dwrite(
-        part_type_0_dataset_masses, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, m
-    );
-    H5Dwrite(
-        part_type_0_dataset_coordinates,
-        H5T_NATIVE_DOUBLE,
-        H5S_ALL,
-        H5S_ALL,
-        H5P_DEFAULT,
-        x
-    );
-    H5Dwrite(
-        part_type_0_dataset_velocities,
-        H5T_NATIVE_DOUBLE,
-        H5S_ALL,
-        H5S_ALL,
-        H5P_DEFAULT,
-        v
-    );
+    H5Dwrite(part_type_0_dataset_part_ids, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, particle_ids);
+    H5Dwrite(part_type_0_dataset_masses, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, m);
+    H5Dwrite(part_type_0_dataset_coordinates, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, x);
+    H5Dwrite(part_type_0_dataset_velocities, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v);
 
     /* Close HDF5 objects */
     H5Dclose(part_type_0_dataset_part_ids);
@@ -884,12 +743,11 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
 {
     ErrorStatus error_status;
 
-    (void)settings;
+    (void) settings;
 
     if (!output_param->output_dir)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
+        error_status = WRAP_RAISE_ERROR(GRAV_POINTER_ERROR, "Output directory path is NULL.");
         goto err_output_dir_null;
     }
 
@@ -909,31 +767,19 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
     char *restrict file_path = malloc(file_path_length * sizeof(char));
     if (!file_path)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for file path string.");
         goto err_file_path_memory_alloc;
     }
-    int actual_file_path_length = snprintf(
-        file_path,
-        file_path_length,
-        "%ssnapshot_%05d.hdf5",
-        output_param->output_dir,
-        output_param->output_count_
-    );
+    int actual_file_path_length = snprintf(file_path, file_path_length, "%ssnapshot_%05d.hdf5", output_param->output_dir, output_param->output_count_);
 
     if (actual_file_path_length < 0)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Failed to get storing file path string"
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Failed to get storing file path string");
         goto err_write_file_path_string;
     }
     else if (actual_file_path_length >= file_path_length)
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_VALUE_ERROR, "Storing file path string is truncated."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_VALUE_ERROR, "Storing file path string is truncated.");
         goto err_write_file_path_string;
     }
 
@@ -953,14 +799,10 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
     }
 
     /* Create group */
-    hid_t header_group =
-        H5Gcreate(file, "/Header", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    hid_t part_type_0_group =
-        H5Gcreate(file, "/PartType0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    hid_t units_group =
-        H5Gcreate(file, "/Units", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (header_group == H5I_INVALID_HID || part_type_0_group == H5I_INVALID_HID ||
-        units_group == H5I_INVALID_HID)
+    hid_t header_group = H5Gcreate(file, "/Header", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t part_type_0_group = H5Gcreate(file, "/PartType0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t units_group = H5Gcreate(file, "/Units", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (header_group == H5I_INVALID_HID || part_type_0_group == H5I_INVALID_HID || units_group == H5I_INVALID_HID)
     {
         H5Gclose(header_group);
         H5Gclose(part_type_0_group);
@@ -977,243 +819,104 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
     hid_t dataspace_1d_1 = H5Screate_simple(1, dims_1d_1, NULL);
     hid_t dataspace_1d_objects_count = H5Screate_simple(1, dims_1d_objects_count, NULL);
     hid_t dataspace_3d_objects_count = H5Screate_simple(2, dims_3d_objects_count, NULL);
-    if (dataspace_scaler == H5I_INVALID_HID || dataspace_1d_1 == H5I_INVALID_HID ||
-        dataspace_1d_objects_count == H5I_INVALID_HID ||
-        dataspace_3d_objects_count == H5I_INVALID_HID)
+    if (
+        dataspace_scaler == H5I_INVALID_HID
+        || dataspace_1d_1 == H5I_INVALID_HID
+        || dataspace_1d_objects_count == H5I_INVALID_HID
+        || dataspace_3d_objects_count == H5I_INVALID_HID
+    )
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 dataspace.");
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 dataspace.");
         goto err_create_hdf5_dataspace;
     }
-
+    
     /* Create attributes for header */
-    hid_t header_attr_num_files_per_snapshot = H5Acreate(
-        header_group,
-        "NumFilesPerSnapshot",
-        H5T_NATIVE_INT,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_num_part_this_file = H5Acreate(
-        header_group,
-        "NumPart_ThisFile",
-        H5T_NATIVE_INT,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_num_part_total = H5Acreate(
-        header_group,
-        "NumPart_Total",
-        H5T_NATIVE_INT,
-        dataspace_1d_1,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_time = H5Acreate(
-        header_group,
-        "Time",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_redshift = H5Acreate(
-        header_group,
-        "Redshift",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_omega_m = H5Acreate(
-        header_group,
-        "Omega0",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t header_attr_omega_lambda = H5Acreate(
-        header_group,
-        "OmegaLambda",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    if (header_attr_num_files_per_snapshot == H5I_INVALID_HID ||
-        header_attr_num_part_this_file == H5I_INVALID_HID ||
-        header_attr_num_part_total == H5I_INVALID_HID ||
-        header_attr_time == H5I_INVALID_HID ||
-        header_attr_redshift == H5I_INVALID_HID ||
-        header_attr_omega_m == H5I_INVALID_HID ||
-        header_attr_omega_lambda == H5I_INVALID_HID)
+    hid_t header_attr_num_files_per_snapshot = H5Acreate(header_group, "NumFilesPerSnapshot", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_num_part_this_file = H5Acreate(header_group, "NumPart_ThisFile", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_num_part_total = H5Acreate(header_group, "NumPart_Total", H5T_NATIVE_INT, dataspace_1d_1, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_time = H5Acreate(header_group, "Time", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_redshift = H5Acreate(header_group, "Redshift", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_omega_m = H5Acreate(header_group, "Omega0", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t header_attr_omega_lambda = H5Acreate(header_group, "OmegaLambda", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    if (
+        header_attr_num_files_per_snapshot == H5I_INVALID_HID
+        || header_attr_num_part_this_file == H5I_INVALID_HID
+        || header_attr_num_part_total == H5I_INVALID_HID
+        || header_attr_time == H5I_INVALID_HID
+        || header_attr_redshift == H5I_INVALID_HID
+        || header_attr_omega_m == H5I_INVALID_HID
+        || header_attr_omega_lambda == H5I_INVALID_HID
+    )
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_OS_ERROR, "Failed to create HDF5 attribute for header."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 attribute for header.");
         goto err_create_hdf5_header_attr;
     }
 
     /* Create datasets for PartType0 */
-    hid_t part_type_0_dataset_part_ids = H5Dcreate(
-        part_type_0_group,
-        "ParticleIDs",
-        H5T_NATIVE_INT,
-        dataspace_1d_objects_count,
-        H5P_DEFAULT,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
+    hid_t part_type_0_dataset_part_ids = H5Dcreate(part_type_0_group, "ParticleIDs", H5T_NATIVE_INT, dataspace_1d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     hid_t part_type_0_dataset_masses;
     hid_t part_type_0_dataset_coordinates;
     hid_t part_type_0_dataset_velocities;
-
+    
     if (output_param->mass_output_dtype == OUTPUT_DTYPE_FLOAT)
     {
-        part_type_0_dataset_masses = H5Dcreate(
-            part_type_0_group,
-            "Masses",
-            H5T_NATIVE_FLOAT,
-            dataspace_1d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_masses = H5Dcreate(part_type_0_group, "Masses", H5T_NATIVE_FLOAT, dataspace_1d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     else
     {
-        part_type_0_dataset_masses = H5Dcreate(
-            part_type_0_group,
-            "Masses",
-            H5T_NATIVE_DOUBLE,
-            dataspace_1d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_masses = H5Dcreate(part_type_0_group, "Masses", H5T_NATIVE_DOUBLE, dataspace_1d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
     if (output_param->coordinate_output_dtype == OUTPUT_DTYPE_FLOAT)
     {
-        part_type_0_dataset_coordinates = H5Dcreate(
-            part_type_0_group,
-            "Coordinates",
-            H5T_NATIVE_FLOAT,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_coordinates = H5Dcreate(part_type_0_group, "Coordinates", H5T_NATIVE_FLOAT, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     else
     {
-        part_type_0_dataset_coordinates = H5Dcreate(
-            part_type_0_group,
-            "Coordinates",
-            H5T_NATIVE_DOUBLE,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_coordinates = H5Dcreate(part_type_0_group, "Coordinates", H5T_NATIVE_DOUBLE, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
     if (output_param->velocity_output_dtype == OUTPUT_DTYPE_FLOAT)
     {
-        part_type_0_dataset_velocities = H5Dcreate(
-            part_type_0_group,
-            "Velocities",
-            H5T_NATIVE_FLOAT,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_velocities = H5Dcreate(part_type_0_group, "Velocities", H5T_NATIVE_FLOAT, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     else
     {
-        part_type_0_dataset_velocities = H5Dcreate(
-            part_type_0_group,
-            "Velocities",
-            H5T_NATIVE_DOUBLE,
-            dataspace_3d_objects_count,
-            H5P_DEFAULT,
-            H5P_DEFAULT,
-            H5P_DEFAULT
-        );
+        part_type_0_dataset_velocities = H5Dcreate(part_type_0_group, "Velocities", H5T_NATIVE_DOUBLE, dataspace_3d_objects_count, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
-    if (part_type_0_dataset_part_ids == H5I_INVALID_HID ||
-        part_type_0_dataset_masses == H5I_INVALID_HID ||
-        part_type_0_dataset_coordinates == H5I_INVALID_HID ||
-        part_type_0_dataset_velocities == H5I_INVALID_HID)
+    if (
+        part_type_0_dataset_part_ids == H5I_INVALID_HID
+        || part_type_0_dataset_masses == H5I_INVALID_HID
+        || part_type_0_dataset_coordinates == H5I_INVALID_HID
+        || part_type_0_dataset_velocities == H5I_INVALID_HID
+    )
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 datasets.");
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 datasets.");
         goto err_create_hdf5_datasets;
     }
-
+    
     /* Create attributes for units */
-    hid_t units_attr_current_unit = H5Acreate(
-        units_group,
-        "Unit current in cgs (U_I)",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t units_attr_length_unit = H5Acreate(
-        units_group,
-        "Unit length in cgs (U_L)",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t units_attr_mass_unit = H5Acreate(
-        units_group,
-        "Unit mass in cgs (U_M)",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t units_attr_time_unit = H5Acreate(
-        units_group,
-        "Unit time in cgs (U_t)",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    hid_t units_attr_temperature_unit = H5Acreate(
-        units_group,
-        "Unit temperature in cgs (U_T)",
-        H5T_NATIVE_DOUBLE,
-        dataspace_scaler,
-        H5P_DEFAULT,
-        H5P_DEFAULT
-    );
-    if (units_attr_current_unit == H5I_INVALID_HID ||
-        units_attr_length_unit == H5I_INVALID_HID ||
-        units_attr_mass_unit == H5I_INVALID_HID ||
-        units_attr_time_unit == H5I_INVALID_HID ||
-        units_attr_temperature_unit == H5I_INVALID_HID)
+    hid_t units_attr_current_unit = H5Acreate(units_group, "Unit current in cgs (U_I)", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t units_attr_length_unit = H5Acreate(units_group, "Unit length in cgs (U_L)", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t units_attr_mass_unit = H5Acreate(units_group, "Unit mass in cgs (U_M)", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t units_attr_time_unit = H5Acreate(units_group, "Unit time in cgs (U_t)", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t units_attr_temperature_unit = H5Acreate(units_group, "Unit temperature in cgs (U_T)", H5T_NATIVE_DOUBLE, dataspace_scaler, H5P_DEFAULT, H5P_DEFAULT);
+    if (
+        units_attr_current_unit == H5I_INVALID_HID
+        || units_attr_length_unit == H5I_INVALID_HID
+        || units_attr_mass_unit == H5I_INVALID_HID
+        || units_attr_time_unit == H5I_INVALID_HID
+        || units_attr_temperature_unit == H5I_INVALID_HID
+    )
     {
-        error_status = WRAP_RAISE_ERROR(
-            GRAV_OS_ERROR, "Failed to create HDF5 attribute for units."
-        );
+        error_status = WRAP_RAISE_ERROR(GRAV_OS_ERROR, "Failed to create HDF5 attribute for units.");
         goto err_create_hdf5_units_attr;
     }
-
+    
     /* Write attributes for header */
     const int num_files_per_snapshot = 1;
-    H5Awrite(
-        header_attr_num_files_per_snapshot, H5T_NATIVE_INT, &num_files_per_snapshot
-    );
+    H5Awrite(header_attr_num_files_per_snapshot, H5T_NATIVE_INT, &num_files_per_snapshot);
     H5Awrite(header_attr_num_part_this_file, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_num_part_total, H5T_NATIVE_INT, &num_particles);
     H5Awrite(header_attr_time, H5T_NATIVE_DOUBLE, &(simulation_status->t));
@@ -1223,33 +926,10 @@ IN_FILE ErrorStatus output_snapshot_cosmology_hdf5(
     H5Awrite(header_attr_omega_lambda, H5T_NATIVE_DOUBLE, &(system->omega_lambda));
 
     /* Write data to HDF5 dataset */
-    H5Dwrite(
-        part_type_0_dataset_part_ids,
-        H5T_NATIVE_INT,
-        H5S_ALL,
-        H5S_ALL,
-        H5P_DEFAULT,
-        particle_ids
-    );
-    H5Dwrite(
-        part_type_0_dataset_masses, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, m
-    );
-    H5Dwrite(
-        part_type_0_dataset_coordinates,
-        H5T_NATIVE_DOUBLE,
-        H5S_ALL,
-        H5S_ALL,
-        H5P_DEFAULT,
-        x
-    );
-    H5Dwrite(
-        part_type_0_dataset_velocities,
-        H5T_NATIVE_DOUBLE,
-        H5S_ALL,
-        H5S_ALL,
-        H5P_DEFAULT,
-        v
-    );
+    H5Dwrite(part_type_0_dataset_part_ids, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, particle_ids);
+    H5Dwrite(part_type_0_dataset_masses, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, m);
+    H5Dwrite(part_type_0_dataset_coordinates, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, x);
+    H5Dwrite(part_type_0_dataset_velocities, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v);
 
     /* Write attributes for units */
     double unit_current = 1.0;

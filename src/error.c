@@ -1,7 +1,7 @@
 /**
  * \file error.c
  * \brief Exception handling functions
- *
+ * 
  * \author Ching-Yin Ng
  */
 
@@ -78,7 +78,8 @@ WIN32DLL_API ErrorStatus raise_warning_fmt(
     if (!warning_msg)
     {
         return WRAP_RAISE_ERROR(
-            GRAV_MEMORY_ERROR, "Failed to allocate memory for warning message"
+            GRAV_MEMORY_ERROR,
+            "Failed to allocate memory for warning message"
         );
     }
 
@@ -90,15 +91,26 @@ WIN32DLL_API ErrorStatus raise_warning_fmt(
     if (actual_msg_size < 0)
     {
         free(warning_msg);
-        return WRAP_RAISE_ERROR(GRAV_UNKNOWN_ERROR, "Failed to encode warning message");
+        return WRAP_RAISE_ERROR(
+            GRAV_UNKNOWN_ERROR,
+            "Failed to encode warning message"
+        );
     }
     else if (actual_msg_size >= warning_msg_size)
     {
         free(warning_msg);
-        return WRAP_RAISE_ERROR(GRAV_UNKNOWN_ERROR, "Warning message is truncated");
+        return WRAP_RAISE_ERROR(
+            GRAV_UNKNOWN_ERROR,
+            "Warning message is truncated"
+        );
     }
 
-    raise_warning(warning_file, warning_line, warning_func, warning_msg);
+    raise_warning(
+        warning_file,
+        warning_line,
+        warning_func,
+        warning_msg
+    );
 
     /* Free memory */
     free(warning_msg);
@@ -115,7 +127,8 @@ WIN32DLL_API ErrorStatus raise_error(
 )
 {
     ErrorStatus error_status = {
-        .traceback = NULL, .traceback_code_ = GRAV_TRACEBACK_NOT_INITIALIZED
+        .traceback = NULL,
+        .traceback_code_ = GRAV_TRACEBACK_NOT_INITIALIZED
     };
 
     char *error_type;
@@ -226,7 +239,8 @@ WIN32DLL_API ErrorStatus raise_error_fmt(
 )
 {
     ErrorStatus error_status = {
-        .traceback = NULL, .traceback_code_ = GRAV_TRACEBACK_NOT_INITIALIZED
+        .traceback = NULL,
+        .traceback_code_ = GRAV_TRACEBACK_NOT_INITIALIZED
     };
 
     char *error_type;
@@ -295,8 +309,7 @@ WIN32DLL_API ErrorStatus raise_error_fmt(
     /* Format the error message */
     va_list args2;
     va_start(args2, format);
-    int actual_msg_size =
-        vsnprintf(formatted_string, formatted_string_size, format, args2);
+    int actual_msg_size = vsnprintf(formatted_string, formatted_string_size, format, args2);
     va_end(args2);
 
     if (actual_msg_size < 0)
@@ -368,8 +381,10 @@ WIN32DLL_API ErrorStatus traceback(
     const char *restrict error_func
 )
 {
-    if (error_status.return_code == GRAV_SUCCESS ||
-        error_status.traceback_code_ != GRAV_TRACEBACK_SUCCESS)
+    if (
+        error_status.return_code == GRAV_SUCCESS
+        || error_status.traceback_code_ != GRAV_TRACEBACK_SUCCESS
+    )
     {
         return error_status;
     }
@@ -450,14 +465,7 @@ WIN32DLL_API void free_traceback(ErrorStatus *restrict error_status)
 
 WIN32DLL_API void print_and_free_traceback(ErrorStatus *restrict error_status)
 {
-    fprintf(
-        stderr,
-        "\n%sTraceback%s %s(most recent call last):%s\n",
-        BRIGHT_RED,
-        RESET,
-        DIM_RED,
-        RESET
-    );
+    fprintf(stderr, "\n%sTraceback%s %s(most recent call last):%s\n", BRIGHT_RED, RESET, DIM_RED, RESET);
     switch (error_status->traceback_code_)
     {
         case GRAV_TRACEBACK_NOT_INITIALIZED:
@@ -469,10 +477,7 @@ WIN32DLL_API void print_and_free_traceback(ErrorStatus *restrict error_status)
             error_status->traceback = NULL;
             break;
         case GRAV_TRACEBACK_MALLOC_FAILED:
-            fputs(
-                "    Something went wrong. Failed to allocate memory for traceback.\n",
-                stderr
-            );
+            fputs("    Something went wrong. Failed to allocate memory for traceback.\n", stderr);
             break;
         case GRAV_TRACEBACK_TRUNCATED:
             fputs(error_status->traceback, stderr);

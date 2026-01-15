@@ -1,7 +1,7 @@
 /**
  * \file integrator_cosmology_leapfrog.c
  * \brief Leapfrog integrator for cosmological simulations.
- *
+ * 
  * \author Ching-Yin Ng
  */
 
@@ -16,12 +16,13 @@
 #include "cosmology.h"
 #include "error.h"
 #include "integrator.h"
-#include "math_functions.h"
 #include "output.h"
 #include "progress_bar.h"
 #include "settings.h"
 #include "system.h"
 #include "utils.h"
+#include "math_functions.h"
+
 
 WIN32DLL_API ErrorStatus leapfrog_cosmology(
     CosmologicalSystem *restrict system,
@@ -65,23 +66,26 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
     // Check if memory allocation is successful
     if (!momentum || !a)
     {
-        error_status =
-            WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
+        error_status = WRAP_RAISE_ERROR(GRAV_MEMORY_ERROR, "Failed to allocate memory for arrays");
         goto err_memory;
     }
 
     /* Get mean background density */
-    const double G =
-        6.67430e-8 *
-        (system->unit_mass * system->unit_time * system->unit_time /
-         (system->unit_length * system->unit_length * system->unit_length));
+    const double G = 6.67430e-8 * (
+        system->unit_mass
+        * system->unit_time * system->unit_time
+        / (system->unit_length * system->unit_length * system->unit_length)
+    );
 
     /* Initial output */
     if (is_output && output_param->output_initial)
     {
-        error_status = WRAP_TRACEBACK(
-            output_snapshot_cosmology(output_param, system, simulation_status, settings)
-        );
+        error_status = WRAP_TRACEBACK(output_snapshot_cosmology(
+            output_param,
+            system,
+            simulation_status,
+            settings
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_initial_output;
@@ -96,13 +100,17 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
     {
         for (int j = 0; j < 3; j++)
         {
-            momentum[i * 3 + j] =
-                (system->scale_factor) * (system->scale_factor) * v[i * 3 + j];
+            momentum[i * 3 + j] = (system->scale_factor) * (system->scale_factor) * v[i * 3 + j];
         }
     }
 
     /* Compute initial acceleration */
-    error_status = WRAP_TRACEBACK(acceleration_PM(a, system, G, pm_grid_size));
+    error_status = WRAP_TRACEBACK(acceleration_PM(
+        a,
+        system,
+        G,
+        pm_grid_size
+    ));
     if (error_status.return_code != GRAV_SUCCESS)
     {
         goto err_acceleration;
@@ -110,12 +118,11 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
 
     /* Main Loop */
     double dt = (tf - t0) / num_steps;
-    int64 total_num_steps = (int64)ceil((tf - t0) / dt);
+    int64 total_num_steps = (int64) ceil((tf - t0) / dt);
     ProgressBarParam progress_bar_param;
     if (enable_progress_bar)
     {
-        error_status =
-            WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
+        error_status = WRAP_TRACEBACK(start_progress_bar(&progress_bar_param, total_num_steps));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_start_progress_bar;
@@ -151,8 +158,7 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
         {
             for (int j = 0; j < 3; j++)
             {
-                x[i * 3 + j] += dt * momentum[i * 3 + j] /
-                                ((system->scale_factor) * (system->scale_factor) * H_a);
+                x[i * 3 + j] += dt * momentum[i * 3 + j] / ((system->scale_factor) * (system->scale_factor) * H_a);
             }
         }
 
@@ -160,7 +166,12 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
         set_periodic_boundary_conditions(system);
 
         /* Kick (p_1) */
-        error_status = WRAP_TRACEBACK(acceleration_PM(a, system, G, pm_grid_size));
+        error_status = WRAP_TRACEBACK(acceleration_PM(
+            a,
+            system,
+            G,
+            pm_grid_size
+        ));
         if (error_status.return_code != GRAV_SUCCESS)
         {
             goto err_acceleration;
@@ -186,12 +197,14 @@ WIN32DLL_API ErrorStatus leapfrog_cosmology(
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    v[i * 3 + j] = momentum[i * 3 + j] /
-                                   (system->scale_factor * system->scale_factor);
+                    v[i * 3 + j] = momentum[i * 3 + j] / (system->scale_factor * system->scale_factor);
                 }
             }
             error_status = WRAP_TRACEBACK(output_snapshot_cosmology(
-                output_param, system, simulation_status, settings
+                output_param,
+                system,
+                simulation_status,
+                settings
             ));
             if (error_status.return_code != GRAV_SUCCESS)
             {

@@ -1,8 +1,8 @@
 /**
  * \file progress_bar.h
- *
+ * 
  * \brief Library for displaying a progress bar in the terminal.
- *
+ * 
  * \author Ching-Yin Ng
  */
 
@@ -25,22 +25,27 @@ typedef struct ProgressBarParam
 
 /**
  * \brief Start the progress bar.
- *
+ * 
  * \param progress_bar_param Pointer to progress bar parameters
  * \param total Total value
  */
-ErrorStatus
-start_progress_bar(ProgressBarParam *restrict progress_bar_param, const double total);
+ErrorStatus start_progress_bar(
+    ProgressBarParam *restrict progress_bar_param,
+    const double total
+);
 
 /**
  * \brief Update the progress bar.
- *
+ * 
  * \param progress_bar_param Pointer to progress bar parameters
  * \param current Current value
  * \param is_end Whether the progress bar is at the end
  */
 void update_progress_bar(
-    ProgressBarParam *restrict progress_bar_param, double current, bool is_end
+    ProgressBarParam *restrict progress_bar_param,
+    double current,
+    bool is_end
 );
+
 
 #endif

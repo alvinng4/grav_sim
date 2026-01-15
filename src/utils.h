@@ -10,42 +10,46 @@
 #include "pcg_basic.h"
 #include "system.h"
 
+
 /**
- * \brief Get current time as a decimal number of seconds using
- * clock_gettime(CLOCK_MONOTONIC, )
- *
+ * \brief Get current time as a decimal number of seconds using clock_gettime(CLOCK_MONOTONIC, )
+ * 
  * \return Current time as a decimal number of seconds
  */
 double grav_get_current_time(void);
 
 /**
  * \brief Compute the energy of the system at a time step
- *
+ * 
  * \param[in] system Pointer to the gravitational system
- *
+ * 
  * \return Energy of the system
  */
 double compute_energy(const System *restrict system);
 
 /**
  * \brief Initialize the PCG random number generator
- *
+ * 
  * \return Initialized PCG random number generator
  */
 pcg32_random_t init_pcg_rng(void);
 
 /**
  * \brief Generate a random number in the range [min, max)
- *
+ * 
  * \param min Minimum value of the range
  * \param max Maximum value of the range
  * \param rng Pointer to the PCG random number generator
  */
-double grav_randrange(const double min, const double max, pcg32_random_t *rng);
+double grav_randrange(
+    const double min,
+    const double max,
+    pcg32_random_t *rng
+);
 
 /**
  * \brief Convert Keplerian elements to Cartesian coordinates
- *
+ * 
  * \param[out] x Output position vector
  * \param[out] v Output velocity vector
  * \param[in] semi_major_axis Semi-major axis
