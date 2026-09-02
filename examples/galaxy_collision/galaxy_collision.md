@@ -25,3 +25,40 @@ The visualization is done with gadgetviewer, which is compatible with our
 HDF5 output format.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/nXTUdjLXwtI?si=0MDsZFkRNru9G8l0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Running the example (C)
+To build the example, run
+```
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DUSE_HDF5=ON -DUSE_OPENMP=ON --fresh
+cmake --build build
+```
+Then, you can run it by
+```
+cd build
+./galaxy_collision
+```
+
+## Running the example (Python)
+
+
+## Animating with gadgetviewer
+To use gadgetviewer, you may download the latest release on their GitHub page. For version 1.2.0 and assuming you are on Linux / MacOS, install the dependencies by
+```
+sudo apt install build-essential gfortran libhdf5-dev libgtk-3-dev
+```
+Then, run
+```
+cd <path of gadgetviewer>
+./configure --prefix=<path of gadgetviewer>
+make
+make install
+```
+Now, you can run gadgetviewer by
+```
+cd bin
+./gadgetviewer
+```
+For example,
+```
+./gadgetviewer ../../grav_sim/examples/galaxy_collision/c/build/snapshots/snapshot_00000.hdf5
+```
