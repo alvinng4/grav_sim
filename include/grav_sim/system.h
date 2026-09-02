@@ -6,8 +6,8 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "error.h"
-#include "settings.h"
+#include "grav_sim/error.h"
+#include "grav_sim/settings.h"
 
 typedef struct System
 {

@@ -8,12 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
-#include "cosmology.h"
-#include "error.h"
-#include "math_functions.h"
-#include "system.h"
-#include "settings.h"
+#include "grav_sim/common.h"
+#include "internal/cosmology.h"
+#include "grav_sim/error.h"
+#include "internal/math_functions.h"
+#include "grav_sim/system.h"
+#include "grav_sim/settings.h"
 
 
 typedef struct

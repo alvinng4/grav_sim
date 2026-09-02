@@ -7,10 +7,10 @@
 #include <omp.h>
 #endif
 
-#include "acceleration.h"
-#include "error.h"
-#include "system.h"
-#include "math_functions.h"
+#include "grav_sim/acceleration.h"
+#include "grav_sim/error.h"
+#include "grav_sim/system.h"
+#include "internal/math_functions.h"
 
 IN_FILE void cloud_in_cell(
     double *restrict delta,

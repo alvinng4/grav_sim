@@ -14,10 +14,10 @@
     #include <omp.h>
 #endif
 
-#include "acceleration.h"
-#include "common.h"
-#include "error.h"
-#include "linear_octree.h"
+#include "grav_sim/acceleration.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
+#include "internal/linear_octree.h"
 
 
 // // For debug only
@@ -659,15 +659,15 @@ IN_FILE ErrorStatus helper_construct_octree(
         {
             const int child = octree->tree_first_internal_children_idx[current_node] + i;
             const int start_idx = octree->tree_first_particle_sorted_idx[child];
-            const int num_particles = octree->tree_num_particles[child];
+            const int num_particles_child = octree->tree_num_particles[child];
 
             /* Leaf node */
-            if (num_particles <= max_num_particles_per_leaf || level >= MORTON_MAX_LEVEL)
+            if (num_particles_child <= max_num_particles_per_leaf || level >= MORTON_MAX_LEVEL)
             {
                 octree->tree_num_internal_children[child] = 0;
 
                 // Update the stack
-                for (int j = 0; j < num_particles; j++)
+                for (int j = 0; j < num_particles_child; j++)
                 {
                     const int particle_idx = sorted_indices[start_idx + j];
                     current_stack->total_mass += m[particle_idx];

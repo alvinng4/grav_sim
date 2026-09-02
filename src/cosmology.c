@@ -1,6 +1,7 @@
 #include <math.h>
 
-#include "common.h"
+#include "internal/cosmology.h"
+#include "grav_sim/common.h"
 
 WIN32DLL_API double compute_omega_k(
     const double omega_m,

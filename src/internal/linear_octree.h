@@ -8,7 +8,7 @@
 #ifndef LINEAR_OCTREE_H
 #define LINEAR_OCTREE_H
 
-#include "common.h"
+#include "grav_sim/common.h"
 
 /* Maximum level for 64-bit Morton index, do not change */
 #define MORTON_MAX_LEVEL 21

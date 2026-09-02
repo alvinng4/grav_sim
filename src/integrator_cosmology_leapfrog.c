@@ -11,17 +11,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "acceleration.h"
-#include "common.h"
-#include "cosmology.h"
-#include "error.h"
-#include "integrator.h"
-#include "output.h"
-#include "progress_bar.h"
-#include "settings.h"
-#include "system.h"
-#include "utils.h"
-#include "math_functions.h"
+#include "grav_sim/acceleration.h"
+#include "grav_sim/common.h"
+#include "internal/cosmology.h"
+#include "grav_sim/error.h"
+#include "grav_sim/integrator.h"
+#include "grav_sim/output.h"
+#include "internal/progress_bar.h"
+#include "grav_sim/settings.h"
+#include "grav_sim/system.h"
+#include "grav_sim/utils.h"
+#include "internal/math_functions.h"
 
 
 WIN32DLL_API ErrorStatus leapfrog_cosmology(

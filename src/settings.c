@@ -1,6 +1,6 @@
 #include <stdbool.h>
 
-#include "settings.h"
+#include "grav_sim/settings.h"
 
 Settings get_new_settings(void)
 {
