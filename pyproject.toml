@@ -1,24 +1,25 @@
 [project]
 name = "grav_sim"
-version = "1.0.0"
-description="Gravity Simulator"
-requires-python = ">= 3.9"
+version = "1.0.1"
+description = "N-body gravity simulation library with C and Python API"
 readme = "README.md"
-license-files = ["LICENSE"]
-dynamic = ["dependencies"]
 authors = [
-    {name = "Ching-Yin Ng", email = "alvinng324@gmail.com"}
+    { name = "Ching-Yin Ng", email = "alvinng324@gmail.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "cmake>=3.10.0",
+    "h5py>=3.0.0",
+    "matplotlib>=3.8.3",
+    "numpy>=1.26.4",
 ]
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-
 [build-system]
-requires = ["setuptools>=42", "wheel", "cmake>=3.10"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.12.2,<0.13.0"]
+build-backend = "uv_build"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "ruff",
-    "pytest",
+    "pytest>=8.4.2",
+    "ruff>=0.16.5",
 ]

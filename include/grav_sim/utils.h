@@ -6,9 +6,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "common.h"
+#include "grav_sim/common.h"
 #include "pcg_basic.h"
-#include "system.h"
+#include "grav_sim/system.h"
 
 
 /**

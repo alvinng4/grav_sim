@@ -3,7 +3,8 @@
 #include <stdlib.h>
 
 #include "grav_sim.h"
-#include "math_functions.h"
+#include "internal/math_functions.h"
+#include "internal/python_interface.h"
 
 WIN32DLL_API void free_memory_int32(int32 *restrict ptr)
 {

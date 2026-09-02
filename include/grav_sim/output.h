@@ -20,10 +20,10 @@
 
 #include <stdbool.h>
 
-#include "common.h"
-#include "error.h"
-#include "settings.h"
-#include "system.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
+#include "grav_sim/settings.h"
+#include "grav_sim/system.h"
 
 
 /**

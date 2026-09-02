@@ -9,8 +9,8 @@
 #ifndef PROGRESS_BAR_H
 #define PROGRESS_BAR_H
 
-#include "common.h"
-#include "error.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
 
 typedef struct ProgressBarParam
 {

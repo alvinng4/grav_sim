@@ -9,12 +9,12 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "common.h"
-#include "error.h"
-#include "math_functions.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
+#include "internal/math_functions.h"
 #include "pcg_basic.h"
-#include "system.h"
-#include "utils.h"
+#include "grav_sim/system.h"
+#include "grav_sim/utils.h"
 
 
 WIN32DLL_API double grav_get_current_time(void)

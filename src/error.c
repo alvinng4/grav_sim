@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
-#include "error.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
 
 #define RESET "\033[0m"
 #define BRIGHT_RED "\033[1;31m"

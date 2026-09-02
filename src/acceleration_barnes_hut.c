@@ -12,8 +12,8 @@
 #include <omp.h>
 #endif
 
-#include "acceleration.h"
-#include "linear_octree.h"
+#include "grav_sim/acceleration.h"
+#include "internal/linear_octree.h"
 
 /**
  * \brief Helper function to compute acceleration

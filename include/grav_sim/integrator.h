@@ -8,11 +8,11 @@
 #ifndef INTEGRATOR_H
 #define INTEGRATOR_H
 
-#include "acceleration.h"
-#include "common.h"
-#include "error.h"
-#include "settings.h"
-#include "system.h"
+#include "grav_sim/acceleration.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
+#include "grav_sim/settings.h"
+#include "grav_sim/system.h"
 
 #define INTEGRATOR_EULER 1
 #define INTEGRATOR_EULER_CROMER 2

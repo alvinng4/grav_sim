@@ -2,28 +2,28 @@
 #define GRAV_SIM_H
 
 /* Acceleration */
-#include "acceleration.h"
+#include "grav_sim/acceleration.h"
 
 /* Common definitions */
-#include "common.h"
+#include "grav_sim/common.h"
 
 /* Exception handling */
-#include "error.h"
+#include "grav_sim/error.h"
 
 /* Integrator */
-#include "integrator.h"
+#include "grav_sim/integrator.h"
 
 /* Output */
-#include "output.h"
+#include "grav_sim/output.h"
 
 /* System */
-#include "system.h"
+#include "grav_sim/system.h"
 
 /* Settings */
-#include "settings.h"
+#include "grav_sim/settings.h"
 
 /* Utils */
-#include "utils.h"
+#include "grav_sim/utils.h"
 
 
 /* Project version */

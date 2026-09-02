@@ -8,7 +8,8 @@
 
 #include <math.h>
 
-#include "common.h"
+#include "internal/math_functions.h"
+#include "grav_sim/common.h"
 
 WIN32DLL_API double vec_sum(const double *restrict vec, const int vec_length)
 {

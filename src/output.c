@@ -24,12 +24,12 @@
 #include <windows.h>
 #endif
 
-#include "acceleration.h"
-#include "common.h"
-#include "error.h"
-#include "integrator.h"
-#include "output.h"
-#include "system.h"
+#include "grav_sim/acceleration.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
+#include "grav_sim/integrator.h"
+#include "grav_sim/output.h"
+#include "grav_sim/system.h"
 
 /**
  * \brief Output a snapshot of the simulation in CSV format.

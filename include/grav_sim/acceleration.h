@@ -9,9 +9,9 @@
 #ifndef ACCELERATION_H
 #define ACCELERATION_H
 
-#include "common.h"
-#include "error.h"
-#include "system.h"
+#include "grav_sim/common.h"
+#include "grav_sim/error.h"
+#include "grav_sim/system.h"
 
 #define ACCELERATION_METHOD_PAIRWISE 1
 #define ACCELERATION_METHOD_MASSLESS 2

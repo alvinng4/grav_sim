@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "common.h"
-#include "utils.h"
-#include "progress_bar.h"
+#include "grav_sim/common.h"
+#include "grav_sim/utils.h"
+#include "internal/progress_bar.h"
 
 #define PROGRESS_BAR_LENGTH 40
 #define MIN_UPDATE_INTERVAL_SECOND 0.1
