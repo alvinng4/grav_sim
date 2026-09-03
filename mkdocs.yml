@@ -4,6 +4,8 @@ repo_name: alvinng4/grav_sim
 docs_dir: .
 site_url: "https://alvinng4.com/grav_sim/"
 site_dir: .cloudflare-assets/grav_sim
+site_author: Ching-Yin Ng
+site_description: N-body gravity simulation library with C and Python API
 
 nav:
   - Home:

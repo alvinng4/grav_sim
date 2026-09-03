@@ -1,3 +1,8 @@
+---
+title: grav_sim
+description: grav_sim is an N-body gravity simulation library with C and Python API
+---
+
 # Index
 
 * [Home](index.md)
@@ -34,6 +39,7 @@ A short course to teach beginners how to write fast and clean N-body gravity sim
 Homepage: https://alvinng4.github.io/grav_sim/5_steps_to_n_body_simulation/
 
 **Contents**
+Resources
 
 - [Step 1: Initial setup](5_steps_to_n_body_simulation/step1.md)
 - [Step 2: Gravity](5_steps_to_n_body_simulation/step2.md)
