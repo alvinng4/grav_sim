@@ -1111,7 +1111,7 @@ wheels = [
 [[package]]
 name = "grav-sim"
 version = "1.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "cmake" },
     { name = "h5py", version = "3.14.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
