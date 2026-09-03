@@ -14,12 +14,15 @@ dependencies = [
     "numpy>=1.26.4",
 ]
 
-[build-system]
-requires = ["uv_build>=0.12.2,<0.13.0"]
-build-backend = "uv_build"
-
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
     "ruff>=0.16.5",
+]
+mkdocs = [
+    "mkdocs-bibtex>=4.4.0",
+    "mkdocs-jupyter>=0.26.3",
+    "mkdocs-material>=9.7.7",
+    "mkdocs-same-dir>=0.1.4",
+    "mkdocstrings[python]>=0.30.1",
 ]

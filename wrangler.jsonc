@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "grav_sim",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": false,
+
+  "assets": {
+    "directory": "./.cloudflare-assets",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  "routes": [
+    {
+      "pattern": "alvinng4.com/grav_sim*",
+      "zone_name": "alvinng4.com"
+    }
+  ]
+}

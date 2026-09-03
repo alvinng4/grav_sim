@@ -2,6 +2,8 @@ site_name: grav_sim
 repo_url: https://github.com/alvinng4/grav_sim
 repo_name: alvinng4/grav_sim
 docs_dir: .
+site_url: "https://alvinng4.com/grav_sim/"
+site_dir: .cloudflare-assets/grav_sim
 
 nav:
   - Home:
