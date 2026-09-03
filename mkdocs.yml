@@ -55,6 +55,7 @@ nav:
     - Conclusion: 5_steps_to_n_body_simulation/conclusion.md
 theme:
   name: material
+  favicon: docs/favicon.svg
   logo: docs/orbit_logo.svg
   icon:
     repo: fontawesome/brands/github-alt
