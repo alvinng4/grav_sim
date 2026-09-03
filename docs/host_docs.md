@@ -1,10 +1,17 @@
-To host the docs locally, first install the libraries:
+## Hosting locally
+To host the docs locally, navigate to the source directory and run
 ```
-pip install mkdocs-material mkdocs-bibtex mkdocs-jupyter mkdocs-same-dir "mkdocstrings[python]"
+uv sync --group mkdocs
 ```
 
 Then, run the following command to start the server:
-```
-cd ..           # Go to the root directory
+```        # Go to the root directory
 mkdocs serve
+```
+
+## Deploy
+To deploy the docs, run
+```
+uv run mkdocs build --strict
+pnpm dlx wrangler@latest deploy
 ```
